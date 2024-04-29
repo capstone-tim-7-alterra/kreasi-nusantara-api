@@ -1,0 +1,793 @@
+openapi: 3.0.3
+info:
+  title: Local Art & Culture (Kelompok 7)
+  description: Dokumentasi ini menyediakan panduan lengkap untuk mengakses dan menggunakan API
+  version: 1.0.0
+  contact:
+    email: uplabs.in@gmail.com
+    name: Learn21
+tags:
+  - name: AuthUser
+    description: Operations related to Auth
+  - name: Products
+    description: Operations related to Products
+  - name: Event
+    description: Operations related to Event
+  - name: Article
+    description: Operations related to Article
+  - name: Admin
+    description: Operations related to Admin
+
+paths:
+  /user/register:
+    post:
+      tags:
+        - AuthUser
+      operationId: create-new-user
+      summary: Create New User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username :
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                phone_no:
+                  type: integer
+                gender:
+                  type: string
+                date_of_birth:
+                  type: integer
+
+
+      responses:
+        '200':
+          description: Successfull Created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/BasicResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Users' 
+                        
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Bad Request"
+                  data:
+                    type: string
+                    example: null
+  /user/login:
+    post:
+      tags:
+        - AuthUser
+      operationId: User Login
+      summary: User Login
+      description: User enter email and password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Successfull
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/BasicResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Users' 
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Bad Request"
+                  data:
+                    type: string
+                    example: null
+  /product:
+    get:
+      tags:
+        - Products
+      operationId: get-fetch-all-products
+      summary: Get all products
+      description: Show all product.
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Input User Token
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          required: false
+          description: Number of items per page.
+        - in: query
+          name: page
+          schema:
+            type: integer
+          required: false
+          description: Page number for pagination.
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BasicResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ProductModel'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Bad Request"
+                  data:
+                    type: string
+                    example: null
+
+  /product/category/{Id}:
+    get:
+      tags:
+        - Products
+      operationId: get-fetch-categories-detail
+      summary: Get categories details
+      description: Retrieves details of a specific categories along with related courses.
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Input User Token
+        - in: path
+          name: Id
+          schema:
+            type: integer
+          required: true
+          description: The ID of the Category to retrieve.
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          required: false
+          description: Number of items per page.
+        - in: query
+          name: page
+          schema:
+            type: integer
+          required: false
+          description: Page number for pagination.
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BasicResponse"
+                  - type: object
+                    properties:
+                      categories:
+                        $ref: '#/components/schemas/ProductCategoriesModel'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Bad Request"
+                  categories:
+                    type: string
+                    example: null
+
+  /product/reviews/{id}:
+    get:
+      tags:
+        - Products
+      operationId: get-fetch-product-reviews
+      summary: Get product review
+      description: Retrieves details of a specific categories along with related courses.
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Input User Token
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: The ID of the review to retrieve.
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BasicResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ProductReviewModel'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Bad Request"
+                  categories:
+                    type: string
+                    example: null
+                      
+  /events:
+    get:
+      tags:
+        - Event
+      operationId: get-fetch-all-event
+      summary: Get all event
+      description: Show all event.
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Input User Token
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          required: false
+          description: Number of items per page.
+        - in: query
+          name: page
+          schema:
+            type: integer
+          required: false
+          description: Page number for pagination.
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BasicResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/EventModel'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Bad Request"
+                  data:
+                    type: string
+                    example: null
+
+  /events/{id}:
+    get:
+      tags:
+        - Event
+      operationId: get-fetch-event
+      summary: Get id event
+      description: Show all event.
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Input User Token
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Number of items per page.
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BasicResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/EventModel'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Bad Request"
+                  data:
+                    type: string
+                    example: null
+                      
+  /article:
+    get:
+      tags:
+        - Article
+      operationId: get-fetch-all-article
+      summary: Get all article
+      description: Show all article.
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Input User Token
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          required: false
+          description: Number of items per page.
+        - in: query
+          name: page
+          schema:
+            type: integer
+          required: false
+          description: Page number for pagination.
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BasicResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ArticleModel'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Bad Request"
+                  data:
+                    type: string
+                    example: null
+
+  /article/{id}:
+    get:
+      tags:
+        - Article
+      operationId: get-fetch-article
+      summary: Get all article
+      description: Show all article.
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Input User Token
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Number of items per page.
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BasicResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ArticleModel'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Bad Request"
+                  data:
+                    type: string
+                    example: null
+
+  /admin/login:
+    post:
+      tags:
+        - Admin
+      operationId: Admin Login
+      summary: Admin Login
+      description: Admin enter email and password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Successfull
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/BasicResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Users' 
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Bad Request"
+                  data:
+                    type: string
+                    example: null
+
+
+
+components:
+  schemas:
+    BasicResponse:
+      title: BasicResponse
+      type: object
+      properties:
+        status:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "success"
+        err:
+          type: string
+          example: null
+    Users:
+      title: user
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        email:
+          type: string
+        phone_no:
+          type: integer
+        gender:
+          type: string
+        date_of_birth:
+          type: integer
+        created_at:
+          type: integer
+    ProductModel:
+      title: Products
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: integer
+        stock:
+          type: integer
+        likes_count:
+          type: integer
+        category_id:
+          type: integer
+        author_id:
+          type: integer
+    ProductCategoriesModel:
+      title: ProductCategories
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        product:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              description:
+                type: string
+              price:
+                type: integer
+              stock:
+                type: integer
+              likes_count:
+                type: integer
+              author_id:
+                type: integer
+    ProductReviewModel:
+      title: ProductReviews
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        product_id:
+          type: integer
+        rating:
+          type: integer
+        review_text:
+          type: string
+        review_date:
+          type: integer
+
+    # TransactionProductModel:
+    #   title: TransactionProduct
+    #   type: object
+    #   properties:
+    #     id: 
+    #       type: integer
+    #     user_id:
+    #       type: integer
+    #     transaction_date:
+    #       type: integer
+    #     total_amount:
+    #       type: integer
+    #     transaction_method_id
+    #       type: integer
+
+    EventModel:
+      title: Event
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        location:
+          $ref: '#/components/schemas/Location'
+        date:
+          $ref: '#/components/schemas/Date'
+        organizer:
+          $ref: '#/components/schemas/Organizer'
+        authorId:
+          type: integer
+
+    Location:
+      type: object
+      properties:
+        id:
+          type: integer
+        address_line:
+          type: string
+        city:
+          type: string
+        state_province:
+          type: string
+        country:
+          type: string
+
+    Date:
+      type: object
+      properties:
+        id:
+          type: integer
+        date_start:
+          type: string
+        date_end:
+          type: string
+        event_time:
+          type: string
+        gates_open:
+          type: string
+
+    Organizer:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+    
+    ArticleModel:
+      title: Article
+      type: object
+      properties:
+        id:
+          type: integer
+        authorId:
+          type: integer
+        title:
+          type: string
+        body:
+          type: string
+        likes_count:
+          type: string
+        date_published:
+          type: integer
+
+    ProductTransactionsModel:
+      title: ProductTransaction
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        transaction_date:
+          type: integer
+        total_amount:
+          type: integer
+        transaction_method_id:
+          type: integer
+
+    ProductTransactionsItemModel:
+      title: ProductTransactionItem
+      type: object
+      properties:
+        id:
+          type: integer
+        product_transaction_id:
+          type: integer
+        product_id:
+          type: integer
+        quantity:
+          type: integer
+        price:
+          type: integer
+
+    TransactionMethodsModel:
+      title: TransactionMethod
+      type: object
+      properties:
+        id: 
+          type: integer
+        name:
+          type: string
+    
+    EventTransactionsModel:
+      title: EventTransactions
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id: 
+          type: integer
+        event_id:
+          $ref: '#/components/schemas/EventModel'
+        transaction_date:
+          type: integer
+        ticket_quantity:
+          type: integer
+        total_amount:
+          type: integer
+      
+    EventTransactionHistoryModel:
+      title: EventTransactionHistory
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        event_transaction_id:
+          $ref: '#/components/schemas/EventTransactionsModel'
+    
