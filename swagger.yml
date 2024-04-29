@@ -518,9 +518,7 @@ paths:
                 allOf:
                   - $ref: '#/components/schemas/BasicResponse'
                   - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/Users' 
+                          
         '400':
           description: Bad Request
           content:
@@ -537,6 +535,483 @@ paths:
                   data:
                     type: string
                     example: null
+  
+  /admin/product:
+    post:
+      tags:
+        - Admin
+      operationId: Admin Create Product
+      summary: Admin Create Product
+      description: Admin Create Product
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                price:
+                  type: integer
+                stock:
+                  type: integer
+                category_id:
+                  type: integer
+      responses: 
+        '200':
+          description: Successfull
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/BasicResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ProductModel'
+                          
+        '400':    
+          description: Bad Request  
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Bad Input"
+                  data:
+                    type: string
+                    example: null
+              
+  /admin/product/update/{id}:
+    put:
+      tags:
+        - Admin
+      operationId: Admin Update Product
+      summary: Admin Update Product
+      description: Admin Update Product
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Input User Token
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: The ID of the Product to retrieve.
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                price:
+                  type: integer
+                stock:
+                  type: integer
+                category_id:
+                  type: integer
+      responses: 
+        '200':
+          description: Successfull
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/BasicResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ProductModel'
+                          
+        '400':    
+          description: Bad Request  
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Bad Input"
+                  data:
+                    type: string
+                    example: null
+
+  /admin/product/delete/{id}:
+    delete:
+      tags:
+        - Admin
+      operationId: Admin Delete Product
+      summary: Admin Delete Product
+      description: Admin Delete Product
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Input User Token
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: The ID of the Product to retrieve.
+      responses: 
+        '200':
+          description: Successfull
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/BasicResponse'
+                 
+                          
+        '400':    
+          description: Bad Request  
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Bad Input"
+                  data:
+                    type: string
+                    example: null
+  /admin/event:
+    post:
+      tags:
+        - Admin
+      operationId: Admin Create Event
+      summary: Admin Create Event
+      description: Admin Create Event
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                start_date:
+                  type: string
+                end_date:
+                  type: string
+                location:
+                  type: string
+                organizer:
+                  type: string
+
+      responses: 
+        '200':
+          description: Successfull
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/BasicResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/EventModel'
+                          
+        '400':    
+          description: Bad Request  
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Bad Input"
+  /admin/event/update/{id}:
+    put:
+      tags:
+        - Admin
+      operationId: Admin Update Event
+      summary: Admin Update Event
+      description: Admin Update Event
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Input User Token
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: The ID of the Event to retrieve.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                start_date:
+                  type: string
+                end_date:
+                  type: string
+                location:
+                  type: string
+                organizer:
+                  type: string
+      responses: 
+        '200':
+          description: Successfull
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/BasicResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/EventModel'
+                          
+        '400':    
+          description: Bad Request  
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Bad Input"
+  
+  /admin/event/delete/{id}:
+    delete:
+      tags:
+        - Admin
+      operationId: Admin Delete Event
+      summary: Admin Delete Event
+      description: Admin Delete Event
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Input User Token
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: The ID of the Event to retrieve.
+      responses: 
+        '200':
+          description: Successfull
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/BasicResponse'
+                 
+                          
+        '400':    
+          description: Bad Request  
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Bad Input"
+
+  /admin/article:
+    post:
+      tags:
+        - Admin
+      operationId: Admin Create Article
+      summary: Admin Create Article
+      description: Admin Create Article
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                content:
+                  type: string
+
+      responses:
+        '200':
+          description: Successfull
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/BasicResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ArticleModel'
+                          
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Bad Input"
+
+  /admin/article/update/{id}:
+      put:
+        tags:
+          - Admin
+        operationId: Admin Update Article
+        summary: Admin Update Article
+        description: Admin Update Article
+        parameters:
+          - in: header
+            name: Authorization
+            schema:
+              type: string
+            required: true
+            description: Input User Token
+          - in: path
+            name: id
+            schema:
+              type: integer
+            required: true
+            description: The ID of the Article to retrieve.
+        requestBody:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  description:
+                    type: string
+                  content:
+                    type: string
+        responses:
+          '200':
+            description: Successfull
+            content:
+              application/json:
+                schema:
+                  allOf:
+                    - $ref: '#/components/schemas/BasicResponse'
+                    - type: object
+                      properties:
+                        data:
+                          $ref: '#/components/schemas/ArticleModel'
+                            
+          '400':
+            description: Bad Request
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    status:
+                      type: boolean
+                      example: false
+                    message:
+                      type: string
+                      example: "Bad Input"
+
+  /admin/article/delete/{id}:
+    delete:
+      tags:
+        - Admin
+      operationId: Admin Delete Article
+      summary: Admin Delete Article
+      description: Admin Delete Article
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Input User Token
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: The ID of the Article to retrieve.
+      responses:
+        '200':
+          description: Successfull
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/BasicResponse'
+                 
+                          
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Bad Input"
 
 
 
