@@ -31,7 +31,7 @@ paths:
             schema:
               type: object
               properties:
-                username :
+                username:
                   type: string
                 email:
                   type: string
@@ -44,21 +44,20 @@ paths:
                 date_of_birth:
                   type: integer
 
-
       responses:
-        '200':
+        "200":
           description: Successfull Created
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/BasicResponse'
+                  - $ref: "#/components/schemas/BasicResponse"
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/Users' 
-                        
-        '400':
+                        $ref: "#/components/schemas/Users"
+
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -74,11 +73,165 @@ paths:
                   data:
                     type: string
                     example: null
+
+  /user/address:
+    post:
+      tags:
+        - AuthUser
+      operationId: add-address
+      summary: Add Address
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Input User Token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                user_id:
+                  type: integer
+                address_line:
+                  type: string
+                postal_code:
+                  type: integer
+                city:
+                  type: string
+                state_province:
+                  type: string
+                country:
+                  type: string
+
+      responses:
+        "200":
+          description: Successfull
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BasicResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/UserAddressModel"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Bad Request"
+                  data:
+                    type: string
+                    example: null
+    get:
+      tags:
+        - AuthUser
+      operationId: get-user-address
+      summary: Get User Address
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Input User Token
+      responses:
+        "200":
+          description: Successfull
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BasicResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/UserAddressModel"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Bad Request"
+                  data:
+                    type: string
+                    example: null
+    put:
+      tags:
+        - AuthUser
+      operationId: update-user-address
+      summary: Update User Address
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Input User Token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                address_line:
+                  type: string
+                postal_code:
+                  type: integer
+                city:
+                  type: string
+                state_province:
+                  type: string
+                country:
+                  type: string
+
+      responses:
+        "200":
+          description: Successfull
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BasicResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/UserAddressModel"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+
   /user/login:
     post:
       tags:
         - AuthUser
-      operationId: User Login
+      operationId: User-Login-post
       summary: User Login
       description: User enter email and password
       requestBody:
@@ -92,18 +245,18 @@ paths:
                 password:
                   type: string
       responses:
-        '200':
+        "200":
           description: Successfull
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/BasicResponse'
+                  - $ref: "#/components/schemas/BasicResponse"
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/Users' 
-        '400':
+                        $ref: "#/components/schemas/Users"
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -156,8 +309,123 @@ paths:
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/ProductModel'
-        '400':
+                        $ref: "#/components/schemas/ProductModel"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Bad Request"
+                  data:
+                    type: string
+                    example: null
+
+  /product/transaction:
+    post:
+      tags:
+        - Products
+      operationId: transactions product
+      summary: Transactions product
+      description: Transactions product
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Input User Token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  type: integer
+                total_price:
+                  type: integer
+                total_amount:
+                  type: integer
+                transaction_method_id:
+                  type: integer
+
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BasicResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/ProductTransactionsModel"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Bad Request"
+                  data:
+                    type: string
+                    example: null
+
+  /product/transaction/items:
+    post:
+      tags:
+        - Products
+      operationId: transactions product items
+      summary: Transactions product items
+      description: Transactions product items
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Input User Token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product_transaction_id:
+                  type: integer
+                product_id:
+                  type: integer
+                quantity:
+                  type: integer
+                price:
+                  type: integer
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BasicResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/ProductTransactionItemsModel"
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -188,24 +456,6 @@ paths:
             type: string
           required: true
           description: Input User Token
-        - in: path
-          name: Id
-          schema:
-            type: integer
-          required: true
-          description: The ID of the Category to retrieve.
-        - in: query
-          name: limit
-          schema:
-            type: integer
-          required: false
-          description: Number of items per page.
-        - in: query
-          name: page
-          schema:
-            type: integer
-          required: false
-          description: Page number for pagination.
       responses:
         "200":
           description: Successful operation
@@ -217,8 +467,8 @@ paths:
                   - type: object
                     properties:
                       categories:
-                        $ref: '#/components/schemas/ProductCategoriesModel'
-        '400':
+                        $ref: "#/components/schemas/ProductCategoriesModel"
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -266,8 +516,8 @@ paths:
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/ProductReviewModel'
-        '400':
+                        $ref: "#/components/schemas/ProductReviewModel"
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -283,7 +533,7 @@ paths:
                   categories:
                     type: string
                     example: null
-                      
+
   /events:
     get:
       tags:
@@ -321,8 +571,8 @@ paths:
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/EventModel'
-        '400':
+                        $ref: "#/components/schemas/EventModel"
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -370,8 +620,8 @@ paths:
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/EventModel'
-        '400':
+                        $ref: "#/components/schemas/EventModel"
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -387,7 +637,68 @@ paths:
                   data:
                     type: string
                     example: null
-                      
+
+  /events/transaction:
+    post:
+      tags:
+        - Event
+      operationId: transaction event
+      summary: transaction event
+      description: transaction event.
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Input User Token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                event_id:
+                  type: integer
+                  example: 1
+                transaction_date:
+                  type: integer
+                  example: 2022-01-01
+                total_amount:
+                  type: integer
+                  example: 10000
+                ticket_quantity:
+                  type: integer
+                  example: 1
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BasicResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/EventTransactionsModel"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Bad Request"
+                  data:
+                    type: string
+                    example: null
+
   /article:
     get:
       tags:
@@ -425,8 +736,8 @@ paths:
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/ArticleModel'
-        '400':
+                        $ref: "#/components/schemas/ArticleModel"
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -474,8 +785,8 @@ paths:
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/ArticleModel'
-        '400':
+                        $ref: "#/components/schemas/ArticleModel"
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -510,16 +821,16 @@ paths:
                 password:
                   type: string
       responses:
-        '200':
+        "200":
           description: Successfull
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/BasicResponse'
+                  - $ref: "#/components/schemas/BasicResponse"
                   - type: object
-                          
-        '400':
+
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -535,7 +846,7 @@ paths:
                   data:
                     type: string
                     example: null
-  
+
   /admin/product:
     post:
       tags:
@@ -543,6 +854,13 @@ paths:
       operationId: Admin Create Product
       summary: Admin Create Product
       description: Admin Create Product
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Input Admin Token
       requestBody:
         content:
           application/json:
@@ -559,21 +877,21 @@ paths:
                   type: integer
                 category_id:
                   type: integer
-      responses: 
-        '200':
+      responses:
+        "200":
           description: Successfull
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/BasicResponse'
+                  - $ref: "#/components/schemas/BasicResponse"
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/ProductModel'
-                          
-        '400':    
-          description: Bad Request  
+                        $ref: "#/components/schemas/ProductModel"
+
+        "400":
+          description: Bad Request
           content:
             application/json:
               schema:
@@ -588,8 +906,8 @@ paths:
                   data:
                     type: string
                     example: null
-              
-  /admin/product/update/{id}:
+
+  /admin/product/{id}:
     put:
       tags:
         - Admin
@@ -602,13 +920,7 @@ paths:
           schema:
             type: string
           required: true
-          description: Input User Token
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
-          description: The ID of the Product to retrieve.
+          description: Input Admin Token
 
       requestBody:
         content:
@@ -626,21 +938,21 @@ paths:
                   type: integer
                 category_id:
                   type: integer
-      responses: 
-        '200':
+      responses:
+        "200":
           description: Successfull
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/BasicResponse'
+                  - $ref: "#/components/schemas/BasicResponse"
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/ProductModel'
-                          
-        '400':    
-          description: Bad Request  
+                        $ref: "#/components/schemas/ProductModel"
+
+        "400":
+          description: Bad Request
           content:
             application/json:
               schema:
@@ -656,7 +968,6 @@ paths:
                     type: string
                     example: null
 
-  /admin/product/delete/{id}:
     delete:
       tags:
         - Admin
@@ -669,25 +980,18 @@ paths:
           schema:
             type: string
           required: true
-          description: Input User Token
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
-          description: The ID of the Product to retrieve.
-      responses: 
-        '200':
+          description: Input Admin Token
+      responses:
+        "200":
           description: Successfull
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/BasicResponse'
-                 
-                          
-        '400':    
-          description: Bad Request  
+                  - $ref: "#/components/schemas/BasicResponse"
+
+        "400":
+          description: Bad Request
           content:
             application/json:
               schema:
@@ -702,6 +1006,7 @@ paths:
                   data:
                     type: string
                     example: null
+
   /admin/event:
     post:
       tags:
@@ -709,6 +1014,13 @@ paths:
       operationId: Admin Create Event
       summary: Admin Create Event
       description: Admin Create Event
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Input Admin Token
       requestBody:
         content:
           application/json:
@@ -728,21 +1040,21 @@ paths:
                 organizer:
                   type: string
 
-      responses: 
-        '200':
+      responses:
+        "200":
           description: Successfull
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/BasicResponse'
+                  - $ref: "#/components/schemas/BasicResponse"
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/EventModel'
-                          
-        '400':    
-          description: Bad Request  
+                        $ref: "#/components/schemas/EventModel"
+
+        "400":
+          description: Bad Request
           content:
             application/json:
               schema:
@@ -754,7 +1066,7 @@ paths:
                   message:
                     type: string
                     example: "Bad Input"
-  /admin/event/update/{id}:
+  /admin/event/{id}:
     put:
       tags:
         - Admin
@@ -768,12 +1080,6 @@ paths:
             type: string
           required: true
           description: Input User Token
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
-          description: The ID of the Event to retrieve.
       requestBody:
         content:
           application/json:
@@ -792,34 +1098,32 @@ paths:
                   type: string
                 organizer:
                   type: string
-      responses: 
-        '200':
+      responses:
+        "200":
           description: Successfull
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/BasicResponse'
+                  - $ref: "#/components/schemas/BasicResponse"
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/EventModel'
-                          
-        '400':    
-          description: Bad Request  
+                        $ref: "#/components/schemas/EventModel"
+
+        "400":
+          description: Bad Request
           content:
             application/json:
               schema:
                 type: object
-                properties: 
+                properties:
                   status:
                     type: boolean
                     example: false
                   message:
                     type: string
                     example: "Bad Input"
-  
-  /admin/event/delete/{id}:
     delete:
       tags:
         - Admin
@@ -833,24 +1137,17 @@ paths:
             type: string
           required: true
           description: Input User Token
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
-          description: The ID of the Event to retrieve.
-      responses: 
-        '200':
+      responses:
+        "200":
           description: Successfull
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/BasicResponse'
-                 
-                          
-        '400':    
-          description: Bad Request  
+                  - $ref: "#/components/schemas/BasicResponse"
+
+        "400":
+          description: Bad Request
           content:
             application/json:
               schema:
@@ -870,6 +1167,13 @@ paths:
       operationId: Admin Create Article
       summary: Admin Create Article
       description: Admin Create Article
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Input User Token
       requestBody:
         content:
           application/json:
@@ -884,19 +1188,19 @@ paths:
                   type: string
 
       responses:
-        '200':
+        "200":
           description: Successfull
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/BasicResponse'
+                  - $ref: "#/components/schemas/BasicResponse"
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/ArticleModel'
-                          
-        '400':
+                        $ref: "#/components/schemas/ArticleModel"
+
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -910,66 +1214,58 @@ paths:
                     type: string
                     example: "Bad Input"
 
-  /admin/article/update/{id}:
-      put:
-        tags:
-          - Admin
-        operationId: Admin Update Article
-        summary: Admin Update Article
-        description: Admin Update Article
-        parameters:
-          - in: header
-            name: Authorization
+  /admin/article/{id}:
+    put:
+      tags:
+        - Admin
+      operationId: Admin Update Article
+      summary: Admin Update Article
+      description: Admin Update Article
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+          required: true
+          description: Input User Token
+      requestBody:
+        content:
+          application/json:
             schema:
-              type: string
-            required: true
-            description: Input User Token
-          - in: path
-            name: id
-            schema:
-              type: integer
-            required: true
-            description: The ID of the Article to retrieve.
-        requestBody:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                content:
+                  type: string
+      responses:
+        "200":
+          description: Successfull
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BasicResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/ArticleModel"
+
+        "400":
+          description: Bad Request
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  title:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
                     type: string
-                  description:
-                    type: string
-                  content:
-                    type: string
-        responses:
-          '200':
-            description: Successfull
-            content:
-              application/json:
-                schema:
-                  allOf:
-                    - $ref: '#/components/schemas/BasicResponse'
-                    - type: object
-                      properties:
-                        data:
-                          $ref: '#/components/schemas/ArticleModel'
-                            
-          '400':
-            description: Bad Request
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    status:
-                      type: boolean
-                      example: false
-                    message:
-                      type: string
-                      example: "Bad Input"
-
-  /admin/article/delete/{id}:
+                    example: "Bad Input"
     delete:
       tags:
         - Admin
@@ -990,16 +1286,15 @@ paths:
           required: true
           description: The ID of the Article to retrieve.
       responses:
-        '200':
+        "200":
           description: Successfull
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/BasicResponse'
-                 
-                          
-        '400':
+                  - $ref: "#/components/schemas/BasicResponse"
+
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -1012,8 +1307,6 @@ paths:
                   message:
                     type: string
                     example: "Bad Input"
-
-
 
 components:
   schemas:
@@ -1048,6 +1341,24 @@ components:
           type: integer
         created_at:
           type: integer
+    UserAddressModel:
+      title: UserAddress
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        address_line:
+          type: string
+        postal_code:
+          type: integer
+        city:
+          type: string
+        state_province:
+          type: string
+        country:
+          type: string
     ProductModel:
       title: Products
       type: object
@@ -1116,7 +1427,7 @@ components:
     #   title: TransactionProduct
     #   type: object
     #   properties:
-    #     id: 
+    #     id:
     #       type: integer
     #     user_id:
     #       type: integer
@@ -1138,11 +1449,11 @@ components:
         description:
           type: string
         location:
-          $ref: '#/components/schemas/Location'
+          $ref: "#/components/schemas/Location"
         date:
-          $ref: '#/components/schemas/Date'
+          $ref: "#/components/schemas/Date"
         organizer:
-          $ref: '#/components/schemas/Organizer'
+          $ref: "#/components/schemas/Organizer"
         authorId:
           type: integer
 
@@ -1181,7 +1492,7 @@ components:
           type: integer
         name:
           type: string
-    
+
     ArticleModel:
       title: Article
       type: object
@@ -1233,28 +1544,28 @@ components:
       title: TransactionMethod
       type: object
       properties:
-        id: 
+        id:
           type: integer
         name:
           type: string
-    
+
     EventTransactionsModel:
       title: EventTransactions
       type: object
       properties:
         id:
           type: integer
-        user_id: 
+        user_id:
           type: integer
         event_id:
-          $ref: '#/components/schemas/EventModel'
+          $ref: "#/components/schemas/EventModel"
         transaction_date:
           type: integer
         ticket_quantity:
           type: integer
         total_amount:
           type: integer
-      
+
     EventTransactionHistoryModel:
       title: EventTransactionHistory
       type: object
@@ -1264,5 +1575,4 @@ components:
         user_id:
           type: integer
         event_transaction_id:
-          $ref: '#/components/schemas/EventTransactionsModel'
-    
+          $ref: "#/components/schemas/EventTransactionsModel"
