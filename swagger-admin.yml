@@ -1,1303 +1,814 @@
-openapi: 3.0.3
+openapi: '3.0.3'
 info:
-  title: Local Art & Culture (Kelompok 7)
-  description: Dokumentasi ini menyediakan panduan lengkap untuk mengakses dan menggunakan API
-  version: 1.0.0
-  contact:
-    email: uplabs.in@gmail.com
-    name: Learn21
+  title: Kreasi Nusantara API (User)
+  version: '1.0.0'
+  description: |
+    This API provides functionalities for Kreasi Nusantara feature, especially the user-site. (For Flutter Team)
 tags:
-  - name: Products
-    description: Operations related to Products
-  - name: Event
-    description: Operations related to Event
-  - name: Article
-    description: Operations related to Article
   - name: Admin
-    description: Operations related to Admin
+    description: |
+      This tag is for all endpoints related to super admin management.
+  - name: Product
+    description: |
+      This tag is for all endpoints related to product management.
+  - name: Event
+    description: |
+      This tag is for all endpoints related to event management.
+  - name: Article
+    description: |
+      This tag is for all endpoints related to article management.
 
 paths:
-  /product:
-    get:
-      tags:
-        - Products
-      operationId: get-fetch-all-products
-      summary: Get all products
-      description: Show all product.
-      parameters:
-        - in: header
-          name: BearerAuth
-          schema:
-            type: string
-          required: true
-          description: Input User Token
-        - in: query
-          name: limit
-          schema:
-            type: integer
-          required: false
-          description: Number of items per page.
-        - in: query
-          name: page
-          schema:
-            type: integer
-          required: false
-          description: Page number for pagination.
-        - in: query
-          name: search
-          schema:
-            type: string
-          required: false
-          description: Search keyword for products
-      responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/BasicResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/ProductModel"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: "Bad Request"
-                  data:
-                    type: string
-                    example: null
-
-  /product/transaction:
+  /admin/register:
     post:
       tags:
-        - Products
-      operationId: transactions product
-      summary: Transactions product
-      description: Transactions product
-      parameters:
-        - in: header
-          name: id
-          schema:
-            type: string
-          required: true
-          description: Input User Token
+        - Admin 
+      operationId: Admin Register
+      summary: Super Admin Register
+      description: Admin Register
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                quantity:
-                  type: integer
-                total_price:
-                  type: integer
-                total_amount:
-                  type: integer
-                transaction_method_id:
-                  type: integer
-
+              $ref: '#/components/schemas/RegisterRequest'
       responses:
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/BasicResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/ProductTransactionsModel"
+                $ref: '#/components/schemas/BaseResponse'
         "400":
-          description: Bad Request
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Conflict
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: "Bad Request"
-                  data:
-                    type: string
-                    example: null
-
-
-
-  /product/transaction/items:
-    post:
-      tags:
-        - Products
-      operationId: transactions product items
-      summary: Transactions product items
-      description: Transactions product items
-      parameters:
-        - in: header
-          name: id
-          schema:
-            type: string
-          required: true
-          description: Input User Token
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                product_transaction_id:
-                  type: integer
-                product_id:
-                  type: integer
-                quantity:
-                  type: integer
-                price:
-                  type: integer
-      responses:
-        "200":
-          description: Successful operation
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: user already exists
+        '500':
+          description: Internal server error
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/BasicResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/ProductTransactionsItemModel"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: "Bad Request"
-                  data:
-                    type: string
-                    example: null
-
-  /product/category/{Id}:
-    get:
-      tags:
-        - Products
-      operationId: getFetchCategoriesDetail
-      summary: Get categories details
-      description: Retrieves details of a specific category along with related courses.
-      parameters:
-        - in: path
-          name: Id
-          schema:
-            type: integer
-          required: true
-          description: Category ID
-        - in: header
-          name: id
-          schema:
-            type: string
-          required: true
-          description: Input User Token
-      security:
-        - BearerAuth: []
-      responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/BasicResponse"
-                  - type: object
-                    properties:
-                      categories:
-                        $ref: "#/components/schemas/ProductCategoriesModel"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: "Bad Request"
-                  categories:
-                    type: string
-                    example: null
-
-  /product/reviews/{id}:
-    get:
-      tags:
-        - Products
-      operationId: get-fetch-product-reviews
-      summary: Get product review
-      description: Retrieves details of a specific categories along with related courses.
-      parameters:
-        - in: header
-          name: id
-          schema:
-            type: string
-          required: true
-          description: Input User Token
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
-          description: The ID of the review to retrieve.
-      responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/BasicResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/ProductReviewModel"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: "Bad Request"
-                  categories:
-                    type: string
-                    example: null
-
-  /events:
-    get:
-      tags:
-        - Event
-      operationId: get-fetch-all-event
-      summary: Get all event
-      description: Show all event.
-      parameters:
-        - in: header
-          name: id
-          schema:
-            type: string
-          required: true
-          description: Input User Token
-        - in: query
-          name: limit
-          schema:
-            type: integer
-          required: false
-          description: Number of items per page.
-        - in: query
-          name: page
-          schema:
-            type: integer
-          required: false
-          description: Page number for pagination.
-      responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/BasicResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/EventModel"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: "Bad Request"
-                  data:
-                    type: string
-                    example: null
-
-  /events/{id}:
-    get:
-      tags:
-        - Event
-      operationId: get-fetch-event
-      summary: Get id event
-      description: Show all event.
-      parameters:
-        - in: header
-          name: id
-          schema:
-            type: string
-          required: true
-          description: Input User Token
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
-          description: Number of items per page.
-      responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/BasicResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/EventModel"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: "Bad Request"
-                  data:
-                    type: string
-                    example: null
-
-  /events/transaction:
-    post:
-      tags:
-        - Event
-      operationId: transaction event
-      summary: transaction event
-      description: transaction event.
-      parameters:
-        - in: header
-          name: id
-          schema:
-            type: string
-          required: true
-          description: Input User Token
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                event_id:
-                  type: integer
-                  example: 1
-                transaction_date:
-                  type: integer
-                  example: 2022-01-01
-                total_amount:
-                  type: integer
-                  example: 10000
-                ticket_quantity:
-                  type: integer
-                  example: 1
-      responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/BasicResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/EventTransactionsModel"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: "Bad Request"
-                  data:
-                    type: string
-                    example: null
-
-  /article:
-    get:
-      tags:
-        - Article
-      operationId: get-fetch-all-article
-      summary: Get all article
-      description: Show all article.
-      parameters:
-        - in: header
-          name: id
-          schema:
-            type: string
-          required: true
-          description: Input User Token
-        - in: query
-          name: limit
-          schema:
-            type: integer
-          required: false
-          description: Number of items per page.
-        - in: query
-          name: page
-          schema:
-            type: integer
-          required: false
-          description: Page number for pagination.
-      responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/BasicResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/ArticleModel"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: "Bad Request"
-                  data:
-                    type: string
-                    example: null
-
-  /article/{id}:
-    get:
-      tags:
-        - Article
-      operationId: get-fetch-article
-      summary: Get all article
-      description: Show all article.
-      parameters:
-        - in: header
-          name: id
-          schema:
-            type: string
-          required: true
-          description: Input User Token
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
-          description: Number of items per page.
-      responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/BasicResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/ArticleModel"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: "Bad Request"
-                  data:
-                    type: string
-                    example: null
+                $ref: '#/components/schemas/BaseResponse'
+              examples:
+                failed create user:
+                  value:
+                    status: failed
+                    message: failed to create admin
+                failed hashing password:
+                  value:
+                    status: failed
+                    message: failed to hash password
 
   /admin/login:
     post:
       tags:
         - Admin
-      operationId: Admin Login
-      summary: Admin Login
-      description: Admin enter email and password
+      operationId: AdminLogin
+      summary: Admin & Super Admin Login
+      description: Admin Login
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                password:
-                  type: string
+              $ref: '#/components/schemas/LoginRequest'
       responses:
         "200":
-          description: Successfull
+          description: Successful operation
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/BasicResponse"
-                  - type: object
-                    properties:
-                      data: 
-                        $ref: "#/components/schemas/AdminModel"
-                      
-
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: user profile retrieved successfully
+                data:
+                  roles: superadmin / admin
+                  token: jwt_token
         "400":
-          description: Bad Request
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          description: Unauthorized
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: "Bad Request"
-                  data:
-                    type: string
-                    example: null
-
-  /admin/product:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: unauthorized user
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              examples:
+                failed_login:
+                  value:
+                    status: failed
+                    message: failed to login
+  /admin:
+    get:
+      tags:
+        - Admin
+      operationId: Get All Admin
+      security:
+        - bearerAuth: []
+      summary: Get All Admin
+      description: Get All Admin
+      parameters:
+        - name: page
+          in: query
+          description: Page number of the admin
+          schema:
+            type: integer
+          example: 1
+        - name: limit
+          in: query
+          description: Limit of the admin
+          schema:
+            type: integer
+          example: 10
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: admin retrieved successfully
+                data:
+                  admin:
+                    - id: 1
+                      email: admin@gmail.com
+                      roles: admin
+                      first_name: admin
+                      last_name: admin
+                      created_at: '2022-01-01T00:00:00Z'
+                    - id: 2
+                      email: superadmin@gmail.com
+                      roles: superadmin
+                      first_name: superadmin
+                      last_name: superadmin
+                      created_at: '2022-01-01T00:00:00Z'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              examples:
+                failed get all admin:
+                  value:
+                    status: failed
+                    message: failed to get all admin
     post:
       tags:
         - Admin
-      operationId: Admin Create Product
-      summary: Admin Create Product
-      description: Admin Create Product
-      parameters:
-        - in: header
-          name: id
-          schema:
-            type: string
-          required: true
-          description: Input Admin Token
+      operationId: Create Admin
+      security:
+        - bearerAuth: []
+      summary: Create Admin
+      description: Create Admin
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                description:
-                  type: string
-                price:
-                  type: integer
-                stock:
-                  type: integer
-                category_id:
-                  type: integer
+              $ref: '#/components/schemas/CreateAdminRequest'
       responses:
         "200":
-          description: Successfull
+          description: Successful operation
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/BasicResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/ProductModel"
-
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: admin created successfully
+                data:
+                  id: 1
+                  email: admin@gmail.com
+                  roles: admin
+                  first_name: admin
+                  last_name: admin
+                  created_at: '2022-01-01T00:00:00Z'
         "400":
-          description: Bad Request
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          description: Internal server error
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: "Bad Input"
-                  data:
-                    type: string
-                    example: null
-
-  /admin/product/{id}:
-    parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-        description: Product ID
-
+                $ref: '#/components/schemas/BaseResponse'
+              examples:
+                failed create admin:
+                  value:
+                    status: failed
+                    message: failed to create admin
+    
     put:
       tags:
         - Admin
-      operationId: adminUpdateProduct
-      summary: Admin Update Product
-      description: Admin Update Product
+      operationId: Update Admin
+      security:
+        - bearerAuth: []
+      summary: Update Admin
+      description: Update Admin
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Admin ID
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductModel"
+              $ref: '#/components/schemas/CreateAdminRequest'
       responses:
         "200":
-          description: Successful
+          description: Successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BasicResponse"
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: admin updated successfully
+                data:
+                  id: 1
+                  email: admin@gmail.com
+                  roles: admin
+                  first_name: admin
+                  last_name: admin
+                  created_at: '2022-01-01T00:00:00Z'
         "400":
-          description: Bad Request
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          description: Internal server error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BasicResponse"
+                $ref: '#/components/schemas/BaseResponse'
+              examples:
+                failed update admin:
+                  value:
+                    status: failed
+                    message: failed to update admin
 
-    delete:
-      tags:
-        - Admin
-      operationId: adminDeleteProduct
-      summary: Admin Delete Product
-      description: Admin Delete Product
-      responses:
-        "200":
-          description: Successful
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/BasicResponse"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/BasicResponse"
 
-  /admin/event:
+  /products:
     post:
       tags:
-        - Admin
-      operationId: Admin Create Event
-      summary: Admin Create Event
-      description: Admin Create Event
-      parameters:
-        - in: header
-          name: id
-          schema:
-            type: string
-          required: true
-          description: Input Admin Token
+        - Product
+      operationId: Create Product
+      security:
+        - bearerAuth: []
+      summary: Create Product
+      description: Create Product
       requestBody:
         content:
           application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                description:
-                  type: string
-                start_date:
-                  type: string
-                end_date:
-                  type: string
-                location:
-                  type: string
-                organizer:
-                  type: string
-
+            schema: 
+              $ref: '#/components/schemas/CreateProductRequest'
       responses:
         "200":
-          description: Successfull
+          description: Successful operation
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/BasicResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/EventModel"
-
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: product created successfully
+                data:
+                  id: 1
+                  name: product 1
+                  image: 'https://example.com/image.png'
+                  description: 'This is the description of the product'
+                  price: 10000
+                  stock: 10
+                  likes_count: 0
+                  category_id: 1
+                  average_rating: 0
+                  reviews_count: 0
         "400":
-          description: Bad Request
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          description: Internal server error
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: "Bad Input"
-
-  /admin/event/{id}:
-    parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-        description: Event ID
-
+                $ref: '#/components/schemas/BaseResponse'
+              examples:
+                failed create product:
+                  value:
+                    status: failed
+                    message: failed to create product
     put:
       tags:
-        - Admin
-      operationId: adminUpdateEvent
-      summary: Admin Update Event
-      description: Admin Update Event
+        - Product
+      operationId: Update Product
+      security:
+        - bearerAuth: []
+      summary: Update Product
+      description: Update Product
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Product ID
       requestBody:
-        required: true
         content:
           application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                description:
-                  type: string
-                start_date:
-                  type: string
-                  format: date-time
-                end_date:
-                  type: string
-                  format: date-time
-                location:
-                  type: string
-                organizer:
-                  type: string
-      security:
-        - BearerAuth: []
+            schema: 
+              $ref: '#/components/schemas/CreateProductRequest'
       responses:
         "200":
-          description: Successful
+          description: Successful operation
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/BasicResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/EventModel"
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: product updated successfully
+                data:
+                  id: 1
+                  name: product 1
+                  image: 'https://example.com/image.png'
+                  description: 'This is the description of the product'
+                  price: 10000
+                  stock: 10
+                  likes_count: 0
+                  category_id: 1
+                  average_rating: 0
+                  reviews_count: 0
         "400":
-          description: Bad Request
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          description: Internal server error
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: "Bad Input"
+                $ref: '#/components/schemas/BaseResponse'
+              examples:
+                failed update product:
+                  value:
+                    status: failed
+                    message: failed to update product
 
     delete:
       tags:
-        - Admin
-      operationId: adminDeleteEvent
-      summary: Admin Delete Event
-      description: Admin Delete Event
+        - Product
+      operationId: Delete Product
       security:
-        - BearerAuth: []
+        - bearerAuth: []
+      summary: Delete Product
+      description: Delete Product
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Product ID
       responses:
         "200":
-          description: Successful
+          description: Successful operation
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/BasicResponse"
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: product deleted successfully
+                data:    
         "400":
-          description: Bad Request
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          description: Internal server error
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: "Bad Input"
+                $ref: '#/components/schemas/BaseResponse'
+              examples:
+                failed delete product:
+                  value:
+                    status: failed
+                    message: failed to delete product
 
-  /admin/article:
+
+  /products/categories:
     post:
       tags:
-        - Admin
-      operationId: Admin Create Article
-      summary: Admin Create Article
-      description: Admin Create Article
-      parameters:
-        - in: header
-          name: id
-          schema:
-            type: string
-          required: true
-          description: Input User Token
+        - Product
+      operationId: Create Category Product
+      security:
+        - bearerAuth: []
+      summary: Create Category Product
+      description: Create Category Product
       requestBody:
         content:
           application/json:
-            schema:
-              type: object
-              properties:
-                title:
-                  type: string
-                description:
-                  type: string
-                content:
-                  type: string
-
+            schema: 
+              $ref: '#/components/schemas/CreateCategoryRequest'
       responses:
         "200":
-          description: Successfull
+          description: Successful operation
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/BasicResponse"
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/ArticleModel"
-
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: category created successfully
+                data:
+                  id: 1
+                  name: category 1
         "400":
-          description: Bad Request
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          description: Internal server error
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: boolean
-                    example: false
-                  message:
-                    type: string
-                    example: "Bad Input"
-
-  /admin/article/{id}:
-    parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-        description: Article ID
-
+                $ref: '#/components/schemas/BaseResponse'
+              examples:
+                failed create category:
+                  value:
+                    status: failed
+                    message: failed to create category
+    get:
+      tags:
+        - Product
+      operationId: Get Category Product
+      security:
+        - bearerAuth: []
+      summary: Get Category Product
+      description: Get Category Product
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: category retrieved successfully
+                data:
+                  id: 1
+                  name: category 1
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              examples:
+                failed get category:
+                  value:
+                    status: failed
+                    message: failed to get category
+    
     put:
       tags:
-        - Admin
-      operationId: adminUpdateArticle
-      summary: Admin Update Article
-      description: Admin Update Article
+        - Product
+      operationId: Update Category Product
+      security:
+        - bearerAuth: []
+      summary: Update Category Product
+      description: Update Category Product
       parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-        description: Article ID
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Category ID
       requestBody:
         content:
           application/json:
-            schema:
-              $ref: "#/components/schemas/ArticleModel"
+            schema: 
+              $ref: '#/components/schemas/CreateCategoryRequest'
       responses:
         "200":
-          description: Successful
+          description: Successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BasicResponse"
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: category updated successfully
+                data:
+                  id: 1
+                  name: category 1
         "400":
-          description: Bad Request
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          description: Internal server error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BasicResponse"
+                $ref: '#/components/schemas/BaseResponse'
+              examples:
+                failed update category:
+                  value:
+                    status: failed
+                    message: failed to update category
 
     delete:
       tags:
-        - Admin
-      operationId: adminDeleteArticle
-      summary: Admin Delete Article
-      description: Admin Delete Article
+        - Product
+      operationId: Delete Category Product
       security:
-        - BearerAuth: []
+        - bearerAuth: []
+      summary: Delete Category Product
+      description: Delete Category Product
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Category ID
       responses:
         "200":
-          description: Successful
+          description: Successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BasicResponse"
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: category deleted successfully
+                data:
+                  id: 1
+                  name: category 1
         "400":
-          description: Bad Request
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          description: Internal server error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BasicResponse"
+                $ref: '#/components/schemas/BaseResponse'
+              examples:
+                failed delete category:
+                  value:
+                    status: failed
+                    message: failed to delete category
+
+              
 
 components:
-  securitySchemes:
-    BearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT # Optional, used to specify the format of the token
-    
   schemas:
-    BasicResponse:
-      title: BasicResponse
+    BaseResponse:
       type: object
       properties:
         status:
-          type: boolean
-          example: true
+          type: string
+          description: Status of the response
         message:
           type: string
-          example: "success"
-        data: {}
-
-    Users:
-      title: user
+          description: Message of the response
+        data:
+          type: object
+          description: Data of the response
+      required:
+        - status
+        - message
+    SearchResponse:
       type: object
       properties:
-        id:
-          type: integer
-        username:
+        status:
           type: string
+          description: The status of the response
+        message:
+          type: string
+          description: The message of the response
+        data:
+          type: object
+          description: The data of the response
+        metadata:
+          type: object
+          description: The metadata of the response
+          properties:
+            total_data:
+              type: integer
+              description: The total data of the response
+            total_count:
+              type: integer
+              description: The total count of the response
+            next_offset:
+              type: integer
+              description: The offset for loading more data
+            has_load_more:
+              type: boolean
+              description: Indicates if there is more data to load
+    PaginationResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: The status of the response
+        message:
+          type: string
+          description: The message of the response
+        data:
+          type: object
+          description: The data of the response
+        pagination:
+          type: object
+          description: The pagination information of the response
+          properties:
+            current_page:
+              type: integer
+              description: The current page of the response
+            total_page:
+              type: integer
+              description: The total number of pages of the response
+            total_data:
+              type: integer
+              description: The total data of the response
+        link:
+          type: object
+          description: The links for the response
+          properties:
+            next:
+              type: string
+              description: The next link of the response
+            prev:
+              type: string
+              description: The previous link of the response
+    RegisterRequest:
+      type: object
+      properties:
         email:
           type: string
-        phone_no:
-          type: integer
-        gender:
+          format: email
+          description: Email of the admin
+          example: kreasinusantara@gmail.com
+        password:
           type: string
-        date_of_birth:
-          type: integer
-        created_at:
-          type: integer
-    UserAddressModel:
-      title: UserAddress
+          description: Password of the admin
+          example: yourpassword
+    CreateAdminRequest:
       type: object
       properties:
-        id:
-          type: integer
-        user_id:
-          type: integer
-        address_line:
+        email:
           type: string
-        postal_code:
-          type: integer
-        city:
+          format: email
+          description: Email of the admin
+          example: kreasinusantara@gmail.com
+        first_name:
           type: string
-        state_province:
+          description: First name of the admin
+          example: Kreasi
+        last_name:
           type: string
-        country:
+          description: Last name of the admin
+          example: Usantara
+        password:
           type: string
-    ProductModel:
-      title: Products
+          description: Password of the admin
+          example: yourpassword
+    CreateProductRequest:
       type: object
       properties:
-        id:
-          type: integer
         name:
           type: string
+          description: Name of the product
+          example: product 1
+        image:
+          type: string
+          description: Image of the product
+          example: https://example.com/image.jpg
         description:
           type: string
+          description: Description of the product
+          example: description 1
         price:
           type: integer
+          description: Price of the product
+          example: 10000
         stock:
           type: integer
-        likes_count:
-          type: integer
+          description: Stock of the product
+          example: 10
         category_id:
           type: integer
-        image:
-          $ref: "#/components/schemas/ImageProductModel"
-        video:
-          type: string
-        author_id:
-          type: integer
-    ProductCategoriesModel:
-      title: ProductCategories
+          description: Category id of the product
+          example: 1
+    CreateCategoryRequest:
       type: object
       properties:
-        id:
-          type: integer
         name:
           type: string
-        product:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: integer
-              name:
-                type: string
-              description:
-                type: string
-              price:
-                type: integer
-              stock:
-                type: integer
-              likes_count:
-                type: integer
-              author_id:
-                type: integer
-    ProductReviewModel:
-      title: ProductReviews
+          description: Name of the category
+          example: category 1
+    CreateTicketRequest:
       type: object
       properties:
-        id:
-          type: integer
-        user_id:
-          type: integer
-        product_id:
-          type: integer
-        rating:
-          type: integer
-        review_text:
-          type: string
-        review_date:
-          type: integer
-
-    # TransactionProductModel:
-    #   title: TransactionProduct
-    #   type: object
-    #   properties:
-    #     id:
-    #       type: integer
-    #     user_id:
-    #       type: integer
-    #     transaction_date:
-    #       type: integer
-    #     total_amount:
-    #       type: integer
-    #     transaction_method_id
-    #       type: integer
-
-    EventModel:
-      title: Event
-      type: object
-      properties:
-        id:
-          type: integer
         name:
           type: string
-        description:
-          type: string
-        location:
-          $ref: "#/components/schemas/Location"
-        date:
-          $ref: "#/components/schemas/Date"
-        organizer:
-          $ref: "#/components/schemas/Organizer"
-        authorId:
-          type: integer
-
-    Location:
+          description: Name of the ticket
+    LoginRequest:
       type: object
       properties:
-        id:
-          type: integer
-        address_line:
-          type: string
-        city:
-          type: string
-        state_province:
-          type: string
-        country:
-          type: string
-
-    Date:
-      type: object
-      properties:
-        id:
-          type: integer
-        date_start:
-          type: string
-        date_end:
-          type: string
-        event_time:
-          type: string
-        gates_open:
-          type: string
-
-    Organizer:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-
-    ArticleModel:
-      title: Article
-      type: object
-      properties:
-        id:
-          type: integer
-        authorId:
-          type: integer
-        title:
-          type: string
-        body:
-          type: string
-        likes_count:
-          type: string
-        date_published:
-          type: integer
-
-    ProductTransactionsModel:
-      title: ProductTransaction
-      type: object
-      properties:
-        id:
-          type: integer
-        user_id:
-          type: integer
-        transaction_date:
-          type: integer
-        total_amount:
-          type: integer
-        transaction_method_id:
-          type: integer
-
-    ProductTransactionsItemModel:
-      title: ProductTransactionItem
-      type: object
-      properties:
-        id:
-          type: integer
-        product_transaction_id:
-          type: integer
-        product_id:
-          type: integer
-        quantity:
-          type: integer
-        price:
-          type: integer
-
-    # TransactionMethodsModel:
-    #   title: TransactionMethod
-    #   type: object
-    #   properties:
-    #     id:
-    #       type: integer
-    #     name:
-    #       type: string
-
-    EventTransactionsModel:
-      title: EventTransactions
-      type: object
-      properties:
-        id:
-          type: integer
-        user_id:
-          type: integer
-        event_id:
-          $ref: "#/components/schemas/EventModel"
-        transaction_date:
-          type: integer
-        ticket_quantity:
-          type: integer
-        total_amount:
-          type: integer
-
-    # EventTransactionHistoryModel:
-    #   title: EventTransactionHistory
-    #   type: object
-    #   properties:
-    #     id:
-    #       type: integer
-    #     user_id:
-    #       type: integer
-    #     event_transaction_id:
-    #       $ref: "#/components/schemas/EventTransactionsModel"
-          
-    AdminModel:
-      title: Admin
-      type: object
-      properties:
-        id:
-          type: integer
-        username:
-          type: string
         email:
           type: string
-        Token:
+          description: Email of the user
+          example: kreasinusantara@gmail.com
+        password:
           type: string
-    ImageProductModel:
-      title: Image
-      type: object
-      properties:
-        id:
-          type: integer
-        product_id:
-          type: integer
-        url:
-          type: string
-
-security:
-  - BearerAuth: []
+          description: Password of the user
+          example: yourpassword
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BaseResponse'
+          examples:
+            invalid_request_data:
+              value:
+                status: failed
+                message: invalid request data
+            mismatched_data_type:
+              value:
+                status: failed
+                message: mismatched data type
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BaseResponse'
+          examples:
+            unauthorized:
+              value:
+                status: failed
+                message: unauthorized user
+            invalid_token:
+              value:
+                status: failed
+                message: invalid token
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BaseResponse'
+          example:
+            status: failed
+            message: forbidden resource
+    BadGateway:
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BaseResponse'
+          example:
+            status: failed
+            message: external service error
+    UserResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BaseResponse'
+          example:
+            status: success
+            message: user profile retrieved successfully
+            data:
+              username: kreasinusantara
+              email: kreasinusantara@gmail.com
+              phone_no: 081234567890
+              gender: Female
+              date_of_birth: '2003-05-01T00:00:00Z'
+    
+    
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
 
