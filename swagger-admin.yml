@@ -1,9 +1,9 @@
 openapi: '3.0.3'
 info:
-  title: Kreasi Nusantara API (User)
+  title: Kreasi Nusantara API (Admin)
   version: '1.0.0'
   description: |
-    This API provides functionalities for Kreasi Nusantara feature, especially the user-site. (For Flutter Team)
+    This API provides functionalities for Kreasi Nusantara feature, especially the user-site. (For React Team)
 tags:
   - name: Admin
     description: |
@@ -38,6 +38,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: user created successfully
+                data:
+                  roles: superadmin
+                  email: kreasinusantara@gmail.com
+
         "400":
           $ref: '#/components/responses/BadRequest'
         '409':
@@ -215,6 +222,7 @@ paths:
                     status: failed
                     message: failed to create admin
     
+  /admin/{adminId}:
     put:
       tags:
         - Admin
@@ -225,7 +233,7 @@ paths:
       description: Update Admin
       parameters:
         - in: path
-          name: id
+          name: adminId
           schema:
             type: integer
           required: true
@@ -268,6 +276,66 @@ paths:
 
 
   /products:
+    get:
+      tags:
+        - Product
+      summary: Get all products
+      operationId: getProducts
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: Page number of the products
+          schema:
+            type: integer
+          example: 1
+        - name: limit
+          in: query
+          description: Limit of the products
+          schema:
+            type: integer
+          example: 10
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginationResponse'
+              example:
+                status: success
+                message: products retrieved successfully
+                data:
+                  - id: 1
+                    name: Product 1
+                    categories:
+                        id: 1
+                        name: Category 1
+                    price: 100000
+                    stock: 10
+                    likes_count: 100
+                  - id: 2
+                    name: Product 2
+                    categories:
+                        id: 2
+                        name: Category 2
+                    price: 200000
+                    stock: 20
+                    likes_count: 200
+                pagination:
+                  current_page: 1
+                  total_page: 10
+                  total_data: 100
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to retrieve products
     post:
       tags:
         - Product
@@ -315,6 +383,93 @@ paths:
                   value:
                     status: failed
                     message: failed to create product
+  /products/search:
+    get:
+      tags:
+        - Product
+      summary: Search products by name
+      operationId: searchProducts
+      parameters:
+        - name: name
+          in: query
+          required: true
+          description: Name of the product to search
+          schema:
+            type: string
+          example: Batik
+        - name: min_price
+          in: query
+          description: Minimum price of the products
+          schema:
+            type: integer
+          example: 100000
+        - name: max_price
+          in: query
+          description: Maximum price of the products
+          schema:
+            type: integer
+          example: 200000
+        - name: sort_by
+          in: query
+          description: Sort by of the products
+          schema:
+            type: string
+          example: price
+        - name: order
+          in: query
+          description: Order of the products
+          schema:
+            type: string
+          example: asc
+        - name: offset
+          in: query
+          description: Offset of the products
+          schema:
+            type: integer
+          example: 0
+        - name: limit
+          in: query
+          description: Limit of the products
+          schema:
+            type: integer
+          example: 10
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+              example:
+                status: success
+                message: products retrieved successfully
+                data:
+                  - id: 1
+                    name: Product 1
+                    price: 100000
+                    stock: 10
+                    likes_count: 100
+                  - id: 2
+                    name: Product 2
+                    price: 200000
+                    stock: 20
+                    likes_count: 200
+                metadata:
+                  total_data: 100
+                  total_count: 10
+                  next_offset: 10
+                  has_load_more: true
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to retrieve products
+
+  /products/{productId}:
     put:
       tags:
         - Product
@@ -325,7 +480,7 @@ paths:
       description: Update Product
       parameters:
         - in: path
-          name: id
+          name: productId
           schema:
             type: integer
           required: true
@@ -380,7 +535,7 @@ paths:
       description: Delete Product
       parameters:
         - in: path
-          name: id
+          name: productId
           schema:
             type: integer
           required: true
@@ -485,7 +640,8 @@ paths:
                   value:
                     status: failed
                     message: failed to get category
-    
+  
+  /products/categories/{categoriesId}:
     put:
       tags:
         - Product
@@ -496,7 +652,7 @@ paths:
       description: Update Category Product
       parameters:
         - in: path
-          name: id
+          name: categoriesId
           schema:
             type: integer
           required: true
@@ -543,7 +699,7 @@ paths:
       description: Delete Category Product
       parameters:
         - in: path
-          name: id
+          name: categoriesId
           schema:
             type: integer
           required: true
@@ -575,7 +731,519 @@ paths:
                     status: failed
                     message: failed to delete category
 
-              
+  /events:
+    get:
+      tags:
+        - Event
+      summary: Get all events
+      operationId: getEvents
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: Page number of the events
+          schema:
+            type: integer
+          example: 1
+        - name: limit
+          in: query
+          description: Limit of the events
+          schema:
+            type: integer
+          example: 10
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginationResponse'
+              example:
+                status: success
+                message: events retrieved successfully
+                data:
+                  - id: 1
+                    name: Event 1
+                    description: This is event 1
+                    dates:
+                      start_date: '2021-08-01T00:00:00Z'
+                      end_date: '2021-08-02T00:00:00Z'
+                    locations:
+                      id: 1
+                      city: Solo 
+                      province: Jawa Tengah
+                  - id: 2
+                    name: Event 2
+                    description: This is event 2
+                    dates:
+                      start_date: '2021-08-03T00:00:00Z'
+                      end_date: '2021-08-04T00:00:00Z'
+                    locations:
+                      id: 2
+                      city: Yogyakarta
+                      province: DI Yogyakarta
+                pagination:
+                  current_page: 1
+                  total_page: 10
+                  total_data: 100
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to retrieve events
+
+    post:
+      tags:
+        - Event
+      operationId: Create Event
+      security:
+        - bearerAuth: []
+      summary: Create Event
+      description: Create Event
+      requestBody:
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/CreateEventRequest'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: event created successfully
+                data:
+                  id: 1
+                  name: Event 1
+                  description: This is event 1
+                  organizer: Hammersonic
+                  dates:
+                    id: 1
+                    start_date: '2021-08-01T00:00:00Z'
+                    end_date: '2021-08-02T00:00:00Z'
+                    event_time: '08:00 - 17:00'
+                    gates_open: '06:00'
+                  locations:
+                    id: 1
+                    address: Jl. Raya No. 1
+                    city: Solo 
+                    province: Jawa Tengah
+                    country: Indonesia
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              examples:
+                failed create event:
+                  value:
+                    status: failed
+                    message: failed to create event
+  /events/search:
+    get:
+      tags:
+        - Event
+      summary: Search events by name
+      operationId: searchEvents
+      parameters:
+        - name: name
+          in: query
+          required: true
+          description: Name of the event to search
+          schema:
+            type: string
+          example: Hammersonic
+        - name: sort_by
+          in: query
+          description: Sort by of the events
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: Order of the events
+          schema:
+            type: string
+          example: asc
+        - name: offset
+          in: query
+          description: Offset of the events
+          schema:
+            type: integer
+          example: 0
+        - name: limit
+          in: query
+          description: Limit of the events
+          schema:
+            type: integer
+          example: 10
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+              example:
+                status: success
+                message: events retrieved successfully
+                data:
+                  - id: 1
+                    name: Event 1
+                    description: This is event 1
+                    dates:
+                      start_date: '2021-08-01T00:00:00Z'
+                      end_date: '2021-08-02T00:00:00Z'
+                    locations:
+                      id: 1
+                      city: Solo 
+                      province: Jawa Tengah
+                  - id: 2
+                    name: Event 2
+                    description: This is event 2
+                    dates:
+                      start_date: '2021-08-03T00:00:00Z'
+                      end_date: '2021-08-04T00:00:00Z'
+                    locations:
+                      id: 2
+                      city: Yogyakarta
+                      province: DI Yogyakarta
+                metadata:
+                  total_data: 100
+                  total_count: 10
+                  next_offset: 10
+                  has_load_more: true
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: events not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to retrieve events
+                
+  /events/{eventId}:            
+    put:
+      tags:
+        - Event
+      operationId: Update Event
+      security:
+        - bearerAuth: []
+      summary: Update Event
+      description: Update Event
+      parameters:
+        - in: path
+          name: eventId
+          schema:
+            type: integer
+          required: true
+          description: Event ID
+      requestBody:
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/CreateEventRequest'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: event updated successfully
+                data:
+                  id: 1
+                  name: Event 1
+                  description: This is event 1
+                  organizer: Hammersonic
+                  dates:
+                    id: 1
+                    start_date: '2021-08-01T00:00:00Z'
+                    end_date: '2021-08-02T00:00:00Z'
+                    event_time: '08:00 - 17:00'
+                    gates_open: '06:00'
+                  locations:
+                    id: 1
+                    address: Jl. Raya No. 1
+                    city: Solo 
+                    province: Jawa Tengah
+                    country: Indonesia
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              examples:
+                failed update event:
+                  value:
+                    status: failed
+                    message: failed to update event
+
+    delete:
+      tags:
+        - Event
+      operationId: Delete Event
+      security:
+        - bearerAuth: []
+      summary: Delete Event
+      description: Delete Event
+      parameters:
+        - in: path
+          name: eventId
+          schema:
+            type: integer
+          required: true
+          description: Event ID
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: event deleted successfully
+                data:
+                  id: 1
+                  name: Event 1
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              examples:
+                failed delete event:
+                  value:
+                    status: failed
+                    message: failed to delete event
+
+  /articles: 
+    get:
+      tags:
+        - Article
+      summary: Get all articles
+      operationId: getArticles
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: Page number of the articles
+          schema:
+            type: integer
+          example: 1
+        - name: limit
+          in: query
+          description: Limit of the articles
+          schema:
+            type: integer
+          example: 10
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginationResponse'
+              example:
+                status: success
+                message: articles retrieved successfully
+                data:
+                  - id: 1
+                    title: Article 1
+                    image: https://yourdomain.com/yourimage.jpg
+                    content: This is article 1
+                    likes_count: 100
+                    comments_count: 10
+                  - id: 2
+                    title: Article 2
+                    image: https://yourdomain.com/yourimage.jpg
+                    content: This is article 2
+                    likes_count: 200
+                    comments_count: 20
+                pagination:
+                  current_page: 1
+                  total_page: 10
+                  total_data: 100
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to retrieve articles
+    post:
+      tags:
+        - Article
+      operationId: Create Article
+      security:
+        - bearerAuth: []
+      summary: Create Article
+      description: Create Article
+      requestBody:
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/CreateArticleRequest'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: article created successfully
+                data:
+                  id: 1
+                  title: Article 1
+                  image: https://yourdomain.com/yourimage.jpg
+                  content: This is article 1
+                  likes_count: 100
+                  comments_count: 10
+                  author_id: 1
+                  date_published: '2021-08-01T00:00:00Z'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              examples:
+                failed create article:
+                  value:
+                    status: failed
+                    message: failed to create article
+  /articles/{articlesId}:
+    put:
+      tags:
+        - Article
+      operationId: Update Article
+      security:
+        - bearerAuth: []
+      summary: Update Article
+      description: Update Article
+      parameters:
+        - in: path
+          name: articlesId
+          schema:
+            type: integer
+          required: true
+          description: Article ID
+      requestBody:
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/CreateArticleRequest'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: article updated successfully
+                data:
+                  id: 1
+                  title: Article 1
+                  image: https://yourdomain.com/yourimage.jpg
+                  content: This is article 1
+                  likes_count: 100
+                  comments_count: 10
+                  author_id: 1
+                  date_published: '2021-08-01T00:00:00Z'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              examples:
+                failed update article:
+                  value:
+                    status: failed
+                    message: failed to update article
+    
+    delete:
+      tags:
+        - Article
+      operationId: Delete Article
+      security:
+        - bearerAuth: []
+      summary: Delete Article
+      description: Delete Article
+      parameters:
+        - in: path
+          name: articlesId
+          schema:
+            type: integer
+          required: true
+          description: Article ID
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: article deleted successfully
+                data:
+                  id: 1
+                  title: Article 1
+            
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              examples:
+                failed delete article:
+                  value:
+                    status: failed
+                    message: failed to delete article
 
 components:
   schemas:
@@ -723,12 +1391,88 @@ components:
           type: string
           description: Name of the category
           example: category 1
-    CreateTicketRequest:
+    CreateEventRequest:
       type: object
       properties:
+        id:
+          type: integer
+          description: ID of the event
+          example: 1
         name:
           type: string
-          description: Name of the ticket
+          description: Name of the event
+          example: Event 1
+        description:
+          type: string
+          description: Description of the event
+          example: This is event 1
+        organizer:
+          type: string
+          description: Organizer of the event
+          example: Hammersonic
+        dates:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: ID of the date entry
+              example: 1
+            start_date:
+              type: string
+              format: date-time
+              description: Start date of the event
+              example: 2021-08-01T00:00:00Z
+            end_date:
+              type: string
+              format: date-time
+              description: End date of the event
+              example: 2021-08-02T00:00:00Z
+            event_time:
+              type: string
+              description: Event time
+              example: 08:00 - 17:00
+            gates_open:
+              type: string
+              description: Gates open time
+              example: 06:00
+        locations:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: ID of the location
+              example: 1
+            address:
+              type: string
+              description: Address of the location
+              example: Jl. Raya No. 1
+            city:
+              type: string
+              description: City of the location
+              example: Solo
+            province:
+              type: string
+              description: Province of the location
+              example: Jawa Tengah
+            country:
+              type: string
+              description: Country of the location
+              example: Indonesia
+    CreateArticleRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of the article
+          example: Article 1
+        image:
+          type: string
+          description: Image of the article
+          example: https://example.com/image.jpg
+        content:
+          type: string
+          description: Content of the article
+          example: content 1
     LoginRequest:
       type: object
       properties:
