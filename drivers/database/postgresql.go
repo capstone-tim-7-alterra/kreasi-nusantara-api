@@ -1,0 +1,52 @@
+package database
+
+import (
+	"fmt"
+	"log"
+	"os"
+
+	log_util "kreasi-nusantara-api/utils/logger"
+	msg "kreasi-nusantara-api/constants/message"
+
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+)
+
+type Config struct {
+	DB_HOST      string
+	DB_USERNAME  string
+	DB_PASSWORD  string
+	DB_NAME      string
+	DB_PORT      string
+	DB_SSL       string
+	DB_TZ        string
+	DB_LOG_LEVEL string
+}
+
+func ConnectDB(config Config) *gorm.DB {
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=%s",
+		config.DB_HOST,
+		config.DB_USERNAME,
+		config.DB_PASSWORD,
+		config.DB_NAME,
+		config.DB_PORT,
+		config.DB_SSL,
+		config.DB_TZ,
+	)
+
+	logLevel := log_util.GetDBLogLevel(config.DB_LOG_LEVEL)
+	logger := logger.New(log.New(os.Stdout, "\r\n", log.LstdFlags), logger.Config{
+		SlowThreshold:        0,
+		LogLevel:             logLevel,
+		Colorful:             true,
+		ParameterizedQueries: true,
+	})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger,
+	})
+	if err != nil {
+		log.Fatalf(msg.FAILED_CONNECT_DB, err)
+	}
+	return db
+}

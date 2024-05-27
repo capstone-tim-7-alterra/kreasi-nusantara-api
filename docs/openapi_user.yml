@@ -1,0 +1,2334 @@
+openapi: '3.0.3'
+info:
+  title: Kreasi Nusantara API (User)
+  version: '1.0.0'
+  description: |
+    This API provides functionalities for Kreasi Nusantara feature, especially the user-site. (For Flutter Team)
+tags:
+  - name: Users Authentication
+    description: |
+      This tag is for all endpoints related to user authentication management.
+  - name: Users Profile
+    description: |
+      This tag is for all endpoints related to user profile management.
+  - name: Products
+    description: |
+      This tag is for all endpoints related to product management.
+  - name: Event
+    description: |
+      This tag is for all endpoints related to event management.
+  - name: Articles
+    description: |
+      This tag is for all endpoints related to article management.
+  - name: Cart
+    description: |
+      This tag is for all endpoints related to cart management.
+  - name: Transactions
+    description: |
+      This tag is for all endpoints related to checkout management.
+
+paths:
+# Users Authentication
+  /auth/register:
+    post:
+      tags:
+        - Users Authentication
+      summary: Register a new user
+      operationId: register
+      requestBody:
+        $ref: '#/components/requestBodies/RegisterRequest'
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: registration initiated, please verify your email
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: user already exists
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              examples:
+                failed create user:
+                  value:
+                    status: failed
+                    message: failed to create user
+                failed hashing password:
+                  value:
+                    status: failed
+                    message: failed to hash password
+  /auth/login:
+    post:
+      tags:
+        - Users Authentication
+      summary: Login to the system
+      operationId: login
+      requestBody:
+        $ref: '#/components/requestBodies/LoginRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: user logged in successfully
+                data:
+                  token: jwt_token
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: unregistered user
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              examples:
+                failed login:
+                  value:
+                    status: failed
+                    message: failed to login
+                failed generate token:
+                  value:
+                    status: failed
+                    message: failed to generate token
+  /auth/forgot-password:
+    post:
+      tags:
+        - Users Authentication
+      summary: Initiate password reset
+      operationId: forgotPassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: Email of the user
+                  example: kreasinusantara@gmail.com
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: password reset initiated, please check your email
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: unregistered user
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to initiate password reset
+  /auth/verify-otp:
+    post:
+      tags:
+        - Users Authentication
+      summary: Verify OTP for registration or password reset
+      operationId: verifyOtp
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum: [register, reset_password]
+                  description: Type of verification
+                email:
+                  type: string
+                  format: email
+                  description: Email of the user
+                otp:
+                  type: string
+                  description: OTP for verification
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: OTP verified successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to verify OTP
+  /auth/reset-password:
+    post:
+      tags:
+        - Users Authentication
+      summary: Reset user password
+      operationId: resetPassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                  description: New password of the user
+                  example: yournewpassword
+                confirm_password:
+                  type: string
+                  description: Confirm new password of the user
+                  example: yournewpassword
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: password reset successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to reset password
+
+# Users Profile
+  /users/me:
+    get:
+      tags:
+        - Users Profile
+      summary: Retrieve the authenticated user's data
+      operationId: getUser
+      responses:
+        '200':
+          $ref: '#/components/responses/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: user not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to retrieve user profile
+      security:
+        - bearerAuth: []
+    put:
+      tags:
+        - Users Profile
+      summary: Update the authenticated user's profile
+      operationId: updateUser
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateUserRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: user profile updated successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to update user profile
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+        - Users Profile
+      summary: Delete the authenticated user's
+      operationId: deleteUser
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: user deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to delete user
+      security:
+        - bearerAuth: []
+  /users/me/password:
+    put:
+      tags:
+        - Users Profile
+      summary: Change the authenticated user's password
+      operationId: changePassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                old_password:
+                  type: string
+                  description: Old password of the user
+                  example: yourpassword
+                new_password:
+                  type: string
+                  description: New password of the user
+                  example: yournewpassword
+                confirm_password:
+                  type: string
+                  description: Confirm new password of the user
+                  example: yournewpassword
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: password changed successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to change password
+      security:
+        - bearerAuth: []
+  /users/me/avatar:
+    post:
+      tags:
+        - Users Profile
+      summary: Upload the authenticated user's avatar
+      operationId: uploadAvatar
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: avatar uploaded successfully
+                data:
+                  avatar_url: https://yourdomain.com/youravatar.jpg
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to upload avatar
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+        - Users Profile
+      summary: Delete the authenticated user's avatar
+      operationId: deleteAvatar
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: avatar deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to delete avatar
+      security:
+        - bearerAuth: []
+  /users/me/addresses:
+    get:
+      tags:
+        - Users Profile
+      summary: Get all addresses of the authenticated user
+      operationId: getUserAddresses
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginationResponse'
+              example:
+                status: success
+                message: addresses retrieved successfully
+                data:
+                  - id: 1
+                    label: Home
+                    recipient_name: John Doe
+                    phone_no: 081234567890
+                    address: Jl. Raya No. 1
+                    city: Jakarta
+                    province: DKI Jakarta
+                    postal_code: 12345
+                    is_primary: true
+                  - id: 2
+                    label: Office
+                    recipient_name: Jane Doe
+                    phone_no: 081234567891
+                    address: Jl. Raya No. 2
+                    city: Jakarta
+                    province: DKI Jakarta
+                    postal_code: 12346
+                    is_primary: false
+                pagination:
+                  current_page: 1
+                  total_page: 1
+                  total_data: 2
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: addresses not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to retrieve addresses
+    post:
+      tags:
+        - Users Profile
+      summary: Add an address to the authenticated user
+      operationId: addUserAddress
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                label:
+                  type: string
+                  description: Label of the address
+                  example: Home
+                recipient_name:
+                  type: string
+                  description: Recipient name of the address
+                  example: John Doe
+                phone_no:
+                  type: integer
+                  description: Phone number of the recipient
+                  example: 081234567890
+                address:
+                  type: string
+                  description: Address of the recipient
+                  example: Jl. Raya No. 1
+                city:
+                  type: string
+                  description: City of the recipient
+                  example: Jakarta
+                province:
+                  type: string
+                  description: Province of the recipient
+                  example: DKI Jakarta
+                postal_code:
+                  type: integer
+                  description: Postal code of the recipient
+                  example: 12345
+                is_primary:
+                  type: boolean
+                  description: Is primary address
+                  example: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: address added successfully
+                data:
+                  id: 1
+                  label: Home
+                  recipient_name: John Doe
+                  phone_no: 081234567890
+                  address: Jl. Raya No. 1
+                  city: Jakarta
+                  province: DKI Jakarta
+                  postal_code: 12345
+                  is_primary: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to add address
+  /users/me/addresses/{addressId}:
+    put:
+      tags:
+        - Users Profile
+      summary: Update an address of the authenticated user
+      operationId: updateUserAddress
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: addressId
+          in: path
+          required: true
+          description: ID of the address to be updated
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                label:
+                  type: string
+                  description: Label of the address
+                  example: Home
+                recipient_name:
+                  type: string
+                  description: Recipient name of the address
+                  example: John Doe
+                phone_no:
+                  type: integer
+                  description: Phone number of the recipient
+                  example: 081234567890
+                address:
+                  type: string
+                  description: Address of the recipient
+                  example: Jl. Raya No. 1
+                city:
+                  type: string
+                  description: City of the recipient
+                  example: Jakarta
+                province:
+                  type: string
+                  description: Province of the recipient
+                  example: DKI Jakarta
+                postal_code:
+                  type: integer
+                  description: Postal code of the recipient
+                  example: 12345
+                is_primary:
+                  type: boolean
+                  description: Is primary address
+                  example: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: address updated successfully
+                data:
+                  id: 1
+                  label: Home
+                  recipient_name: John Doe
+                  phone_no: 081234567890
+                  address: Jl. Raya No. 1
+                  city: Jakarta
+                  province: DKI Jakarta
+                  postal_code: 12345
+                  is_primary: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: address not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to update address
+    delete:
+      tags:
+        - Users Profile
+      summary: Delete an address of the authenticated user
+      operationId: deleteUserAddress
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: addressId
+          in: path
+          required: true
+          description: ID of the address to be deleted
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: address deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: address not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to delete address
+
+# Products
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Get all products
+      operationId: getProducts
+      parameters:
+        - name: page
+          in: query
+          description: Page number of the products
+          schema:
+            type: integer
+          example: 1
+        - name: limit
+          in: query
+          description: Limit of the products
+          schema:
+            type: integer
+          example: 10
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginationResponse'
+              example:
+                status: success
+                message: products retrieved successfully
+                data:
+                  - id: 1
+                    name: Product 1
+                    image: https://yourdomain.com/yourimage.jpg
+                    price: 100000
+                    stock: 10
+                    likes_count: 100
+                  - id: 2
+                    name: Product 2
+                    image: https://yourdomain.com/yourimage.jpg
+                    price: 200000
+                    stock: 20
+                    likes_count: 200
+                pagination:
+                  current_page: 1
+                  total_page: 10
+                  total_data: 100
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to retrieve products
+  /products/{productId}:
+    get:
+      tags:
+        - Products
+      summary: Get a specific product
+      operationId: getProduct
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: ID of the product to get
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: product retrieved successfully
+                data:
+                  id: 1
+                  name: Product 1
+                  image: https://yourdomain.com/yourimage.jpg
+                  description: This is product 1
+                  price: 100000
+                  stock: 10
+                  likes_count: 100
+                  average_rating: 4.5
+                  reviews_count: 10
+                  categories:
+                    - id: 1
+                      name: Category 1
+                    - id: 2
+                      name: Category 2
+                  
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: product not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to retrieve product
+  /products/{productId}/reviews:
+    get:
+      tags:
+        - Products
+      summary: Get all reviews of a specific product
+      operationId: getProductReviews
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: ID of the product to get reviews
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: reviews retrieved successfully
+                data:
+                  - id: 1
+                    rating: 5
+                    comment: This is a great product
+                    user:
+                      id: 1
+                      name: User 1
+                    created_at: '2021-08-01T00:00:00Z'
+                  - id: 2
+                    rating: 4
+                    comment: This is a good product
+                    user:
+                      id: 2
+                      name: User 2
+                    created_at: '2021-08-02T00:00:00Z'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: reviews not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to retrieve reviews
+    post:
+      tags:
+        - Products
+      summary: Add a review to a specific product
+      operationId: addProductReview
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: ID of the product to add review
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rating:
+                  type: integer
+                  description: Rating of the product
+                  example: 5
+                comment:
+                  type: string
+                  description: Comment of the product
+                  example: This is a great product
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: review added successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: product not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to add review
+  /products/search:
+    get:
+      tags:
+        - Products
+      summary: Search products by name
+      operationId: searchProducts
+      parameters:
+        - name: name
+          in: query
+          required: true
+          description: Name of the product to search
+          schema:
+            type: string
+          example: Batik
+        - name: min_price
+          in: query
+          description: Minimum price of the products
+          schema:
+            type: integer
+          example: 100000
+        - name: max_price
+          in: query
+          description: Maximum price of the products
+          schema:
+            type: integer
+          example: 200000
+        - name: sort_by
+          in: query
+          description: Sort by of the products
+          schema:
+            type: string
+          example: price
+        - name: order
+          in: query
+          description: Order of the products
+          schema:
+            type: string
+          example: asc
+        - name: offset
+          in: query
+          description: Offset of the products
+          schema:
+            type: integer
+          example: 0
+        - name: limit
+          in: query
+          description: Limit of the products
+          schema:
+            type: integer
+          example: 10
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+              example:
+                status: success
+                message: products retrieved successfully
+                data:
+                  - id: 1
+                    name: Product 1
+                    price: 100000
+                    stock: 10
+                    likes_count: 100
+                  - id: 2
+                    name: Product 2
+                    price: 200000
+                    stock: 20
+                    likes_count: 200
+                metadata:
+                  total_data: 100
+                  total_count: 10
+                  next_offset: 10
+                  has_load_more: true
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to retrieve products
+
+# Event
+  /events:
+    get:
+      tags:
+        - Event
+      summary: Get all events
+      operationId: getEvents
+      parameters:
+        - name: page
+          in: query
+          description: Page number of the events
+          schema:
+            type: integer
+          example: 1
+        - name: limit
+          in: query
+          description: Limit of the events
+          schema:
+            type: integer
+          example: 10
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginationResponse'
+              example:
+                status: success
+                message: events retrieved successfully
+                data:
+                  - id: 1
+                    name: Event 1
+                    description: This is event 1
+                    dates:
+                      start_date: '2021-08-01T00:00:00Z'
+                      end_date: '2021-08-02T00:00:00Z'
+                    locations:
+                      id: 1
+                      city: Solo 
+                      province: Jawa Tengah
+                  - id: 2
+                    name: Event 2
+                    description: This is event 2
+                    dates:
+                      start_date: '2021-08-03T00:00:00Z'
+                      end_date: '2021-08-04T00:00:00Z'
+                    locations:
+                      id: 2
+                      city: Yogyakarta
+                      province: DI Yogyakarta
+                pagination:
+                  current_page: 1
+                  total_page: 10
+                  total_data: 100
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to retrieve events
+  /events/{eventId}:
+    get:
+      tags:
+        - Event
+      summary: Get a specific event
+      operationId: getEvent
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          description: ID of the event to get
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: event retrieved successfully
+                data:
+                  id: 1
+                  name: Event 1
+                  description: This is event 1
+                  organizer: Hammersonic
+                  dates:
+                    id: 1
+                    start_date: '2021-08-01T00:00:00Z'
+                    end_date: '2021-08-02T00:00:00Z'
+                    event_time: '08:00 - 17:00'
+                    gates_open: '06:00'
+                  locations:
+                    id: 1
+                    address: Jl. Raya No. 1
+                    city: Solo 
+                    province: Jawa Tengah
+                    country: Indonesia
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: event not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to retrieve event
+  /events/search:
+    get:
+      tags:
+        - Event
+      summary: Search events by name
+      operationId: searchEvents
+      parameters:
+        - name: name
+          in: query
+          required: true
+          description: Name of the event to search
+          schema:
+            type: string
+          example: Hammersonic
+        - name: sort_by
+          in: query
+          description: Sort by of the events
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: Order of the events
+          schema:
+            type: string
+          example: asc
+        - name: offset
+          in: query
+          description: Offset of the events
+          schema:
+            type: integer
+          example: 0
+        - name: limit
+          in: query
+          description: Limit of the events
+          schema:
+            type: integer
+          example: 10
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+              example:
+                status: success
+                message: events retrieved successfully
+                data:
+                  - id: 1
+                    name: Event 1
+                    description: This is event 1
+                    dates:
+                      start_date: '2021-08-01T00:00:00Z'
+                      end_date: '2021-08-02T00:00:00Z'
+                    locations:
+                      id: 1
+                      city: Solo 
+                      province: Jawa Tengah
+                  - id: 2
+                    name: Event 2
+                    description: This is event 2
+                    dates:
+                      start_date: '2021-08-03T00:00:00Z'
+                      end_date: '2021-08-04T00:00:00Z'
+                    locations:
+                      id: 2
+                      city: Yogyakarta
+                      province: DI Yogyakarta
+                metadata:
+                  total_data: 100
+                  total_count: 10
+                  next_offset: 10
+                  has_load_more: true
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: events not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to retrieve events
+
+# Cart
+  /cart/items:
+    post:
+      tags:
+        - Cart
+      summary: Add an item to the cart
+      operationId: addItemToCart
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Item to add to the cart
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product_id:
+                  type: integer
+                  description: ID of the product to add to the cart
+                  example: 1
+                quantity:
+                  type: integer
+                  description: Quantity of the product to add to the cart
+                  example: 1
+                options:
+                  type: array
+                  properties:
+                    size:
+                      type: string
+                      description: Size of the product
+                      example: M
+                    color:
+                      type: string
+                      description: Color of the product
+                      example: Red
+                  required:
+                    - product_id
+                    - quantity
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: item added to cart successfully
+                data:
+                  id: 1
+                  product_id: 1
+                  quantity: 1
+                  options:
+                    size: M
+                    color: Red
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to add item to cart
+    get:
+      tags:
+        - Cart
+      summary: Get all items in the cart
+      operationId: getCartItems
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginationResponse'
+              example:
+                status: success
+                message: cart items retrieved successfully
+                data:
+                  - id: 1
+                    product_id: 1
+                    quantity: 1
+                    options:
+                      size: M
+                      color: Red
+                  - id: 2
+                    product_id: 2
+                    quantity: 2
+                    options:
+                      size: L
+                      color: Blue
+                pagination:
+                  current_page: 1
+                  total_page: 10
+                  total_data: 10
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: cart is empty
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to retrieve cart items
+  /cart/items/{itemId}:
+    put:
+      tags:
+        - Cart
+      summary: Update an item in the cart
+      operationId: updateCartItem
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          description: ID of the item to be updated
+          schema:
+            type: integer
+      requestBody:
+        description: Item details to be updated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  type: integer
+                  description: Updated quantity of the product
+                  example: 2
+                options:
+                  type: object
+                  properties:
+                    size:
+                      type: string
+                      description: Updated size of the product
+                      example: L
+                    color:
+                      type: string
+                      description: Updated color of the product
+                      example: Blue
+                  required:
+                    - quantity
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: item updated successfully
+                data:
+                  id: 1
+                  product_id: 1
+                  quantity: 2
+                  options:
+                    size: L
+                    color: Blue
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: item not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to update item
+    delete:
+      tags:
+        - Cart
+      summary: Delete an item from the cart
+      operationId: deleteCartItem
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          description: ID of the item to be deleted
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: item deleted successfully
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: item not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to delete item
+
+# Article
+  /articles:
+    get:
+      tags:
+        - Articles
+      summary: Get all articles
+      operationId: getArticles
+      parameters:
+        - name: page
+          in: query
+          description: Page number of the articles
+          schema:
+            type: integer
+          example: 1
+        - name: limit
+          in: query
+          description: Limit of the articles
+          schema:
+            type: integer
+          example: 10
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginationResponse'
+              example:
+                status: success
+                message: articles retrieved successfully
+                data:
+                  - id: 1
+                    title: Article 1
+                    image: https://yourdomain.com/yourimage.jpg
+                    content: This is article 1
+                    likes_count: 100
+                    comments_count: 10
+                  - id: 2
+                    title: Article 2
+                    image: https://yourdomain.com/yourimage.jpg
+                    content: This is article 2
+                    likes_count: 200
+                    comments_count: 20
+                pagination:
+                  current_page: 1
+                  total_page: 10
+                  total_data: 100
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to retrieve articles
+  /articles/{articleId}:
+    get:
+      tags:
+        - Articles
+      summary: Get a specific article
+      operationId: getArticle
+      parameters:
+        - name: articleId
+          in: path
+          required: true
+          description: ID of the article to get
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: article retrieved successfully
+                data:
+                  id: 1
+                  title: Article 1
+                  image: https://yourdomain.com/yourimage.jpg
+                  content: This is article 1
+                  likes_count: 100
+                  comments_count: 10
+                  date_published: '2021-08-01T00:00:00Z'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: article not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to retrieve article
+  /articles/{articleId}/comments:
+    get:
+      tags:
+        - Articles
+      summary: Get all comments of a specific article
+      operationId: getArticleComments
+      parameters:
+        - name: articleId
+          in: path
+          required: true
+          description: ID of the article to get comments
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginationResponse'
+              example:
+                status: success
+                message: comments retrieved successfully
+                data:
+                  - id: 1
+                    comment: This is a great article
+                    user:
+                      id: 1
+                      name: User 1
+                    created_at: '2021-08-01T00:00:00Z'
+                  - id: 2
+                    comment: This is a good article
+                    user:
+                      id: 2
+                      name: User 2
+                    created_at: '2021-08-02T00:00:00Z'
+                pagination:
+                  current_page: 1
+                  total_page: 10
+                  total_data: 100
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: comments not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to retrieve comments
+    post:
+      tags:
+        - Articles
+      summary: Add a comment to a specific article
+      operationId: addArticleComment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: articleId
+          in: path
+          required: true
+          description: ID of the article to add comment
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                comment:
+                  type: string
+                  description: Comment of the article
+                  example: This is a great article
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: comment added successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: article not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to add comment
+
+# Transactions
+  /cart/items/{itemId}/checkout:
+    post:
+      tags:
+        - Transactions
+      summary: Checkout an item in the cart
+      operationId: checkoutItem
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          description: ID of the item to be checked out
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                address_id:
+                  type: integer
+                  description: ID of the address to deliver the item
+                  example: 1
+                payment_method:
+                  type: string
+                  description: Payment method for the item
+                  example: Bank Transfer
+              required:
+                - address_id
+                - payment_method
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: item checked out successfully
+                data:
+                  order_id: 12345
+                  payment_url: https://payment-gateway.com/transaction/12345
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: item not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to checkout item
+  /cart/checkout:
+    post:
+      tags:
+        - Transactions
+      summary: Checkout all items in the cart
+      operationId: checkoutCart
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                address_id:
+                  type: integer
+                  description: ID of the address to deliver the items
+                  example: 1
+                payment_method:
+                  type: string
+                  description: Payment method for the items
+                  example: Bank Transfer
+              required:
+                - address_id
+                - payment_method
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: items checked out successfully
+                  data:
+                    type: object
+                    properties:
+                      order_id:
+                        type: integer
+                        example: 12345
+                      payment_url:
+                        type: string
+                        example: https://payment-gateway.com/transaction/12345
+                      items:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            product_id:
+                              type: integer
+                              example: 1
+                            quantity:
+                              type: integer
+                              example: 2
+                            price:
+                              type: number
+                              format: float
+                              example: 19.99
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: cart is empty
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to checkout items
+  /tickets/purchase:
+    post:
+      tags:
+        - Transactions
+      summary: Purchase an event tickets
+      operationId: purchaseTickets
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                event_id:
+                  type: integer
+                  description: ID of the event to purchase tickets
+                  example: 1
+                quantity:
+                  type: integer
+                  description: Quantity of the tickets to purchase
+                  example: 2
+                payment_method:
+                  type: string
+                  description: Payment method for the tickets
+                  example: Bank Transfer
+              required:
+                - event_id
+                - quantity
+                - payment_method
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: tickets purchased successfully
+                data:
+                  order_id: 12345
+                  payment_url: https://payment-gateway.com/transaction/12345
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: event not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to purchase tickets
+  /transactions/{orderId}:
+    get:
+      tags:
+        - Transactions
+      summary: Get a specific transaction
+      operationId: getTransaction
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          description: ID of the transaction to get
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: transaction retrieved successfully
+                data:
+                  id: 1
+                  order_id: 12345
+                  status: pending
+                  total_amount: 19.99
+                  payment_method: Bank Transfer
+                  created_at: '2021-08-01T00:00:00Z'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: transaction not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to retrieve transaction
+  /transactions/{orderId}/status:
+    get:
+      tags:
+        - Transactions
+      summary: Get the status of a specific transaction
+      operationId: getTransactionStatus
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          description: ID of the transaction to get status
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: success
+                message: transaction status retrieved successfully
+                data:
+                  id: 1
+                  order_id: 12345
+                  status: pending
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: transaction not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to retrieve transaction status
+  /transactions/history:
+    get:
+      tags:
+        - Transactions
+      summary: Get all transaction history
+      operationId: getTransactionHistory
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: Page number of the transaction history
+          schema:
+            type: integer
+          example: 1
+        - name: limit
+          in: query
+          description: Limit of the transaction history
+          schema:
+            type: integer
+          example: 10
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginationResponse'
+              example:
+                status: success
+                message: transaction history retrieved successfully
+                data:
+                  - id: 1
+                    order_id: 12345
+                    status: pending
+                    total_amount: 19.99
+                    payment_method: Bank Transfer
+                    created_at: '2021-08-01T00:00:00Z'
+                  - id: 2
+                    order_id: 12346
+                    status: completed
+                    total_amount: 29.99
+                    payment_method: Credit Card
+                    created_at: '2021-08-02T00:00:00Z'
+                pagination:
+                  current_page: 1
+                  total_page: 10
+                  total_data: 100
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                status: failed
+                message: failed to retrieve transaction history
+
+components:
+  schemas:
+    BaseResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Status of the response
+        message:
+          type: string
+          description: Message of the response
+        data:
+          type: object
+          description: Data of the response
+      required:
+        - status
+        - message
+    SearchResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: The status of the response
+        message:
+          type: string
+          description: The message of the response
+        data:
+          type: object
+          description: The data of the response
+        metadata:
+          type: object
+          description: The metadata of the response
+          properties:
+            total_data:
+              type: integer
+              description: The total data of the response
+            total_count:
+              type: integer
+              description: The total count of the response has loaded
+            next_offset:
+              type: integer
+              description: The offset for next the loaded more
+            has_load_more:
+              type: boolean
+              description: The has load more of the response
+    PaginationResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: The status of the response
+        message:
+          type: string
+          description: The message of the response
+        data:
+          type: object
+          description: The data of the response
+        pagination:
+          type: object
+          description: The pagination of the response
+          properties:
+            current_page:
+              type: integer
+              description: The current page of the response
+            total_page:
+              type: integer
+              description: The total page of the response
+            total_data:
+              type: integer
+              description: The total data of the response
+        link:
+          type: object
+          description: The link of the response
+          properties:
+            next:
+              type: string
+              description: The next link response
+            prev:
+              type: string
+              description: The prev link response
+  requestBodies:
+    RegisterRequest:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              username:
+                  type: string
+                  description: Username of the user
+                  example: kreasinusantara
+              email:
+                type: string
+                format: email
+                description: Email of the user
+                example: kreasinusantara@gmail.com
+              password:
+                type: string
+                description: Password of the user
+                example: yourpassword
+              phone_no:
+                type: integer
+                description: Phone number of the user
+                example: 081234567890
+              gender:
+                type: string
+                enum:
+                  - Male
+                  - Female
+                description: Gender of the user
+                example: Female
+              date_of_birth:
+                type: string
+                format: date-time
+                description: Date of birth of the user
+                example: '2003-05-01T00:00:00Z'
+    LoginRequest:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+                description: Email of the user
+                example: kreasinusantara@gmail.com
+              password:
+                type: string
+                description: Password of the user
+                example: yourpassword
+    UpdateUserRequest:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+                description: Username of the user
+                example: kreasinusantara
+              phone_no:
+                type: integer
+                description: Phone number of the user
+                example: 081234567890
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BaseResponse'
+          examples:
+            invalid request data:
+              value:
+                status: failed
+                message: invalid request data
+            mismatched data type:
+              value:
+                status: failed
+                message: mismatched data type
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BaseResponse'
+          examples:
+            unauthorized:
+                value:
+                  status: failed
+                  message: unauthorized user
+            invalid token:
+              value:
+                status: failed
+                message: invalid token
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BaseResponse'
+          example:
+            status: failed
+            message: forbidden resource
+    BadGateway:
+      description: Bad Gateway
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BaseResponse'
+          example:
+            status: failed
+            message: external service error
+    UserResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BaseResponse'
+          example:
+            status: success
+            message: user profile retrieved successfully
+            data:
+              username: kreasinusantara
+              email: kreasinusantara@gmail.com
+              phone_no: 081234567890
+              gender: Female
+              date_of_birth: '2003-05-01T00:00:00Z'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
