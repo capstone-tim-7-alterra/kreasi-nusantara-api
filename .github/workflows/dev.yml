@@ -3,6 +3,8 @@ name: Development CI/CD
 on:
   pull_request:
     branches: [develop]
+  push:
+    branches: [develop]
 
 jobs:
   lint:
