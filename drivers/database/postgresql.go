@@ -5,8 +5,9 @@ import (
 	"log"
 	"os"
 
-	log_util "kreasi-nusantara-api/utils/logger"
 	msg "kreasi-nusantara-api/constants/message"
+	"kreasi-nusantara-api/entities"
+	log_util "kreasi-nusantara-api/utils/logger"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -48,5 +49,15 @@ func ConnectDB(config Config) *gorm.DB {
 	if err != nil {
 		log.Fatalf(msg.FAILED_CONNECT_DB, err)
 	}
+	migrate(db)
 	return db
+}
+
+func migrate(db *gorm.DB) {
+	err := db.AutoMigrate(
+		&entities.User{},
+	)
+	if err != nil {
+		log.Fatal(msg.FAILED_MIGRATE_DB)
+	}
 }
