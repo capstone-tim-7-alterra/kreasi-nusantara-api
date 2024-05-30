@@ -56,6 +56,7 @@ func ConnectDB(config Config) *gorm.DB {
 func migrate(db *gorm.DB) {
 	err := db.AutoMigrate(
 		&entities.User{},
+		&entities.Admin{},
 	)
 	if err != nil {
 		log.Fatal(msg.FAILED_MIGRATE_DB)

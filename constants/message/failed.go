@@ -35,4 +35,9 @@ const (
 	UNREGISTERED_USER = "unregistered user!"
 	DUPLICATE_KEY = "duplicate key value violates unique constraint"
 	FAILED_GET_USER = "failed to get user!"
+
+	//Admin
+	FAILED_CREATE_ADMIN = "failed to create admin!"
+	FAILED_LOGIN_ADMIN = "login failed!"
+	
 )

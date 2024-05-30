@@ -2,7 +2,7 @@ package user
 
 import (
 	"kreasi-nusantara-api/controllers"
-	"kreasi-nusantara-api/middlewares"
+	// "kreasi-nusantara-api/middlewares"
 	"kreasi-nusantara-api/repositories"
 	"kreasi-nusantara-api/usecases"
 	"kreasi-nusantara-api/utils/password"
@@ -23,6 +23,6 @@ func InitUserRoute(g *echo.Group, db *gorm.DB, v *validation.Validator) {
 	g.POST("/register", userController.Register)
 
 	// Protected routes
-	g.Use(middlewares.Auth)
+	// g.Use(middlewares.Auth)
 	// g.GET("/profile", userController.GetProfile)
 }
