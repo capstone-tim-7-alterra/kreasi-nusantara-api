@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	msg "kreasi-nusantara-api/constants/message"
 	dto "kreasi-nusantara-api/dto/admin"
 	"kreasi-nusantara-api/usecases"
@@ -30,11 +31,13 @@ func (ac *adminController) Register(c echo.Context) error {
 	}
 
 	if err := ac.validator.Validate(request); err != nil {
+		fmt.Println(err)
 		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.INVALID_REQUEST_DATA)
 	}
 
 	err := ac.adminUsecase.Register(c, request)
 	if err != nil {
+		fmt.Println("Error: ", err)
 		return http_util.HandleErrorResponse(c, http.StatusInternalServerError, msg.FAILED_CREATE_ADMIN)
 	}
 

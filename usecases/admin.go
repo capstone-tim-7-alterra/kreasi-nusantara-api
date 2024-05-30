@@ -9,6 +9,7 @@ import (
 	"kreasi-nusantara-api/repositories"
 	"kreasi-nusantara-api/utils/password"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -59,6 +60,7 @@ func (uc *adminUsecase) Register(c echo.Context, req *dto.RegisterRequest) error
 	imageURLPtr := &imageURL
 
 	admin := &entities.Admin{
+		ID:           uuid.New(),
 		Image:        imageURLPtr,
 		FirstName:    req.FirstName,
 		LastName:     req.LastName,

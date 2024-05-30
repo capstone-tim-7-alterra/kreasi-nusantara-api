@@ -14,7 +14,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func InitUserRoute(g *echo.Group, db *gorm.DB, v *validation.Validator) {
+func InitAdminRoute(g *echo.Group, db *gorm.DB, v *validation.Validator) {
 
 	adminRepo := repositories.NewAdminRepository(db)
 	passwordUtil := password.NewPasswordUtil()
@@ -25,7 +25,7 @@ func InitUserRoute(g *echo.Group, db *gorm.DB, v *validation.Validator) {
 	adminController := controllers.NewAdminController(adminUseCase, v)
 
 	// Public routes
-	g.POST("admin/register", adminController.Register)
+	g.POST("/admin/register", adminController.Register)
 
 	// Protected routes
 	// g.Use(middlewares.Auth, middlewares.IsAdmin)
