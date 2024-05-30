@@ -3,12 +3,13 @@ package controllers
 import (
 	"context"
 	"errors"
+	"fmt"
+	http_const "kreasi-nusantara-api/constants/http"
 	msg "kreasi-nusantara-api/constants/message"
 	dto "kreasi-nusantara-api/dto/user"
 	"kreasi-nusantara-api/usecases"
-	http_util "kreasi-nusantara-api/utils/http"
-	http_const "kreasi-nusantara-api/constants/http"
 	err_util "kreasi-nusantara-api/utils/error"
+	http_util "kreasi-nusantara-api/utils/http"
 	"kreasi-nusantara-api/utils/validation"
 	"net/http"
 	"strings"
@@ -60,9 +61,43 @@ func (uc *userController) Register(c echo.Context) error {
 			code = http.StatusInternalServerError
 			message = msg.FAILED_CREATE_USER
 		}
+		fmt.Println("Error: ", err)
 		return http_util.HandleErrorResponse(c, code, message)
 	}
-	return http_util.HandleSuccessResponse(c, http.StatusCreated, msg.USER_CREATED_SUCCESS, nil)
+	return http_util.HandleSuccessResponse(c, http.StatusCreated, "OTP sent to email!", nil)
 }
 
-// TODO: Verify OTP, Login, Forgot Password, Reset Password
+func (uc *userController) VerifyOTP(c echo.Context) error {
+	request := new(dto.VerifyOTPRequest)
+	if err := c.Bind(request); err != nil {
+		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.MISMATCH_DATA_TYPE)
+	}
+
+	if err := uc.validator.Validate(request); err != nil {
+		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.INVALID_REQUEST_DATA)
+	}
+
+	err := uc.userUseCase.VerifyOTP(c, request)
+	if err != nil {
+		var (
+			code    int
+			message string
+		)
+		switch {
+		case errors.Is(err, context.Canceled):
+			code = http_const.STATUS_CLIENT_CANCELLED_REQUEST
+			message = msg.FAILED_VERIFY_OTP
+		case strings.Contains(err.Error(), "record not found"):
+			code = http.StatusNotFound
+			message = msg.USER_NOT_FOUND
+		case strings.Contains(err.Error(), "invalid otp"):
+			code = http.StatusBadRequest
+			message = msg.INVALID_OTP
+		default:
+			code = http.StatusInternalServerError
+			message = msg.FAILED_VERIFY_OTP
+		}
+		return http_util.HandleErrorResponse(c, code, message)
+	}
+	return http_util.HandleSuccessResponse(c, http.StatusOK, "OTP verified!", nil)
+}
