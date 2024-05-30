@@ -35,4 +35,7 @@ const (
 	UNREGISTERED_USER = "unregistered user!"
 	DUPLICATE_KEY = "duplicate key value violates unique constraint"
 	FAILED_GET_USER = "failed to get user!"
+	FAILED_VERIFY_OTP = "failed to verify otp!"
+	USER_NOT_FOUND = "user not found!"
+	INVALID_OTP = "invalid otp!"
 )
