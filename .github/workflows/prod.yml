@@ -57,7 +57,7 @@ jobs:
       - name: Connect and Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
         env:
-          CONTAINER_NAME: go-chefbot
+          CONTAINER_NAME: kreasinusantara
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           HOST_PORT: ${{ secrets.HOST_PORT }}
           CONTAINER_PORT: ${{ secrets.CONTAINER_PORT }}
