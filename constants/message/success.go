@@ -11,4 +11,6 @@ const (
 	ADMIN_RETRIEVED_SUCCESS = "admin retrieve successfully!"
 	ADMIN_UPDATED_SUCCESS   = "admin updated successfully!"
 	ADMIN_DELETED_SUCCESS   = "admin deleted successfully!"
+	SUCCESS_FETCH_DATA      = "Successfully fetched data"
+	SUCCES_SEARCH_ADMIN     = "Successfully search admin"
 )

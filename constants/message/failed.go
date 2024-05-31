@@ -39,5 +39,12 @@ const (
 	//Admin
 	FAILED_CREATE_ADMIN = "failed to create admin!"
 	FAILED_LOGIN_ADMIN = "login failed!"
+	FAILED_FETCH_DATA     = "Failed to fetch data"
+	FAILED_UPDATE_ADMIN = "failed to update admin!"
+	FAILED_DELETE_ADMIN = "failed to delete admin!"
+	FAILED_PARSE_ADMIN = "failed to parse admin id"
+	MISSING_USERNAME_PARAMETER = "Missing username parameter"
+	FAILED_SEARCH_ADMIN = "failed to search admin by username"
+	ADMIN_NOT_FOUND = "admin not found"
 	
 )
