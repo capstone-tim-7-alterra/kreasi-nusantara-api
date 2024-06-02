@@ -2,12 +2,14 @@ package usecases
 
 import (
 	"context"
+	"errors"
 	dto "kreasi-nusantara-api/dto/user"
 	"kreasi-nusantara-api/entities"
 	"kreasi-nusantara-api/repositories"
 	"kreasi-nusantara-api/utils/email"
 	"kreasi-nusantara-api/utils/otp"
 	"kreasi-nusantara-api/utils/password"
+	"kreasi-nusantara-api/utils/token"
 	"time"
 
 	"kreasi-nusantara-api/drivers/redis"
@@ -17,8 +19,16 @@ import (
 )
 
 type UserUseCase interface {
+	// Authentication
 	Register(c echo.Context, req *dto.RegisterRequest) error
 	VerifyOTP(c echo.Context, req *dto.VerifyOTPRequest) error
+	Login(c echo.Context, req *dto.LoginRequest) (*dto.LoginResponse, error)
+	ForgotPassword(c echo.Context, req *dto.ForgotPasswordRequest) error
+	ResetPassword(c echo.Context, req *dto.ResetPasswordRequest) error
+
+	// Profile
+	GetUserByID(c echo.Context, id uuid.UUID) (*dto.UserProfileResponse, error)
+	UpdateProfile(c echo.Context, id uuid.UUID, req *dto.UpdateProfileRequest) error
 }
 
 type userUseCase struct {
@@ -27,6 +37,7 @@ type userUseCase struct {
 	redisClient  redis.RedisClient
 	otpUtil      otp.OTPUtil
 	emailUtil    email.EmailUtil
+	tokenUtil    token.TokenUtil
 }
 
 func NewUserUseCase(
@@ -35,6 +46,7 @@ func NewUserUseCase(
 	redisClient redis.RedisClient,
 	otpUtil otp.OTPUtil,
 	emailUtil email.EmailUtil,
+	tokenUtil token.TokenUtil,
 ) *userUseCase {
 	return &userUseCase{
 		userRepo:     userRepo,
@@ -42,6 +54,7 @@ func NewUserUseCase(
 		redisClient:  redisClient,
 		otpUtil:      otpUtil,
 		emailUtil:    emailUtil,
+		tokenUtil:    tokenUtil,
 	}
 }
 
@@ -94,11 +107,120 @@ func (uc *userUseCase) VerifyOTP(c echo.Context, req *dto.VerifyOTPRequest) erro
 		return err
 	}
 	if storedOTP != req.OTP {
-		return err
+		return errors.New("invalid otp")
 	}
 	err = uc.userRepo.VerifyUser(ctx, req.Email)
 	if err != nil {
 		return err
 	}
 	return uc.redisClient.Del(req.Email)
+}
+
+func (uc *userUseCase) Login(c echo.Context, req *dto.LoginRequest) (*dto.LoginResponse, error) {
+	ctx, cancel := context.WithCancel(c.Request().Context())
+	defer cancel()
+
+	user, err := uc.userRepo.GetUserByEmail(ctx, req.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := uc.passwordUtil.VerifyPassword(req.Password, user.Password); err != nil {
+		return nil, err
+	}
+
+	token, err := uc.tokenUtil.GenerateToken(user.ID, "user")
+	if err != nil {
+		return nil, err
+	}
+	return &dto.LoginResponse{
+		Username: user.Username,
+		Email:    user.Email,
+		Token:    token,
+	}, nil
+}
+
+func (uc *userUseCase) ForgotPassword(c echo.Context, req *dto.ForgotPasswordRequest) error {
+	ctx, cancel := context.WithCancel(c.Request().Context())
+	defer cancel()
+
+	user, err := uc.userRepo.GetUserByEmail(ctx, req.Email)
+	if err != nil {
+		return err
+	}
+
+	otpCode, err := uc.otpUtil.GenerateOTP(4)
+	if err != nil {
+		return err
+	}
+
+	err = uc.redisClient.Set(user.Email, otpCode, 10*time.Minute)
+	if err != nil {
+		return err
+	}
+
+	err = uc.emailUtil.SendOTP(user.Email, otpCode)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (uc *userUseCase) ResetPassword(c echo.Context, req *dto.ResetPasswordRequest) error {
+	ctx, cancel := context.WithCancel(c.Request().Context())
+	defer cancel()
+
+	if req.NewPassword != req.ConfirmNewPassword {
+		return errors.New("passwords do not match")
+	}
+
+	hashedPassword, err := uc.passwordUtil.HashPassword(req.NewPassword)
+	if err != nil {
+		return err
+	}
+
+	err = uc.userRepo.UpdatePassword(ctx, req.Email, hashedPassword)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (uc *userUseCase) GetUserByID(c echo.Context, id uuid.UUID) (*dto.UserProfileResponse, error) {
+	ctx, cancel := context.WithCancel(c.Request().Context())
+	defer cancel()
+
+	user, err := uc.userRepo.GetUserByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.UserProfileResponse{
+		Username:    user.Username,
+		FirstName:   user.FirstName,
+		LastName:    user.LastName,
+		Email:       user.Email,
+		Phone:       user.Phone,
+		Photo:       user.Photo,
+		Gender:      user.Gender,
+		DateOfBirth: user.DateOfBirth,
+	}, nil
+}
+
+func (uc *userUseCase) UpdateProfile(c echo.Context, id uuid.UUID, req *dto.UpdateProfileRequest) error {
+	ctx, cancel := context.WithCancel(c.Request().Context())
+	defer cancel()
+
+	user := &entities.User{
+		ID:          id,
+		FirstName:   *req.FirstName,
+		LastName:    *req.LastName,
+		Phone:       req.Phone,
+		Gender:      req.Gender,
+		DateOfBirth: req.DateOfBirth,
+	}
+	if err := uc.userRepo.UpdateProfile(ctx, user); err != nil {
+		return err
+	}
+	return nil
 }

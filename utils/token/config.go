@@ -6,17 +6,17 @@ import (
 	"os"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 
-	http_util "kreasi-nusantara-api/utils/http"
 	msg "kreasi-nusantara-api/constants/message"
+	http_util "kreasi-nusantara-api/utils/http"
 )
 
 type JWTClaim struct {
-	Username     string `json:"username"`
-	IsAdmin      bool   `json:"is_admin"`
-	IsSuperAdmin bool   `json:"is_super_admin"`
+	ID   uuid.UUID `json:"id"`
+	Role string    `json:"role"`
 	jwt.RegisteredClaims
 }
 

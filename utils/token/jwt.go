@@ -5,12 +5,12 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
 type TokenUtil interface {
-	GenerateToken(username string, isAdmin bool, isSuperAdmin bool) (string, error)
-	VerifyToken(token string) (*JWTClaim, error)
+	GenerateToken(id uuid.UUID, role string) (string, error)
 	GetClaims(c echo.Context) *JWTClaim
 }
 
@@ -20,11 +20,10 @@ func NewTokenUtil() *tokenUtil {
 	return &tokenUtil{}
 }
 
-func (*tokenUtil) GenerateToken(username string, isAdmin bool, isSuperAdmin bool) (string, error) {
+func (*tokenUtil) GenerateToken(id uuid.UUID, role string) (string, error) {
 	claims := JWTClaim{
-		Username:     username,
-		IsAdmin:      isAdmin,
-		IsSuperAdmin: isSuperAdmin,
+		ID:   id,
+		Role: role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * time.Hour)),
 		},
@@ -35,17 +34,6 @@ func (*tokenUtil) GenerateToken(username string, isAdmin bool, isSuperAdmin bool
 		return "", err
 	}
 	return signedToken, nil
-}
-
-func (*tokenUtil) VerifyToken(token string) (*JWTClaim, error) {
-	claims := &JWTClaim{}
-	_, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(os.Getenv("JWT_KEY")), nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	return claims, nil
 }
 
 func (*tokenUtil) GetClaims(c echo.Context) *JWTClaim {
