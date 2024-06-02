@@ -14,6 +14,7 @@ type Admin struct {
 	LastName     string    `gorm:"type:varchar(100); not null"`
 	Password     string    `gorm:"type:varchar(100); not null"`
 	Photo        *string   `gorm:"type:varchar(255); not null"`
+	Token        string    `gorm:"-"`
 	IsSuperAdmin bool      `gorm:"default:false"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time

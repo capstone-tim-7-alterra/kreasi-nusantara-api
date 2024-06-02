@@ -38,4 +38,7 @@ const (
 	FAILED_VERIFY_OTP = "failed to verify otp!"
 	USER_NOT_FOUND = "user not found!"
 	INVALID_OTP = "invalid otp!"
+	FAILED_FORGOT_PASSWORD = "failed to initiate forgot password!"
+	FAILED_GET_PROFILE = "failed to get user profile!"
+	FAILED_UPDATE_PROFILE = "failed to update user profile!"
 )
