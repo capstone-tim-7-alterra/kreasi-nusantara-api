@@ -213,8 +213,8 @@ func (uc *userUseCase) UpdateProfile(c echo.Context, id uuid.UUID, req *dto.Upda
 
 	user := &entities.User{
 		ID:          id,
-		FirstName:   *req.FirstName,
-		LastName:    *req.LastName,
+		FirstName:   req.FirstName,
+		LastName:    req.LastName,
 		Phone:       req.Phone,
 		Gender:      req.Gender,
 		DateOfBirth: req.DateOfBirth,

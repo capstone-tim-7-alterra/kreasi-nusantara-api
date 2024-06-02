@@ -189,13 +189,13 @@ func (uc *userController) ResetPassword(c echo.Context) error {
 		switch {
 		case errors.Is(err, context.Canceled):
 			code = http_const.STATUS_CLIENT_CANCELLED_REQUEST
-			message = msg.FAILED_FORGOT_PASSWORD
-		case errors.Is(err, err_util.ErrPasswordMismatch):
+			message = msg.FAILED_RESET_PASSWORD
+		case strings.Contains(err.Error(), "passwords do not match"):
 			code = http.StatusBadRequest
 			message = msg.PASSWORD_MISMATCH
 		default:
 			code = http.StatusInternalServerError
-			message = msg.FAILED_FORGOT_PASSWORD
+			message = msg.FAILED_RESET_PASSWORD
 		}
 		return http_util.HandleErrorResponse(c, code, message)
 	}
