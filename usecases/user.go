@@ -29,6 +29,7 @@ type UserUseCase interface {
 	// Profile
 	GetUserByID(c echo.Context, id uuid.UUID) (*dto.UserProfileResponse, error)
 	UpdateProfile(c echo.Context, id uuid.UUID, req *dto.UpdateProfileRequest) error
+	DeleteProfile(c echo.Context, id uuid.UUID) error
 }
 
 type userUseCase struct {
@@ -220,6 +221,16 @@ func (uc *userUseCase) UpdateProfile(c echo.Context, id uuid.UUID, req *dto.Upda
 		DateOfBirth: req.DateOfBirth,
 	}
 	if err := uc.userRepo.UpdateProfile(ctx, user); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (uc *userUseCase) DeleteProfile(c echo.Context, id uuid.UUID) error {
+	ctx, cancel := context.WithCancel(c.Request().Context())
+	defer cancel()
+
+	if err := uc.userRepo.DeleteProfile(ctx, id); err != nil {
 		return err
 	}
 	return nil

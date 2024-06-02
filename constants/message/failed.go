@@ -42,4 +42,5 @@ const (
 	FAILED_GET_PROFILE = "failed to get user profile!"
 	FAILED_UPDATE_PROFILE = "failed to update user profile!"
 	FAILED_RESET_PASSWORD = "failed to reset password!"
+	FAILED_DELETE_PROFILE = "failed to delete user profile!"
 )
