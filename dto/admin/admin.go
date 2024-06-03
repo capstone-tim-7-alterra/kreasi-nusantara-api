@@ -37,7 +37,7 @@ type AdminResponse struct {
 	Username     string  `json:"username"`
 	Email        string  `json:"email"`
 	IsSuperAdmin bool    `json:"is_super_admin"`
-	Image        *string `json:"image"`
+	Photo        *string `json:"photo"`
 	CreatedAt    string  `json:"created_at"`
 }
 
@@ -48,5 +48,5 @@ type UpdateAdminRequest struct {
 	Email        string                `json:"email" form:"email" validate:"required,email"`
 	Password     string                `json:"password" form:"password" validate:"required,min=8,max=32"`
 	IsSuperAdmin bool                  `json:"is_super_admin" form:"is_super_admin"`
-	Image        *multipart.FileHeader ` form:"image" `
+	Photo        *multipart.FileHeader ` form:"photo" `
 }

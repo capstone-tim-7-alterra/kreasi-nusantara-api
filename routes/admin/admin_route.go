@@ -30,15 +30,13 @@ func InitAdminRoute(g *echo.Group, db *gorm.DB, v *validation.Validator) {
 	adminController := controllers.NewAdminController(adminUseCase, v)
 
 	// Public routes
+
+	// Protected routes
+	g.Use(echojwt.WithConfig(token.GetJWTConfig()), middlewares.IsAdmin)
 	g.POST("/admin/register", adminController.Register)
 	g.POST("/admin/login", adminController.Login)
 	g.GET("/admin", adminController.GetAllAdmins)
 	g.DELETE("/admin/:id", adminController.DeleteAdmin)
 	g.PUT("/admin/:id", adminController.UpdateAdmin)
 	g.GET("/admin/search", adminController.SearchAdminByUsername)
-
-	g.Use(echojwt.WithConfig(token.GetJWTConfig()), middlewares.IsAdmin)
-	g.GET("/tes", func(c echo.Context) error {
-		return c.JSON(200, "tes")
-	})
 }
