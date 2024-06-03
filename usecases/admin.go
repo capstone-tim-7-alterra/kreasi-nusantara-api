@@ -71,7 +71,7 @@ func (au *adminUsecase) Register(c echo.Context, req *dto.RegisterRequest) error
 
 	admin := &entities.Admin{
 		ID:           uuid.New(),
-		Image:        imageURLPtr,
+		Photo:        imageURLPtr,
 		FirstName:    req.FirstName,
 		LastName:     req.LastName,
 		Username:     req.Username,
@@ -89,6 +89,7 @@ func (au *adminUsecase) Register(c echo.Context, req *dto.RegisterRequest) error
 }
 
 func (au *adminUsecase) Login(c echo.Context, req *dto.LoginRequest) (*dto.LoginResponse, error) {
+	
 	ctx, cancel := context.WithCancel(c.Request().Context())
 	defer cancel()
 
@@ -100,13 +101,24 @@ func (au *adminUsecase) Login(c echo.Context, req *dto.LoginRequest) (*dto.Login
 		return nil, err
 	}
 
-	isAdmin := !admin.IsSuperAdmin
+	
 
-	token, err := au.tokenUtil.GenerateToken(admin.Username, isAdmin, admin.IsSuperAdmin)
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate token: %w", err)
+	var token string
+	
+	admin.Token = token
+
+	if admin.IsSuperAdmin {
+		token, err = au.tokenUtil.GenerateToken(admin.ID, "super_admin")
+	} else {
+		token, err = au.tokenUtil.GenerateToken(admin.ID, "admin")
 	}
 
+	if err != nil {
+        return nil, fmt.Errorf("failed to generate token: %w", err)
+    }
+
+    admin.Token = token
+		
 	return &dto.LoginResponse{
 		Username: admin.Username,
 		Email:    admin.Email,
@@ -131,7 +143,7 @@ func (au *adminUsecase) GetAllAdmin(ctx echo.Context) ([]*dto.AdminResponse, err
 			Username:     admin.Username,
 			Email:        admin.Email,
 			IsSuperAdmin: admin.IsSuperAdmin,
-			Image:        admin.Image,
+			Photo:        admin.Photo,
 			CreatedAt:    createdAtStr,
 		}
 	}
@@ -156,14 +168,13 @@ func (au *adminUsecase) SearchAdminByUsername(ctx echo.Context, username string)
 			Username:     admin.Username,
 			Email:        admin.Email,
 			IsSuperAdmin: admin.IsSuperAdmin,
-			Image:        admin.Image,
+			Photo:        admin.Photo,
 			CreatedAt:    createdAtStr,
 		}
 	}
 
 	return adminResponses, nil
 }
-
 
 func (au *adminUsecase) UpdateAdmin(ctx echo.Context, adminID uuid.UUID, req *dto.UpdateAdminRequest) error {
 	// Get admin data by ID
@@ -200,7 +211,7 @@ func (au *adminUsecase) UpdateAdmin(ctx echo.Context, adminID uuid.UUID, req *dt
 		}
 
 		// Set the admin's image URL to the new uploaded image
-		admin.Image = &imageURL
+		admin.Photo = &imageURL
 
 	}
 
@@ -240,4 +251,3 @@ func (au *adminUsecase) DeleteAdmin(ctx echo.Context, adminID uuid.UUID) error {
 
 	return nil
 }
-

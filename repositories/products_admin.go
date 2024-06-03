@@ -9,6 +9,7 @@ import (
 
 type ProductAdminRepository interface {
 	CreateProduct(ctx context.Context, product *entities.Products) error
+	GetAllProduct(ctx context.Context) ([]*entities.Products, error)
 	GetProduct(ctx context.Context, product *entities.Products) (*entities.Products, error)
 	CreateCategory(ctx context.Context, category *entities.Category) error
 	DeleteCategory(ctx context.Context, id int) error

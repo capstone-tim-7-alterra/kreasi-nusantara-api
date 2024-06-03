@@ -11,6 +11,7 @@ import (
 
 type CloudinaryService interface {
 	UploadImage(ctx context.Context, input multipart.File) (string, error)
+	UploadVideo(ctx context.Context, input multipart.File) (string, error)
 }
 
 type cloudinaryService struct {
@@ -24,6 +25,19 @@ func NewCloudinaryService(cloudinary *cloudinary.Cloudinary) CloudinaryService {
 }
 
 func (cs *cloudinaryService) UploadImage(ctx context.Context, input multipart.File) (string, error) {
+	uploadParams := uploader.UploadParams{
+		Folder: config.EnvCloudUploadFolder(),
+	}
+
+	result, err := cs.cloudinary.Upload.Upload(ctx, input, uploadParams)
+	if err != nil {
+		return "", err
+	}
+
+	return result.SecureURL, nil
+}
+
+func (cs *cloudinaryService) UploadVideo(ctx context.Context, input multipart.File) (string, error) {
 	uploadParams := uploader.UploadParams{
 		Folder: config.EnvCloudUploadFolder(),
 	}

@@ -89,3 +89,31 @@ func (c *ProductsAdminController) DeleteCategory(ctx echo.Context) error {
 
 	return http_util.HandleSuccessResponse(ctx, http.StatusOK, msg.CATEGORY_DELETED_SUCCESS, nil)
 }
+
+func (c *ProductsAdminController) CreateProduct(ctx echo.Context) error {
+	request := new(dto.ProductRequest)
+	if err := ctx.Bind(request); err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, msg.MISMATCH_DATA_TYPE)
+	}
+
+	if err := c.validator.Validate(request); err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, msg.INVALID_REQUEST_DATA)
+	}
+
+	if err := c.productAdminUseCase.CreateProduct(ctx, request); err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, msg.FAILED_CREATE_PRODUCT)
+	}
+
+	return http_util.HandleSuccessResponse(ctx, http.StatusCreated, msg.PRODUCT_CREATED_SUCCESS, nil)
+
+}
+
+func (c *ProductsAdminController) GetAllProducts(ctx echo.Context) error {
+	products, err := c.productAdminUseCase.GetAllProduct(ctx)
+	if err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, msg.FAILED_FETCH_DATA)
+	}
+
+	return http_util.HandleSuccessResponse(ctx, http.StatusOK, msg.SUCCESS_FETCH_DATA, products)
+
+}

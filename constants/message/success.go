@@ -15,7 +15,7 @@ const (
 	SUCCES_SEARCH_ADMIN     = "Successfully search admin"
 
 	//Products Admin
-	
+	PRODUCT_CREATED_SUCCESS  = "product created successfully!"
 	CATEGORY_CREATED_SUCCESS = "category created successfully!"
 	CATEGORY_UPDATED_SUCCESS = "category updated successfully!"
 	CATEGORY_DELETED_SUCCESS = "category deleted successfully!"

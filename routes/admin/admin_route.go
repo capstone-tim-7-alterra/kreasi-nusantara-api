@@ -4,6 +4,7 @@ import (
 	"kreasi-nusantara-api/config"
 	"kreasi-nusantara-api/controllers"
 	"kreasi-nusantara-api/drivers/cloudinary"
+	"kreasi-nusantara-api/middlewares"
 
 	// "kreasi-nusantara-api/middlewares"
 	"kreasi-nusantara-api/repositories"
@@ -12,6 +13,7 @@ import (
 	"kreasi-nusantara-api/utils/token"
 	"kreasi-nusantara-api/utils/validation"
 
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
@@ -28,16 +30,12 @@ func InitAdminRoute(g *echo.Group, db *gorm.DB, v *validation.Validator) {
 	adminController := controllers.NewAdminController(adminUseCase, v)
 
 	// Public routes
-	g.POST("/admin/register", adminController.Register)
 	g.POST("/admin/login", adminController.Login)
+	// Protected routes
+	g.Use(echojwt.WithConfig(token.GetJWTConfig()), middlewares.IsSuperAdmin)
+	g.POST("/admin/register", adminController.Register)
 	g.GET("/admin", adminController.GetAllAdmins)
 	g.DELETE("/admin/:id", adminController.DeleteAdmin)
 	g.PUT("/admin/:id", adminController.UpdateAdmin)
 	g.GET("/admin/search", adminController.SearchAdminByUsername)
-
-
-
-	// Protected routes
-	// g.Use(middlewares.Auth, middlewares.IsAdmin)
-	// g.POST("/register", adminController.Register)
 }
