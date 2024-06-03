@@ -30,9 +30,11 @@ func InitAdminRoute(g *echo.Group, db *gorm.DB, v *validation.Validator) {
 	adminController := controllers.NewAdminController(adminUseCase, v)
 
 	// Public routes
+	g.Use(echojwt.WithConfig(token.GetJWTConfig()), middlewares.IsAdmin)
+	
 
 	// Protected routes
-	g.Use(echojwt.WithConfig(token.GetJWTConfig()), middlewares.IsAdmin)
+	g.Use(echojwt.WithConfig(token.GetJWTConfig()), middlewares.IsSuperAdmin)
 	g.POST("/admin/register", adminController.Register)
 	g.POST("/admin/login", adminController.Login)
 	g.GET("/admin", adminController.GetAllAdmins)
