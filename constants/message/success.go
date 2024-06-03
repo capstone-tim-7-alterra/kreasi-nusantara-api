@@ -13,4 +13,10 @@ const (
 	ADMIN_DELETED_SUCCESS   = "admin deleted successfully!"
 	SUCCESS_FETCH_DATA      = "Successfully fetched data"
 	SUCCES_SEARCH_ADMIN     = "Successfully search admin"
+
+	//Products Admin
+	
+	CATEGORY_CREATED_SUCCESS = "category created successfully!"
+	CATEGORY_UPDATED_SUCCESS = "category updated successfully!"
+	CATEGORY_DELETED_SUCCESS = "category deleted successfully!"
 )

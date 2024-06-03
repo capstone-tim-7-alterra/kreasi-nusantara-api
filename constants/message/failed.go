@@ -47,4 +47,12 @@ const (
 	FAILED_SEARCH_ADMIN = "failed to search admin by username"
 	ADMIN_NOT_FOUND = "admin not found"
 	
+
+	//Product Admin
+	FAILED_CREATE_CATEGORY = "failed to create category"
+	FAILED_PARSE_CATEGORY = "failed to parse category id"
+	FAILED_UPDATE_CATEGORY = "failed to update category"
+	FAILED_DELETE_CATEGORY = "failed to delete category"
+	FAILED_SEARCH_CATEGORY = "failed to search category by name"
+	CATEGORY_NOT_FOUND = "category not found"
 )

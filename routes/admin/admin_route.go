@@ -35,6 +35,8 @@ func InitAdminRoute(g *echo.Group, db *gorm.DB, v *validation.Validator) {
 	g.PUT("/admin/:id", adminController.UpdateAdmin)
 	g.GET("/admin/search", adminController.SearchAdminByUsername)
 
+
+
 	// Protected routes
 	// g.Use(middlewares.Auth, middlewares.IsAdmin)
 	// g.POST("/register", adminController.Register)

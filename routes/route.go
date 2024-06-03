@@ -2,6 +2,7 @@ package routes
 
 import (
 	"kreasi-nusantara-api/routes/admin"
+	"kreasi-nusantara-api/routes/products_admin"
 	"kreasi-nusantara-api/routes/user"
 	"kreasi-nusantara-api/utils/validation"
 
@@ -14,7 +15,9 @@ func InitRoute(e *echo.Echo, db *gorm.DB, v *validation.Validator) {
 
 	userRoute := baseRoute.Group("")
 	adminRoute := baseRoute.Group("")
+	productsadminRoute := baseRoute.Group("")
 
 	user.InitUserRoute(userRoute, db, v)
 	admin.InitAdminRoute(adminRoute, db, v)
+	products_admin.InitProductAdminRoute(productsadminRoute, db, v)
 }
