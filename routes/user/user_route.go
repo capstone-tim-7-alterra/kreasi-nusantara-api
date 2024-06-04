@@ -1,6 +1,7 @@
 package user
 
 import (
+	"kreasi-nusantara-api/config"
 	"kreasi-nusantara-api/controllers"
 	"kreasi-nusantara-api/drivers/redis"
 
@@ -13,6 +14,7 @@ import (
 	"kreasi-nusantara-api/utils/token"
 	"kreasi-nusantara-api/utils/validation"
 
+	cs "kreasi-nusantara-api/drivers/cloudinary"
 	echojwt "github.com/labstack/echo-jwt/v4"
 
 	"github.com/labstack/echo/v4"
@@ -21,13 +23,15 @@ import (
 
 func InitUserRoute(g *echo.Group, db *gorm.DB, v *validation.Validator) {
 	userRepo := repositories.NewUserRepository(db)
+	cloudinaryInstance, _ := config.SetupCloudinary()
+	cloudinaryService := cs.NewCloudinaryService(cloudinaryInstance)
 	redisClient := redis.NewRedisClient()
 	passwordUtil := password.NewPasswordUtil()
 	otpUtil := otp.NewOTPUtil()
 	emailUtil := email.NewEmailUtil()
 	tokenUtil := token.NewTokenUtil()
 
-	userUseCase := usecases.NewUserUseCase(userRepo, passwordUtil, *redisClient, otpUtil, emailUtil, tokenUtil)
+	userUseCase := usecases.NewUserUseCase(userRepo, passwordUtil, *redisClient, cloudinaryService, otpUtil, emailUtil, tokenUtil)
 	userController := controllers.NewUserController(userUseCase, v, tokenUtil)
 
 	// Public routes
@@ -42,4 +46,5 @@ func InitUserRoute(g *echo.Group, db *gorm.DB, v *validation.Validator) {
 	g.GET("/users/me", userController.GetProfile)
 	g.PUT("/users/me", userController.UpdateProfile)
 	g.DELETE("/users/me", userController.DeleteProfile)
+	g.POST("/users/me/avatar", userController.UploadPhoto)
 }

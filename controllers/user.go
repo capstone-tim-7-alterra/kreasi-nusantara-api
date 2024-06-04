@@ -283,3 +283,33 @@ func (uc *userController) DeleteProfile(c echo.Context) error {
 	}
 	return http_util.HandleSuccessResponse(c, http.StatusOK, msg.DELETE_PROFILE_SUCCESS, nil)
 }
+
+func (uc *userController) UploadPhoto(c echo.Context) error {
+	claims := uc.tokenUtil.GetClaims(c)
+	request := new(dto.UserProfilePhotoRequest)
+
+	if err := c.Bind(request); err != nil {
+		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.MISMATCH_DATA_TYPE)
+	}
+
+	err := uc.userUseCase.UploadProfilePhoto(c, claims.ID, request)
+	if err != nil {
+		var (
+			code    int
+			message string
+		)
+		switch {
+		case errors.Is(err, context.Canceled):
+			code = http_const.STATUS_CLIENT_CANCELLED_REQUEST
+			message = msg.FAILED_UPLOAD_IMAGE
+		case errors.Is(err, gorm.ErrRecordNotFound):
+			code = http.StatusNotFound
+			message = msg.UNREGISTERED_USER
+		default:
+			code = http.StatusInternalServerError
+			message = msg.FAILED_UPLOAD_IMAGE
+		}
+		return http_util.HandleErrorResponse(c, code, message)
+	}
+	return http_util.HandleSuccessResponse(c, http.StatusOK, msg.UPLOAD_IMAGE_SUCCESS, nil)
+}
