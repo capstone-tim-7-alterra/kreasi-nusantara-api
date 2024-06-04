@@ -16,6 +16,7 @@ type UserRepository interface {
 	UpdatePassword(ctx context.Context, email string, newPassword string) error
 	GetUserByID(ctx context.Context, id uuid.UUID) (*entities.User, error)
 	UpdateProfile(ctx context.Context, user *entities.User) error
+	DeleteProfile(ctx context.Context, id uuid.UUID) error
 }
 
 type userRepository struct {
@@ -87,4 +88,11 @@ func (ur *userRepository) UpdateProfile(ctx context.Context, user *entities.User
 		return err
 	}
 	return ur.DB.Session(&gorm.Session{FullSaveAssociations: true}).Where("id = ?", user.ID).Updates(user).Error
+}
+
+func (ur *userRepository) DeleteProfile(ctx context.Context, id uuid.UUID) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	return ur.DB.Where("id = ?", id).Delete(&entities.User{}).Error
 }

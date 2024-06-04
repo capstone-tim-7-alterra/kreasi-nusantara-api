@@ -167,7 +167,7 @@ func (uc *userController) ForgotPassword(c echo.Context) error {
 		}
 		return http_util.HandleErrorResponse(c, code, message)
 	}
-	return http_util.HandleSuccessResponse(c, http.StatusOK, "OTP sent to email!", nil)
+	return http_util.HandleSuccessResponse(c, http.StatusOK, msg.OTP_SENT_SUCCESS, nil)
 }
 
 func (uc *userController) ResetPassword(c echo.Context) error {
@@ -199,7 +199,7 @@ func (uc *userController) ResetPassword(c echo.Context) error {
 		}
 		return http_util.HandleErrorResponse(c, code, message)
 	}
-	return http_util.HandleSuccessResponse(c, http.StatusOK, "Password reset successfully!", nil)
+	return http_util.HandleSuccessResponse(c, http.StatusOK, msg.PASSWORD_RESET_SUCCESS, nil)
 }
 
 func (uc *userController) GetProfile(c echo.Context) error {
@@ -224,7 +224,7 @@ func (uc *userController) GetProfile(c echo.Context) error {
 		}
 		return http_util.HandleErrorResponse(c, code, message)
 	}
-	return http_util.HandleSuccessResponse(c, http.StatusOK, "User profile retrieved successfully!", response)
+	return http_util.HandleSuccessResponse(c, http.StatusOK, msg.GET_PROFILE_SUCCESS, response)
 }
 
 func (uc *userController) UpdateProfile(c echo.Context) error {
@@ -256,5 +256,30 @@ func (uc *userController) UpdateProfile(c echo.Context) error {
 		}
 		return http_util.HandleErrorResponse(c, code, message)
 	}
-	return http_util.HandleSuccessResponse(c, http.StatusOK, "User profile updated successfully!", nil)
+	return http_util.HandleSuccessResponse(c, http.StatusOK, msg.UPDATE_PROFILE_SUCCESS, nil)
+}
+
+func (uc *userController) DeleteProfile(c echo.Context) error {
+	claims := uc.tokenUtil.GetClaims(c)
+
+	err := uc.userUseCase.DeleteProfile(c, claims.ID)
+	if err != nil {
+		var (
+			code    int
+			message string
+		)
+		switch {
+		case errors.Is(err, context.Canceled):
+			code = http_const.STATUS_CLIENT_CANCELLED_REQUEST
+			message = msg.FAILED_DELETE_PROFILE
+		case errors.Is(err, gorm.ErrRecordNotFound):
+			code = http.StatusNotFound
+			message = msg.UNREGISTERED_USER
+		default:
+			code = http.StatusInternalServerError
+			message = msg.FAILED_DELETE_PROFILE
+		}
+		return http_util.HandleErrorResponse(c, code, message)
+	}
+	return http_util.HandleSuccessResponse(c, http.StatusOK, msg.DELETE_PROFILE_SUCCESS, nil)
 }
