@@ -2,7 +2,6 @@ package cloudinary
 
 import (
 	"context"
-	"kreasi-nusantara-api/config"
 	"mime/multipart"
 
 	"github.com/cloudinary/cloudinary-go/v2"
@@ -10,8 +9,8 @@ import (
 )
 
 type CloudinaryService interface {
-	UploadImage(ctx context.Context, input multipart.File) (string, error)
-	UploadVideo(ctx context.Context, input multipart.File) (string, error)
+	UploadImage(ctx context.Context, input multipart.File, folder string) (string, error)
+	UploadVideo(ctx context.Context, input multipart.File, folder string) (string, error)
 }
 
 type cloudinaryService struct {
@@ -24,9 +23,9 @@ func NewCloudinaryService(cloudinary *cloudinary.Cloudinary) CloudinaryService {
 	}
 }
 
-func (cs *cloudinaryService) UploadImage(ctx context.Context, input multipart.File) (string, error) {
+func (cs *cloudinaryService) UploadImage(ctx context.Context, input multipart.File, folder string) (string, error) {
 	uploadParams := uploader.UploadParams{
-		Folder: config.EnvCloudUploadFolder(),
+		Folder: folder,
 	}
 
 	result, err := cs.cloudinary.Upload.Upload(ctx, input, uploadParams)
@@ -37,9 +36,9 @@ func (cs *cloudinaryService) UploadImage(ctx context.Context, input multipart.Fi
 	return result.SecureURL, nil
 }
 
-func (cs *cloudinaryService) UploadVideo(ctx context.Context, input multipart.File) (string, error) {
+func (cs *cloudinaryService) UploadVideo(ctx context.Context, input multipart.File, folder string) (string, error) {
 	uploadParams := uploader.UploadParams{
-		Folder: config.EnvCloudUploadFolder(),
+		Folder: folder,
 	}
 
 	result, err := cs.cloudinary.Upload.Upload(ctx, input, uploadParams)

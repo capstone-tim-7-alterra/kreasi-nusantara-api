@@ -57,7 +57,7 @@ func (au *adminUsecase) Register(c echo.Context, req *dto.RegisterRequest) error
 	}
 	defer formFile.Close()
 
-	imageURL, err := au.cloudinaryService.UploadImage(ctx, formFile)
+	imageURL, err := au.cloudinaryService.UploadImage(ctx, formFile, "kreasinusantara/admin-profile")
 	if err != nil {
 		return err
 	}
@@ -177,7 +177,6 @@ func (au *adminUsecase) SearchAdminByUsername(ctx echo.Context, username string)
 }
 
 func (au *adminUsecase) UpdateAdmin(ctx echo.Context, adminID uuid.UUID, req *dto.UpdateAdminRequest) error {
-	// Get admin data by ID
 	admin, err := au.adminRepo.GetAdminByID(ctx.Request().Context(), adminID)
 	if err != nil {
 		return err
@@ -186,7 +185,6 @@ func (au *adminUsecase) UpdateAdmin(ctx echo.Context, adminID uuid.UUID, req *dt
 		return errors.New("admin not found")
 	}
 
-	// Check if there's a new image in the form
 	formImage, err := ctx.FormFile("image")
 	if err != nil {
 		if err == http.ErrMissingFile {
@@ -205,17 +203,15 @@ func (au *adminUsecase) UpdateAdmin(ctx echo.Context, adminID uuid.UUID, req *dt
 		defer formFile.Close()
 
 		// Upload the new image
-		imageURL, err := au.cloudinaryService.UploadImage(ctx.Request().Context(), formFile)
+		imageURL, err := au.cloudinaryService.UploadImage(ctx.Request().Context(), formFile, "kreasinusantara/admin-profile")
 		if err != nil {
 			return err
 		}
 
-		// Set the admin's image URL to the new uploaded image
 		admin.Photo = &imageURL
 
 	}
 
-	// Update other fields if provided in the request
 	if req.FirstName != "" {
 		admin.FirstName = req.FirstName
 	}
@@ -233,7 +229,6 @@ func (au *adminUsecase) UpdateAdmin(ctx echo.Context, adminID uuid.UUID, req *dt
 	}
 	admin.IsSuperAdmin = req.IsSuperAdmin
 
-	// Perform the update
 	err = au.adminRepo.UpdateAdmin(ctx.Request().Context(), admin)
 	if err != nil {
 		return err
@@ -243,7 +238,6 @@ func (au *adminUsecase) UpdateAdmin(ctx echo.Context, adminID uuid.UUID, req *dt
 }
 
 func (au *adminUsecase) DeleteAdmin(ctx echo.Context, adminID uuid.UUID) error {
-	// Delete the admin directly by ID
 	err := au.adminRepo.DeleteAdmin(ctx.Request().Context(), adminID)
 	if err != nil {
 		return err

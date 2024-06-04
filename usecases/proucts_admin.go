@@ -141,7 +141,7 @@ func uploadFile(ctx context.Context, c echo.Context, field string, service cloud
 	}
 	defer formFile.Close()
 
-	var uploadFunc func(ctx context.Context, input multipart.File) (string, error)
+	var uploadFunc func(ctx context.Context, input multipart.File, folder string) (string, error)
 	switch field {
 	case "image":
 		uploadFunc = service.UploadImage
@@ -149,7 +149,7 @@ func uploadFile(ctx context.Context, c echo.Context, field string, service cloud
 		uploadFunc = service.UploadVideo
 	}
 
-	fileURL, err := uploadFunc(ctx, formFile)
+	fileURL, err := uploadFunc(ctx, formFile, "kreasinusantara/products")
 	if err != nil {
 		fmt.Printf("Error uploading %s: %s\n", field, err)
 		return "", err

@@ -1,11 +1,9 @@
 package config
 
 import (
-	"log"
 	"os"
 
 	"github.com/cloudinary/cloudinary-go/v2"
-	"github.com/joho/godotenv"
 )
 
 func SetupCloudinary() (*cloudinary.Cloudinary, error) {
@@ -19,12 +17,4 @@ func SetupCloudinary() (*cloudinary.Cloudinary, error) {
 	}
 
 	return cld, nil
-}
-
-func EnvCloudUploadFolder() string {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-	return os.Getenv("CLOUDINARY_UPLOAD_FOLDER")
 }
