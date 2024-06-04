@@ -1,0 +1,175 @@
+package controllers
+
+import (
+	"kreasi-nusantara-api/usecases"
+	http_util "kreasi-nusantara-api/utils/http"
+	"kreasi-nusantara-api/utils/validation"
+	"net/http"
+	"strconv"
+
+	msg "kreasi-nusantara-api/constants/message"
+	dto "kreasi-nusantara-api/dto/products_admin"
+
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
+)
+
+type ProductsAdminController struct {
+	productAdminUseCase usecases.ProductAdminUseCase
+	validator           *validation.Validator
+}
+
+func NewProductsAdminController(productAdminUseCase usecases.ProductAdminUseCase, validator *validation.Validator) *ProductsAdminController {
+	return &ProductsAdminController{
+		productAdminUseCase: productAdminUseCase,
+		validator:           validator,
+	}
+}
+
+func (c *ProductsAdminController) CreateCategory(ctx echo.Context) error {
+	request := new(dto.CategoryRequest)
+	if err := ctx.Bind(request); err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, msg.MISMATCH_DATA_TYPE)
+	}
+
+	if err := c.validator.Validate(request); err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, msg.INVALID_REQUEST_DATA)
+	}
+
+	if err := c.productAdminUseCase.CreateCategory(ctx, request); err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, msg.FAILED_CREATE_CATEGORY)
+	}
+
+	return http_util.HandleSuccessResponse(ctx, http.StatusCreated, msg.CATEGORY_CREATED_SUCCESS, nil)
+
+}
+
+func (c *ProductsAdminController) GetAllCategories(ctx echo.Context) error {
+	categories, err := c.productAdminUseCase.GetAllCategory(ctx)
+	if err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, msg.FAILED_FETCH_DATA)
+	}
+
+	return http_util.HandleSuccessResponse(ctx, http.StatusOK, msg.SUCCESS_FETCH_DATA, categories)
+
+}
+
+func (c *ProductsAdminController) UpdateCategory(ctx echo.Context) error {
+	categoryID := ctx.Param("id")
+	id, err := strconv.Atoi(categoryID)
+	if err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, msg.FAILED_PARSE_CATEGORY)
+	}
+
+	request := new(dto.CategoryRequest)
+	if err := ctx.Bind(request); err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, msg.MISMATCH_DATA_TYPE)
+	}
+
+	if err := c.validator.Validate(request); err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, msg.INVALID_REQUEST_DATA)
+	}
+
+	if err := c.productAdminUseCase.UpdateCategory(ctx, id, request); err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, msg.FAILED_UPDATE_CATEGORY)
+	}
+
+	return http_util.HandleSuccessResponse(ctx, http.StatusOK, msg.CATEGORY_UPDATED_SUCCESS, nil)
+}
+
+func (c *ProductsAdminController) DeleteCategory(ctx echo.Context) error {
+	categoryID := ctx.Param("id")
+	id, err := strconv.Atoi(categoryID)
+	if err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, msg.FAILED_PARSE_CATEGORY)
+	}
+
+	if err := c.productAdminUseCase.DeleteCategory(ctx, id); err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, msg.FAILED_DELETE_CATEGORY)
+	}
+
+	return http_util.HandleSuccessResponse(ctx, http.StatusOK, msg.CATEGORY_DELETED_SUCCESS, nil)
+}
+
+func (c *ProductsAdminController) CreateProduct(ctx echo.Context) error {
+	request := new(dto.ProductRequest)
+	if err := ctx.Bind(request); err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, msg.MISMATCH_DATA_TYPE)
+	}
+
+	if err := c.validator.Validate(request); err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, msg.INVALID_REQUEST_DATA)
+	}
+
+	if err := c.productAdminUseCase.CreateProduct(ctx, request); err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, msg.FAILED_CREATE_PRODUCT)
+	}
+
+	return http_util.HandleSuccessResponse(ctx, http.StatusCreated, msg.PRODUCT_CREATED_SUCCESS, nil)
+
+}
+
+func (c *ProductsAdminController) GetAllProducts(ctx echo.Context) error {
+	products, err := c.productAdminUseCase.GetAllProduct(ctx)
+	if err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, msg.FAILED_FETCH_DATA)
+	}
+
+	return http_util.HandleSuccessResponse(ctx, http.StatusOK, msg.SUCCESS_FETCH_DATA, products)
+
+}
+
+func (c *ProductsAdminController) UpdateProduct(ctx echo.Context) error {
+	// Mendapatkan ID produk dari parameter URL
+	productID := ctx.Param("id")
+
+	// Konversi string UUID menjadi uuid.UUID
+	uuidParsed, err := uuid.Parse(productID)
+	if err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, msg.FAILED_PARSE_PRODUCT)
+	}
+
+	request := new(dto.ProductRequest)
+	if err := ctx.Bind(request); err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, msg.MISMATCH_DATA_TYPE)
+	}
+
+	if err := c.validator.Validate(request); err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, msg.INVALID_REQUEST_DATA)
+	}
+
+	if err := c.productAdminUseCase.UpdateProduct(ctx, uuidParsed, request); err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, msg.FAILED_UPDATE_PRODUCT)
+	}
+
+	return http_util.HandleSuccessResponse(ctx, http.StatusOK, msg.PRODUCT_UPDATED_SUCCESS, nil)
+}
+
+func (c *ProductsAdminController) DeleteProduct(ctx echo.Context) error {
+	// Mendapatkan ID produk dari parameter URL
+	productID := ctx.Param("id")
+
+	// Konversi string UUID menjadi uuid.UUID
+	uuidParsed, err := uuid.Parse(productID)
+	if err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, msg.FAILED_PARSE_PRODUCT)
+	}
+
+	if err := c.productAdminUseCase.DeleteProduct(ctx, uuidParsed); err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, msg.FAILED_DELETE_PRODUCT)
+	}
+
+	return http_util.HandleSuccessResponse(ctx, http.StatusOK, msg.PRODUCT_DELETED_SUCCESS, nil)
+}
+
+
+func (c *ProductsAdminController) SearchProductByName(ctx echo.Context) error {
+	name := ctx.QueryParam("product_name")
+	products, err := c.productAdminUseCase.SearchProductByName(ctx, name)
+	if err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, msg.FAILED_FETCH_DATA)
+	}
+
+	return http_util.HandleSuccessResponse(ctx, http.StatusOK, msg.SUCCESS_FETCH_DATA, products)
+
+}

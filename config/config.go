@@ -29,3 +29,4 @@ func InitConfigDB() database.Config {
 		DB_LOG_LEVEL: os.Getenv("DB_LOG_LEVEL"),
 	}
 }
+
