@@ -87,7 +87,7 @@ func (ur *userRepository) UpdateProfile(ctx context.Context, user *entities.User
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	return ur.DB.Session(&gorm.Session{FullSaveAssociations: true}).Where("id = ?", user.ID).Updates(user).Error
+	return ur.DB.Session(&gorm.Session{FullSaveAssociations: true}).Where("id = ?", user.ID).Updates(user).Update("photo", user.Photo).Error
 }
 
 func (ur *userRepository) DeleteProfile(ctx context.Context, id uuid.UUID) error {

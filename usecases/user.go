@@ -3,6 +3,7 @@ package usecases
 import (
 	"context"
 	"errors"
+	cs "kreasi-nusantara-api/drivers/cloudinary"
 	dto "kreasi-nusantara-api/dto/user"
 	"kreasi-nusantara-api/entities"
 	"kreasi-nusantara-api/repositories"
@@ -30,32 +31,38 @@ type UserUseCase interface {
 	GetUserByID(c echo.Context, id uuid.UUID) (*dto.UserProfileResponse, error)
 	UpdateProfile(c echo.Context, id uuid.UUID, req *dto.UpdateProfileRequest) error
 	DeleteProfile(c echo.Context, id uuid.UUID) error
+	UploadProfilePhoto(c echo.Context, id uuid.UUID, req *dto.UserProfilePhotoRequest) error
+	DeleteProfilePhoto(c echo.Context, id uuid.UUID) error
+	ChangePassword(c echo.Context, id uuid.UUID, req *dto.ChangePasswordRequest) error
 }
 
 type userUseCase struct {
-	userRepo     repositories.UserRepository
-	passwordUtil password.PasswordUtil
-	redisClient  redis.RedisClient
-	otpUtil      otp.OTPUtil
-	emailUtil    email.EmailUtil
-	tokenUtil    token.TokenUtil
+	userRepo          repositories.UserRepository
+	passwordUtil      password.PasswordUtil
+	redisClient       redis.RedisClient
+	cloudinaryService cs.CloudinaryService
+	otpUtil           otp.OTPUtil
+	emailUtil         email.EmailUtil
+	tokenUtil         token.TokenUtil
 }
 
 func NewUserUseCase(
 	userRepo repositories.UserRepository,
 	passwordUtil password.PasswordUtil,
 	redisClient redis.RedisClient,
+	cloudinaryService cs.CloudinaryService,
 	otpUtil otp.OTPUtil,
 	emailUtil email.EmailUtil,
 	tokenUtil token.TokenUtil,
 ) *userUseCase {
 	return &userUseCase{
-		userRepo:     userRepo,
-		passwordUtil: passwordUtil,
-		redisClient:  redisClient,
-		otpUtil:      otpUtil,
-		emailUtil:    emailUtil,
-		tokenUtil:    tokenUtil,
+		userRepo:          userRepo,
+		passwordUtil:      passwordUtil,
+		redisClient:       redisClient,
+		cloudinaryService: cloudinaryService,
+		otpUtil:           otpUtil,
+		emailUtil:         emailUtil,
+		tokenUtil:         tokenUtil,
 	}
 }
 
@@ -231,6 +238,100 @@ func (uc *userUseCase) DeleteProfile(c echo.Context, id uuid.UUID) error {
 	defer cancel()
 
 	if err := uc.userRepo.DeleteProfile(ctx, id); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (uc *userUseCase) UploadProfilePhoto(c echo.Context, id uuid.UUID, req *dto.UserProfilePhotoRequest) error {
+	ctx, cancel := context.WithCancel(c.Request().Context())
+	defer cancel()
+
+	formHeader, err := c.FormFile("photo")
+	if err != nil {
+		return err
+	}
+
+	formFile, err := formHeader.Open()
+	if err != nil {
+		return err
+	}
+
+	photoURL, err := uc.cloudinaryService.UploadImage(ctx, formFile, "kreasinusantara/user-profile")
+	if err != nil {
+		return err
+	}
+
+	user := &entities.User{
+		ID:    id,
+		Photo: &photoURL,
+	}
+
+	err = uc.userRepo.UpdateProfile(ctx, user)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (uc *userUseCase) DeleteProfilePhoto(c echo.Context, id uuid.UUID) error {
+	ctx, cancel := context.WithCancel(c.Request().Context())
+	defer cancel()
+
+	user, err := uc.userRepo.GetUserByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if user.Photo == nil {
+		return errors.New("no photo to delete")
+	}
+
+	// Delete photo from Cloudinary
+	err = uc.cloudinaryService.DeleteImage(ctx, *user.Photo)
+	if err != nil {
+		return err
+	}
+
+	// Update user profile to remove photo URL
+	user = &entities.User{
+		ID:    id,
+		Photo: nil,
+	}
+
+	err = uc.userRepo.UpdateProfile(ctx, user)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (uc *userUseCase) ChangePassword(c echo.Context, id uuid.UUID, req *dto.ChangePasswordRequest) error {
+	ctx, cancel := context.WithCancel(c.Request().Context())
+	defer cancel()
+
+	user, err := uc.userRepo.GetUserByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if err := uc.passwordUtil.VerifyPassword(req.OldPassword, user.Password); err != nil {
+		return err
+	}
+
+	if req.NewPassword != req.ConfirmNewPassword {
+		return errors.New("passwords do not match")
+	}
+
+	hashedPassword, err := uc.passwordUtil.HashPassword(req.NewPassword)
+	if err != nil {
+		return err
+	}
+
+	err = uc.userRepo.UpdatePassword(ctx, user.Email, hashedPassword)
+	if err != nil {
 		return err
 	}
 	return nil
