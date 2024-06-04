@@ -31,3 +31,15 @@ func IsSuperAdmin(next echo.HandlerFunc) echo.HandlerFunc {
 		return next(c)
 	}
 }
+
+func IsAdminOrSuperAdmin(next echo.HandlerFunc) echo.HandlerFunc {
+    return func(c echo.Context) error {
+        claims := token.NewTokenUtil().GetClaims(c)
+        role := strings.ToLower(claims.Role)
+        if role != "admin" && role != "super_admin" {
+            return http_util.HandleErrorResponse(c, http.StatusUnauthorized, msg.UNAUTHORIZED)
+        }
+
+        return next(c)
+    }
+}
