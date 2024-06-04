@@ -21,4 +21,7 @@ var (
 
 	// DuplicateKey 
 	ErrDuplicateKey = errors.New(message.DUPLICATE_KEY)
+
+	// pages
+	ErrPageNotFound = errors.New(message.PAGE_NOT_FOUND)
 )

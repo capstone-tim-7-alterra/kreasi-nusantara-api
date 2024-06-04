@@ -14,11 +14,12 @@ const (
 	FAILED_MIGRATE_DB = "failed to migrate database!"
 
 	// Token
-	MISSING_TOKEN           = "missing token"
-	INVALID_TOKEN           = "invalid token"
-	INVALID_AUTH_TYPE       = "invalid authentication type. use Bearer"
-	UNAUTHORIZED            = "unauthorized user"
-	FAILED_GENERATE_TOKEN   = "failed to generate token!"
+	MISSING_TOKEN =	"missing token"
+	INVALID_TOKEN =	"invalid token"
+	INVALID_UUID = "invalid uuid"
+	INVALID_AUTH_TYPE = "invalid authentication type. use Bearer"
+	UNAUTHORIZED =	"unauthorized user"
+	FAILED_GENERATE_TOKEN = "failed to generate token!"
 	FAILED_INVALIDATE_TOKEN = "failed to invalidate token!"
 
 	// Forbidden
@@ -35,6 +36,18 @@ const (
 	UNREGISTERED_USER  = "unregistered user!"
 	DUPLICATE_KEY      = "duplicate key value violates unique constraint"
 	FAILED_GET_USER    = "failed to get user!"
+  FAILED_VERIFY_OTP      = "failed to verify otp!"
+	USER_NOT_FOUND         = "user not found!"
+	INVALID_OTP            = "invalid otp!"
+	FAILED_FORGOT_PASSWORD = "failed to initiate forgot password!"
+	FAILED_GET_PROFILE     = "failed to get user profile!"
+	FAILED_UPDATE_PROFILE  = "failed to update user profile!"
+	FAILED_RESET_PASSWORD  = "failed to reset password!"
+	FAILED_DELETE_PROFILE = "failed to delete user profile!"
+	FAILED_GET_USER_ADDRESSES = "failed to get user addresses!"
+	FAILED_CREATE_USER_ADDRESSES = "failed to create user addresses!"
+	FAILED_UPDATE_USER_ADDRESSES = "failed to update user addresses!"
+	FAILED_DELETE_USER_ADDRESSES = "failed to delete user addresses!"
 
 	//Admin
 	FAILED_CREATE_ADMIN        = "failed to create admin!"
@@ -62,13 +75,6 @@ const (
 	FAILED_SEARCH_PRODUCT = "failed to search product by name"
 	PRODUCT_NOT_FOUND = "product not found"
 
-
-
-	FAILED_VERIFY_OTP      = "failed to verify otp!"
-	USER_NOT_FOUND         = "user not found!"
-	INVALID_OTP            = "invalid otp!"
-	FAILED_FORGOT_PASSWORD = "failed to initiate forgot password!"
-	FAILED_GET_PROFILE     = "failed to get user profile!"
-	FAILED_UPDATE_PROFILE  = "failed to update user profile!"
-	FAILED_RESET_PASSWORD  = "failed to reset password!"
+	// Pages
+	PAGE_NOT_FOUND = "page not found!"
 )

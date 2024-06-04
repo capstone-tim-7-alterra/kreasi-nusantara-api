@@ -41,4 +41,5 @@ func InitUserRoute(g *echo.Group, db *gorm.DB, v *validation.Validator) {
 	g.Use(echojwt.WithConfig(token.GetJWTConfig()))
 	g.GET("/users/me", userController.GetProfile)
 	g.PUT("/users/me", userController.UpdateProfile)
+	g.DELETE("/users/me", userController.DeleteProfile)
 }
