@@ -48,6 +48,7 @@ const (
 	FAILED_CREATE_USER_ADDRESSES = "failed to create user addresses!"
 	FAILED_UPDATE_USER_ADDRESSES = "failed to update user addresses!"
 	FAILED_DELETE_USER_ADDRESSES = "failed to delete user addresses!"
+	FAILED_CHANGE_PASSWORD = "failed to change password!"
 
 	//Admin
 	FAILED_CREATE_ADMIN        = "failed to create admin!"
@@ -79,4 +80,5 @@ const (
 
 	// Images
 	FAILED_UPLOAD_IMAGE = "failed to upload image!"
+	FAILED_DELETE_IMAGE = "failed to delete image!"
 )

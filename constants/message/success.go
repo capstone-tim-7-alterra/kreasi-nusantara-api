@@ -14,6 +14,7 @@ const (
 	CREATE_USER_ADDRESSES_SUCCESS = "user addresses created successfully!"
 	UPDATE_USER_ADDRESSES_SUCCESS = "user addresses updated successfully!"
 	DELETE_USER_ADDRESSES_SUCCESS = "user addresses deleted successfully!"
+	CHANGE_PASSWORD_SUCCESS       = "password changed successfully!"
 
 	//Admin
 	ADMIN_CREATED_SUCCESS   = "admin created successfully!"
@@ -33,4 +34,5 @@ const (
 
 	// Images
 	UPLOAD_IMAGE_SUCCESS = "image uploaded successfully!"
+	DELETE_IMAGE_SUCCESS = "image deleted successfully!"
 )

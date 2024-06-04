@@ -32,6 +32,8 @@ type UserUseCase interface {
 	UpdateProfile(c echo.Context, id uuid.UUID, req *dto.UpdateProfileRequest) error
 	DeleteProfile(c echo.Context, id uuid.UUID) error
 	UploadProfilePhoto(c echo.Context, id uuid.UUID, req *dto.UserProfilePhotoRequest) error
+	DeleteProfilePhoto(c echo.Context, id uuid.UUID) error
+	ChangePassword(c echo.Context, id uuid.UUID, req *dto.ChangePasswordRequest) error
 }
 
 type userUseCase struct {
@@ -270,5 +272,67 @@ func (uc *userUseCase) UploadProfilePhoto(c echo.Context, id uuid.UUID, req *dto
 		return err
 	}
 
+	return nil
+}
+
+func (uc *userUseCase) DeleteProfilePhoto(c echo.Context, id uuid.UUID) error {
+	ctx, cancel := context.WithCancel(c.Request().Context())
+	defer cancel()
+
+	user, err := uc.userRepo.GetUserByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if user.Photo == nil {
+		return errors.New("no photo to delete")
+	}
+
+	// Delete photo from Cloudinary
+	err = uc.cloudinaryService.DeleteImage(ctx, *user.Photo)
+	if err != nil {
+		return err
+	}
+
+	// Update user profile to remove photo URL
+	user = &entities.User{
+		ID:    id,
+		Photo: nil,
+	}
+
+	err = uc.userRepo.UpdateProfile(ctx, user)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (uc *userUseCase) ChangePassword(c echo.Context, id uuid.UUID, req *dto.ChangePasswordRequest) error {
+	ctx, cancel := context.WithCancel(c.Request().Context())
+	defer cancel()
+
+	user, err := uc.userRepo.GetUserByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if err := uc.passwordUtil.VerifyPassword(req.OldPassword, user.Password); err != nil {
+		return err
+	}
+
+	if req.NewPassword != req.ConfirmNewPassword {
+		return errors.New("passwords do not match")
+	}
+
+	hashedPassword, err := uc.passwordUtil.HashPassword(req.NewPassword)
+	if err != nil {
+		return err
+	}
+
+	err = uc.userRepo.UpdatePassword(ctx, user.Email, hashedPassword)
+	if err != nil {
+		return err
+	}
 	return nil
 }
