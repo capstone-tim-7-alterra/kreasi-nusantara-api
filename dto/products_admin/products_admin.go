@@ -24,7 +24,7 @@ type ProductResponse struct {
 	Video       *string `json:"video"`
 	AuthorID    string  `json:"author_id"`
 	LikesCount  int     `json:"likes_count"`
-	CategoryID  int     `json:"category_id"`
+	Category    string  `json:"category"`
 }
 
 type CategoryRequest struct {

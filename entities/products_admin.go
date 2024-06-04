@@ -16,7 +16,7 @@ type Products struct {
 	Image       *string   `gorm:"type:varchar(255)"`
 	Video       *string   `gorm:"type:varchar(255)"`
 	LikesCount  *int      `gorm:"type:int"`
-	AuthorID    uuid.UUID `gorm:"type:int;not null"`
+	AuthorID    uuid.UUID `gorm:"type:uuid;not null"`
 	CategoryID  int       `gorm:"type:int;not null"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time

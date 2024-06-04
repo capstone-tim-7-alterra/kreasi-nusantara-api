@@ -19,4 +19,6 @@ const (
 	CATEGORY_CREATED_SUCCESS = "category created successfully!"
 	CATEGORY_UPDATED_SUCCESS = "category updated successfully!"
 	CATEGORY_DELETED_SUCCESS = "category deleted successfully!"
+	PRODUCT_UPDATED_SUCCESS  = "product updated successfully!"
+	PRODUCT_DELETED_SUCCESS  = "product deleted successfully!"
 )

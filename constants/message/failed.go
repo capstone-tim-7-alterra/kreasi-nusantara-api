@@ -56,6 +56,11 @@ const (
 	FAILED_SEARCH_CATEGORY = "failed to search category by name"
 	CATEGORY_NOT_FOUND = "category not found"
 	FAILED_CREATE_PRODUCT = "failed to create product"
+	FAILED_PARSE_PRODUCT = "failed to parse product id"
+	FAILED_UPDATE_PRODUCT = "failed to update product"
+	FAILED_DELETE_PRODUCT = "failed to delete product"
+	FAILED_SEARCH_PRODUCT = "failed to search product by name"
+	PRODUCT_NOT_FOUND = "product not found"
 
 
 
