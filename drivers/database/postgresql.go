@@ -58,7 +58,7 @@ func migrate(db *gorm.DB) {
 		&entities.User{},
 		&entities.UserAddresses{},
 		&entities.Admin{},
-		&entities.Category{},
+		&entities.ProductCategory{},
 		&entities.Products{},
 	)
 	if err != nil {

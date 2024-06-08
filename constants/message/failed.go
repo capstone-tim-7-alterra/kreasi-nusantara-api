@@ -81,4 +81,7 @@ const (
 	// Images
 	FAILED_UPLOAD_IMAGE = "failed to upload image!"
 	FAILED_DELETE_IMAGE = "failed to delete image!"
+
+	// Products
+	FAILED_GET_PRODUCTS = "failed to get products!"
 )

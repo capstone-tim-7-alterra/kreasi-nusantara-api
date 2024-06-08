@@ -45,7 +45,7 @@ func NewProductAdminUseCase(productAdminRepository repositories.ProductAdminRepo
 
 func (pu *productAdminUseCase) CreateCategory(ctx echo.Context, req *dto.CategoryRequest) error {
 
-	category := &entities.Category{
+	category := &entities.ProductCategory{
 		Name: req.Name,
 	}
 

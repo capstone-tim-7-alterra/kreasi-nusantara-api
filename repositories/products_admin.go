@@ -16,12 +16,12 @@ type ProductAdminRepository interface {
 	GetSearchProduct(ctx context.Context, name string) ([]*entities.Products, error)
 	DeleteProduct(ctx context.Context, id uuid.UUID) error
 	UpdateProduct(ctx context.Context, product *entities.Products) error
-	CreateCategory(ctx context.Context, category *entities.Category) error
+	CreateCategory(ctx context.Context, category *entities.ProductCategory) error
 	DeleteCategory(ctx context.Context, id int) error
-	UpdateCategory(ctx context.Context, category *entities.Category) error
-	GetCategory(ctx context.Context, category *entities.Category) (*entities.Category, error)
-	GetAllCategory(ctx context.Context) ([]*entities.Category, error)
-	GetCategoryByID(ctx context.Context, id int) (*entities.Category, error)
+	UpdateCategory(ctx context.Context, category *entities.ProductCategory) error
+	GetCategory(ctx context.Context, category *entities.ProductCategory) (*entities.ProductCategory, error)
+	GetAllCategory(ctx context.Context) ([]*entities.ProductCategory, error)
+	GetCategoryByID(ctx context.Context, id int) (*entities.ProductCategory, error)
 }
 
 type productAdminRepository struct {
@@ -98,14 +98,14 @@ func (pr *productAdminRepository) GetSearchProduct(ctx context.Context, name str
 	return products, nil
 }
 
-func (pr *productAdminRepository) CreateCategory(ctx context.Context, category *entities.Category) error {
+func (pr *productAdminRepository) CreateCategory(ctx context.Context, category *entities.ProductCategory) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
 	return pr.DB.Create(category).Error
 }
 
-func (pr *productAdminRepository) GetCategory(ctx context.Context, category *entities.Category) (*entities.Category, error) {
+func (pr *productAdminRepository) GetCategory(ctx context.Context, category *entities.ProductCategory) (*entities.ProductCategory, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -115,29 +115,29 @@ func (pr *productAdminRepository) GetCategory(ctx context.Context, category *ent
 	return category, nil
 }
 
-func (pr *productAdminRepository) GetAllCategory(ctx context.Context) ([]*entities.Category, error) {
+func (pr *productAdminRepository) GetAllCategory(ctx context.Context) ([]*entities.ProductCategory, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	var categories []*entities.Category
+	var categories []*entities.ProductCategory
 	if err := pr.DB.Find(&categories).Error; err != nil {
 		return nil, err
 	}
 	return categories, nil
 }
 
-func (pr *productAdminRepository) GetCategoryByID(ctx context.Context, id int) (*entities.Category, error) {
+func (pr *productAdminRepository) GetCategoryByID(ctx context.Context, id int) (*entities.ProductCategory, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	var category entities.Category
+	var category entities.ProductCategory
 	if err := pr.DB.Where("id = ?", id).First(&category).Error; err != nil {
 		return nil, err
 	}
 	return &category, nil
 }
 
-func (pr *productAdminRepository) UpdateCategory(ctx context.Context, category *entities.Category) error {
+func (pr *productAdminRepository) UpdateCategory(ctx context.Context, category *entities.ProductCategory) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
@@ -146,7 +146,7 @@ func (pr *productAdminRepository) UpdateCategory(ctx context.Context, category *
 
 func (pr *productAdminRepository) DeleteCategory(ctx context.Context, id int) error {
 
-	if err := pr.DB.WithContext(ctx).Where("id = ?", id).Delete(&entities.Category{}).Error; err != nil {
+	if err := pr.DB.WithContext(ctx).Where("id = ?", id).Delete(&entities.ProductCategory{}).Error; err != nil {
 		return err
 	}
 	return nil

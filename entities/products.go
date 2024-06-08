@@ -23,7 +23,7 @@ type Products struct {
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
 }
 
-type Category struct {
+type ProductCategory struct {
 	ID        int        `gorm:"primaryKey;autoIncrement"`
 	Name      string     `gorm:"type:varchar(100);not null"`
 	Products  []Products `gorm:"foreignKey:CategoryID"`
@@ -31,3 +31,4 @@ type Category struct {
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
+
