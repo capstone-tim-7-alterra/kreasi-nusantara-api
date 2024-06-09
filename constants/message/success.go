@@ -38,4 +38,12 @@ const (
 
 	// Products
 	GET_PRODUCTS_SUCCESS = "products retrieved successfully!"
+
+	// Articles
+	GET_ARTICLES_SUCCESS  = "articles retrieved successfully!"
+	GET_COMMENTS_SUCCESS  = "comments retrieved successfully!"
+	ADD_COMMENT_SUCCESS   = "comment added successfully!"
+	REPLY_COMMENT_SUCCESS = "comment replied successfully!"
+	LIKE_ARTICLE_SUCCESS  = "article liked successfully!"
+	UNLIKE_ARTICLE_SUCCESS = "article unliked successfully!"
 )

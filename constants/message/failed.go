@@ -48,7 +48,7 @@ const (
 	FAILED_CREATE_USER_ADDRESSES = "failed to create user addresses!"
 	FAILED_UPDATE_USER_ADDRESSES = "failed to update user addresses!"
 	FAILED_DELETE_USER_ADDRESSES = "failed to delete user addresses!"
-	FAILED_CHANGE_PASSWORD = "failed to change password!"
+	FAILED_CHANGE_PASSWORD       = "failed to change password!"
 
 	//Admin
 	FAILED_CREATE_ADMIN        = "failed to create admin!"
@@ -84,4 +84,12 @@ const (
 
 	// Products
 	FAILED_GET_PRODUCTS = "failed to get products!"
+
+	// Articles
+	FAILED_GET_ARTICLES  = "failed to get articles!"
+	FAILED_GET_COMMENTS  = "failed to get comments!"
+	FAILED_ADD_COMMENT   = "failed to add comments!"
+	FAILED_REPLY_COMMENT = "failed to reply comment!"
+	FAILED_LIKE_ARTICLE  = "failed to like article!"
+	FAILED_UNLIKE_ARTICLE = "failed to unlike article!"
 )

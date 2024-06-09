@@ -60,6 +60,8 @@ func migrate(db *gorm.DB) {
 		&entities.Admin{},
 		&entities.ProductCategory{},
 		&entities.Products{},
+		&entities.Articles{},
+		&entities.ArticleComments{},
 	)
 	if err != nil {
 		log.Fatal(msg.FAILED_MIGRATE_DB)
