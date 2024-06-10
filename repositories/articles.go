@@ -76,12 +76,12 @@ func (ar *articleRepository) SearchArticles(ctx context.Context, req *dto_base.S
 
 	offset := *req.Offset
 
-	countQuery := ar.DB.WithContext(ctx).Model(&entities.Articles{}).Where("title LIKE ?", "%"+req.Item+"%")
+	countQuery := ar.DB.WithContext(ctx).Model(&entities.Articles{}).Where("title ILIKE ?", "%"+req.Item+"%")
 	if err := countQuery.Count(&totalData).Error; err != nil {
 		return nil, 0, err
 	}
 
-	query := ar.DB.WithContext(ctx).Where("title LIKE ?", "%"+req.Item+"%").Order(req.SortBy).Limit(req.Limit).Offset(offset)
+	query := ar.DB.WithContext(ctx).Model(&entities.Articles{}).Where("title ILIKE ?", "%"+req.Item+"%").Order(req.SortBy).Limit(req.Limit).Offset(offset)
 	if err := query.Find(&articles).Error; err != nil {
 		return nil, 0, err
 	}

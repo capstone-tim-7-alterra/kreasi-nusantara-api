@@ -92,4 +92,7 @@ const (
 	FAILED_REPLY_COMMENT = "failed to reply comment!"
 	FAILED_LIKE_ARTICLE  = "failed to like article!"
 	FAILED_UNLIKE_ARTICLE = "failed to unlike article!"
+
+	// Events
+	FAILED_GET_EVENTS = "failed to get events!"
 )

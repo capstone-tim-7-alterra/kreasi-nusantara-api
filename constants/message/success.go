@@ -46,4 +46,7 @@ const (
 	REPLY_COMMENT_SUCCESS = "comment replied successfully!"
 	LIKE_ARTICLE_SUCCESS  = "article liked successfully!"
 	UNLIKE_ARTICLE_SUCCESS = "article unliked successfully!"
+
+	// Events
+	GET_EVENTS_SUCCESS = "events retrieved successfully!"
 )
