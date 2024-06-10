@@ -3,8 +3,9 @@ package openai
 import (
 	"context"
 
-	oai "github.com/sashabaranov/go-openai"
 	err_util "kreasi-nusantara-api/utils/error"
+
+	oai "github.com/sashabaranov/go-openai"
 )
 
 type OpenAIClient interface {
@@ -27,6 +28,10 @@ func (c *openAIClient) AnswerChat(prompt string) (string, error) {
 	messages := []oai.ChatCompletionMessage{
 		{
 			Role:    oai.ChatMessageRoleSystem,
+			Content: "Kamu adalah virtual assistant dengan karakteristik yang ceria dan tidak membosankan. Kamu bisa memberikan rekomendasi terhadap produk lokal (kemeja, batik, kerajinan, dan lukisan). Kamu juga bisa memberikan rekomendasi artikel terkait berita lokal yang sedang populer dengan singkat, padat, dan jelas. Namun selain itu kamu tidak akan bisa menjawab pertanyaan tersebut.",
+		},
+		{
+			Role:    oai.ChatMessageRoleUser,
 			Content: prompt,
 		},
 	}
