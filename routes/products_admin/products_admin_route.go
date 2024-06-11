@@ -22,11 +22,8 @@ func InitProductAdminRoute(g *echo.Group, db *gorm.DB, v *validation.Validator) 
 	tokenUtil := token.NewTokenUtil()
 
 	productAdminRepository := repositories.NewProductAdminRepository(db)
-	productAdminUsecase := usecases.NewProductAdminUseCase(productAdminRepository, cloudinaryService, tokenUtil)
-	productAdminController := controllers.NewProductsAdminController(productAdminUsecase, v)
-
-
-	
+	productAdminUsecase := usecases.NewProductAdminUseCase(productAdminRepository, tokenUtil)
+	productAdminController := controllers.NewProductsAdminController(productAdminUsecase, v, cloudinaryService)
 	// g.DELETE("/products/:id", productAdminController.DeleteProduct)
 	// g.PUT("/products/:id", productAdminController.UpdateProduct)
 
