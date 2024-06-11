@@ -22,11 +22,8 @@ func InitProductAdminRoute(g *echo.Group, db *gorm.DB, v *validation.Validator) 
 	tokenUtil := token.NewTokenUtil()
 
 	productAdminRepository := repositories.NewProductAdminRepository(db)
-	productAdminUsecase := usecases.NewProductAdminUseCase(productAdminRepository, cloudinaryService, tokenUtil)
-	productAdminController := controllers.NewProductsAdminController(productAdminUsecase, v)
-
-
-	
+	productAdminUsecase := usecases.NewProductAdminUseCase(productAdminRepository, tokenUtil)
+	productAdminController := controllers.NewProductsAdminController(productAdminUsecase, v, cloudinaryService)
 	// g.DELETE("/products/:id", productAdminController.DeleteProduct)
 	// g.PUT("/products/:id", productAdminController.UpdateProduct)
 
@@ -37,7 +34,7 @@ func InitProductAdminRoute(g *echo.Group, db *gorm.DB, v *validation.Validator) 
 	g.PUT("/categories/:id", productAdminController.UpdateCategory)
 	g.POST("/products", productAdminController.CreateProduct)
 	g.GET("/products", productAdminController.GetAllProducts)
-	g.DELETE("/products/:id", productAdminController.DeleteProduct)
-	g.PUT("/products/:id", productAdminController.UpdateProduct)
-	g.GET("/products/search", productAdminController.SearchProductByName)
+	// g.DELETE("/products/:id", productAdminController.DeleteProduct)
+	// g.PUT("/products/:id", productAdminController.UpdateProduct)
+	// g.GET("/products/search", productAdminController.SearchProductByName)
 }
