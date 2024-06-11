@@ -13,10 +13,10 @@ type ProductAdminRepository interface {
 	CreateProduct(ctx context.Context, product *entities.Products) error
 	GetAllProduct(ctx context.Context, page, limit int) ([]*entities.Products, error)
 	GetProduct(ctx context.Context, product *entities.Products) (*entities.Products, error)
-	GetProductByID(ctx context.Context, id uuid.UUID) (*entities.Products, error)
-	GetSearchProduct(ctx context.Context, name string) ([]*entities.Products, error)
-	DeleteProduct(ctx context.Context, id uuid.UUID) error
-	UpdateProduct(ctx context.Context, product *entities.Products) error
+	GetProductByID(ctx context.Context, productID uuid.UUID) (*entities.Products, error) 
+	SearchProductByName(ctx context.Context, name string, page, limit int) ([]*entities.Products, error)
+	DeleteProduct(ctx context.Context, productID uuid.UUID) error 
+	UpdateProduct(ctx context.Context, productID uuid.UUID, product *entities.Products) error 
 	// Category
 	CreateCategory(ctx context.Context, category *entities.ProductCategory) error
 	DeleteCategory(ctx context.Context, id int) error
@@ -73,41 +73,26 @@ func (pr *productAdminRepository) GetProduct(ctx context.Context, product *entit
 	return product, nil
 }
 
-func (pr *productAdminRepository) DeleteProduct(ctx context.Context, id uuid.UUID) error {
-	if err := ctx.Err(); err != nil {
-		return err
-	}
-	return pr.DB.Where("id = ?", id).Delete(&entities.Products{}).Error
+func (pr *productAdminRepository) SearchProductByName(ctx context.Context, name string, page, limit int) ([]*entities.Products, error) {
+    if err := ctx.Err(); err != nil {
+        return nil, err
+    }
+    
+    var products []*entities.Products
+    query := pr.DB.Preload("ProductPricing").Preload("ProductVariants").Preload("ProductImages").Preload("ProductVideos").Where("name ILIKE ?", "%"+name+"%")
+    
+    if page > 0 && limit > 0 {
+        offset := (page - 1) * limit
+        query = query.Limit(limit).Offset(offset)
+    }
+    
+    if err := query.Find(&products).Error; err != nil {
+        return nil, err
+    }
+    
+    return products, nil
 }
 
-func (pr *productAdminRepository) UpdateProduct(ctx context.Context, product *entities.Products) error {
-	if err := ctx.Err(); err != nil {
-		return err
-	}
-	return pr.DB.Updates(product).Error
-}
-
-func (pr *productAdminRepository) GetProductByID(ctx context.Context, id uuid.UUID) (*entities.Products, error) {
-	if err := ctx.Err(); err != nil {
-		return nil, err
-	}
-	var product entities.Products
-	if err := pr.DB.Where("id = ?", id).First(&product).Error; err != nil {
-		return nil, err
-	}
-	return &product, nil
-}
-
-func (pr *productAdminRepository) GetSearchProduct(ctx context.Context, name string) ([]*entities.Products, error) {
-	if err := ctx.Err(); err != nil {
-		return nil, err
-	}
-	var products []*entities.Products
-	if err := pr.DB.Where("product_name LIKE ?", "%"+name+"%").Find(&products).Error; err != nil {
-		return nil, err
-	}
-	return products, nil
-}
 
 // Categories
 
@@ -165,76 +150,68 @@ func (pr *productAdminRepository) DeleteCategory(ctx context.Context, id int) er
 	return nil
 }
 
-// Pricing
-func (pr *productAdminRepository) CreatePricing(ctx context.Context, pricing *entities.ProductPricing) error {
-	if err := ctx.Err(); err != nil {
-		return err
-	}
-	return pr.DB.Create(pricing).Error
+func (pr *productAdminRepository) UpdateProduct(ctx context.Context, productID uuid.UUID, product *entities.Products) error {
+    if err := ctx.Err(); err != nil {
+        return err
+    }
+    return pr.DB.Model(&entities.Products{}).Where("id = ?", productID).Updates(product).Error
 }
 
-func (pr *productAdminRepository) GetPricing(ctx context.Context, pricing *entities.ProductPricing) (*entities.ProductPricing, error) {
-	if err := ctx.Err(); err != nil {
-		return nil, err
-	}
-	if err := pr.DB.Where(pricing).First(pricing).Error; err != nil {
-		return nil, err
-	}
-	return pricing, nil
+func (pr *productAdminRepository) GetProductByID(ctx context.Context, productID uuid.UUID) (*entities.Products, error) {
+    if err := ctx.Err(); err != nil {
+        return nil, err
+    }
+    var product entities.Products
+    if err := pr.DB.Preload("ProductPricing").Preload("ProductVariants").Preload("ProductImages").Preload("ProductVideos").First(&product, "id = ?", productID).Error; err != nil {
+        return nil, err
+    }
+    return &product, nil
 }
 
-func (pr *productAdminRepository) GetPricingByID(ctx context.Context, id int) (*entities.ProductPricing, error) {
-	if err := ctx.Err(); err != nil {
-		return nil, err
-	}
-	var pricing entities.ProductPricing
-	if err := pr.DB.Where("id = ?", id).First(&pricing).Error; err != nil {
-		return nil, err
-	}
-	return &pricing, nil
+
+
+func (pr *productAdminRepository) DeleteProduct(ctx context.Context, productID uuid.UUID) error {
+    if err := ctx.Err(); err != nil {
+        return err
+    }
+
+    // Start a transaction
+    tx := pr.DB.Begin()
+    if tx.Error != nil {
+        return tx.Error
+    }
+
+    // Delete product pricing
+    if err := tx.Where("product_id = ?", productID).Delete(&entities.ProductPricing{}).Error; err != nil {
+        tx.Rollback()
+        return err
+    }
+
+    // Delete product variants
+    if err := tx.Where("product_id = ?", productID).Delete(&entities.ProductVariants{}).Error; err != nil {
+        tx.Rollback()
+        return err
+    }
+
+    // Delete product images
+    if err := tx.Where("product_id = ?", productID).Delete(&entities.ProductImages{}).Error; err != nil {
+        tx.Rollback()
+        return err
+    }
+
+    // Delete product videos
+    if err := tx.Where("product_id = ?", productID).Delete(&entities.ProductVideos{}).Error; err != nil {
+        tx.Rollback()
+        return err
+    }
+
+    // Delete main product
+    if err := tx.Where("id = ?", productID).Delete(&entities.Products{}).Error; err != nil {
+        tx.Rollback()
+        return err
+    }
+
+    // Commit the transaction
+    return tx.Commit().Error
 }
 
-// Variants
-
-func (pr *productAdminRepository) CreateVariant(ctx context.Context, variant *entities.ProductVariants) error {
-	if err := ctx.Err(); err != nil {
-		return err
-	}
-	return pr.DB.Create(variant).Error
-}
-
-func (pr *productAdminRepository) GetVariant(ctx context.Context, variant *entities.ProductVariants) (*entities.ProductVariants, error) {
-	if err := ctx.Err(); err != nil {
-		return nil, err
-	}
-	if err := pr.DB.Where(variant).First(variant).Error; err != nil {
-		return nil, err
-	}
-	return variant, nil
-}
-
-func (pr *productAdminRepository) GetVariantByID(ctx context.Context, id int) (*entities.ProductVariants, error) {
-	if err := ctx.Err(); err != nil {
-		return nil, err
-	}
-	var variant entities.ProductVariants
-	if err := pr.DB.Where("id = ?", id).First(&variant).Error; err != nil {
-		return nil, err
-	}
-	return &variant, nil
-}
-
-// Image & Video
-func (pr *productAdminRepository) CreateImage(ctx context.Context, image *entities.ProductImages) error {
-	if err := ctx.Err(); err != nil {
-		return err
-	}
-	return pr.DB.Create(image).Error
-}
-
-func (pr *productAdminRepository) CreateVideo(ctx context.Context, video *entities.ProductVideos) error {
-	if err := ctx.Err(); err != nil {
-		return err
-	}
-	return pr.DB.Create(video).Error
-}

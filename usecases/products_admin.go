@@ -15,10 +15,10 @@ import (
 type ProductAdminUseCase interface {
 	CreateProduct(ctx echo.Context, req *dto.ProductRequest) error
 	GetAllProduct(ctx echo.Context, page, limit int) (*[]dto.ProductResponse, error)
-	// UpdateProduct(ctx echo.Context, id uuid.UUID, req *dto.ProductRequest) (*dto.ProductResponse, error)
-	// DeleteProduct(ctx echo.Context, id uuid.UUID) error
-	// SearchProductByName(ctx echo.Context, name string) ([]*dto.ProductResponse, error)
-	// GetProduct(ctx context.Context, product *entities.Products) (*entities.Products, error)
+	UpdateProduct(c echo.Context, productID uuid.UUID, req *dto.ProductRequest) error
+	DeleteProduct(c echo.Context, productID uuid.UUID) error
+	SearchProductByName(c echo.Context, name string, page, limit int) ([]*entities.Products, error)
+	// Category
 	CreateCategory(ctx echo.Context, req *dto.CategoryRequest) error
 	GetAllCategory(ctx echo.Context) ([]*dto.CategoryResponse, error)
 	GetCategoryByID(ctx echo.Context, id int) (*dto.CategoryResponse, error)
@@ -277,158 +277,99 @@ func (pu *productAdminUseCase) GetAllProduct(ctx echo.Context, page, limit int) 
 	return &productResponses, nil
 }
 
-// func (pu *productAdminUseCase)  UpdateProduct(ctx echo.Context, id uuid.UUID, req *dto.ProductRequest) (*dto.ProductResponse, error) {
-// 	product, err := pu.productAdminRepository.GetProductByID(ctx.Request().Context(), id)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+func (pu *productAdminUseCase) UpdateProduct(c echo.Context, productID uuid.UUID, req *dto.ProductRequest) error {
+	ctx, cancel := context.WithCancel(c.Request().Context())
+	defer cancel()
 
-// 	if product == nil {
-// 		return nil, echo.NewHTTPError(http.StatusNotFound, "Product not found")
-// 	}
+	claims := pu.tokenUtil.GetClaims(c)
+	if claims == nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+	}
 
-// 	product.Name = req.Name
-// 	product.Description = req.Description
-// 	product.MinOrder = req.MinOrder
-// 	product.CategoryID = req.CategoryID
+	// Ensure that the product exists
+	existingProduct, err := pu.productAdminRepository.GetProductByID(ctx, productID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "Product not found")
+	}
+	discountPrice := float64(req.ProductPricing.OriginalPrice) * (1 - float64(*req.ProductPricing.DiscountPercent)/100)
+	// Update the product details
+	existingProduct.Name = req.Name
+	existingProduct.Description = req.Description
+	existingProduct.MinOrder = req.MinOrder
+	existingProduct.CategoryID = req.CategoryID
+	existingProduct.ProductPricing = entities.ProductPricing{
+		ID:              uuid.New(),
+		ProductID:       existingProduct.ID,
+		OriginalPrice:   req.ProductPricing.OriginalPrice,
+		DiscountPercent: req.ProductPricing.DiscountPercent,
+		DiscountPrice:   &discountPrice,
+	}
 
-// 	product.ProductPricing = entities.ProductPricing{
-// 		OriginalPrice:   req.ProductPricing.OriginalPrice,
-// 		DiscountPercent: req.ProductPricing.DiscountPercent,
-// 	}
+	// Update product variants
+	existingProduct.ProductVariants = &[]entities.ProductVariants{}
+	for _, variant := range *req.ProductVariants {
+		*existingProduct.ProductVariants = append(*existingProduct.ProductVariants, entities.ProductVariants{
+			ID:        uuid.New(),
+			ProductID: existingProduct.ID,
+			Price:     variant.Price,
+			Stock:     variant.Stock,
+			Size:      variant.Size,
+		})
+	}
 
+	// Update images
+	existingProduct.ProductImages = []entities.ProductImages{}
+	for _, images := range req.ProductImages {
+		existingProduct.ProductImages = append(existingProduct.ProductImages, entities.ProductImages{
+			ID:        uuid.New(),
+			ProductID: existingProduct.ID,
+			ImageUrl:  images.ImageUrl,
+		})
+	}
 
+	// Update videos
+	existingProduct.ProductVideos = []entities.ProductVideos{}
+	for _, videos := range req.ProductVideos {
+		existingProduct.ProductVideos = append(existingProduct.ProductVideos, entities.ProductVideos{
+			ID:        uuid.New(),
+			ProductID: existingProduct.ID,
+			VideoUrl:  videos.VideoUrl,
+		})
+	}
 
-// }
+	// Save the updated product
+	return pu.productAdminRepository.UpdateProduct(ctx, productID, existingProduct)
+}
 
-// func (pu *productAdminUseCase) UpdateProduct(ctx echo.Context, id uuid.UUID, req *dto.ProductRequest) error {
-// 	// Dapatkan context dari echo.Context
-// 	requestCtx := ctx.Request().Context()
+func (pu *productAdminUseCase) DeleteProduct(c echo.Context, productID uuid.UUID) error {
+	ctx, cancel := context.WithCancel(c.Request().Context())
+	defer cancel()
 
-// 	// Ambil produk berdasarkan ID
-// 	product, err := pu.productAdminRepository.GetProductByID(requestCtx, id)
-// 	if err != nil {
-// 		return err
-// 	}
+	claims := pu.tokenUtil.GetClaims(c)
+	if claims == nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+	}
 
-// 	if product == nil {
-// 		return echo.NewHTTPError(http.StatusNotFound, "Product not found")
-// 	}
+	// Call the repository to delete the product
+	if err := pu.productAdminRepository.DeleteProduct(ctx, productID); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to delete product")
+	}
 
-// 	// Upload image
-// 	imageURL, err := uploadFile(requestCtx, ctx, "image", pu.cloudinaryService)
-// 	if err != nil {
-// 		return err
-// 	}
+	return nil
+}
 
-// 	// Upload video
-// 	videoURL, err := uploadFile(requestCtx, ctx, "video", pu.cloudinaryService)
-// 	if err != nil {
-// 		return err
-// 	}
+func (pu *productAdminUseCase) SearchProductByName(c echo.Context, name string, page, limit int) ([]*entities.Products, error) {
+	ctx, cancel := context.WithCancel(c.Request().Context())
+	defer cancel()
 
-// 	// Update fields if they are provided in the request
-// 	if req.ProductName != "" {
-// 		product.ProductName = req.ProductName
-// 	}
+	if claims := pu.tokenUtil.GetClaims(c); claims == nil {
+		return nil, echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+	}
 
-// 	if req.Description != "" {
-// 		product.Description = req.Description
-// 	}
+	products, err := pu.productAdminRepository.SearchProductByName(ctx, name, page, limit)
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, "Failed to search products")
+	}
 
-// 	if req.Price != 0 {
-// 		product.Price = req.Price
-// 	}
-
-// 	if req.Stock != 0 {
-// 		product.Stock = req.Stock
-// 	}
-
-// 	if imageURL != "" {
-// 		product.Image = &imageURL
-// 	}
-
-// 	if videoURL != "" {
-// 		product.Video = &videoURL
-// 	}
-
-// 	if req.CategoryID != 0 {
-// 		product.CategoryID = req.CategoryID
-// 	}
-
-// 	// Update product in the repository
-// 	err = pu.productAdminRepository.UpdateProduct(requestCtx, product)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
-// func (pu *productAdminUseCase) DeleteProduct(ctx echo.Context, id uuid.UUID) error {
-// 	// Dapatkan context dari echo.Context
-// 	requestCtx := ctx.Request().Context()
-
-// 	// Ambil produk berdasarkan ID
-// 	product, err := pu.productAdminRepository.GetProductByID(requestCtx, id)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	if product == nil {
-// 		return echo.NewHTTPError(http.StatusNotFound, "Product not found")
-// 	}
-
-// 	// Delete product from the repository
-// 	err = pu.productAdminRepository.DeleteProduct(requestCtx, id)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
-// func (pu *productAdminUseCase) SearchProductByName(ctx echo.Context, name string) ([]*dto.ProductResponse, error) {
-// 	products, err := pu.productAdminRepository.GetSearchProduct(ctx.Request().Context(), name)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	categories, err := pu.productAdminRepository.GetAllCategory(ctx.Request().Context())
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	// Membuat peta untuk memetakan CategoryID ke CategoryResponse
-// 	categoryMap := make(map[int]string)
-// 	for _, category := range categories {
-// 		categoryMap[category.ID] = category.Name
-// 	}
-
-// 	// Membuat slice untuk menyimpan respons produk
-// 	productResponses := make([]*dto.ProductResponse, len(products))
-
-// 	// Mengisi respons produk dengan informasi produk dan kategori
-// 	for i, product := range products {
-// 		// Mendapatkan informasi kategori dari peta categoryMap
-// 		categoryName, ok := categoryMap[product.CategoryID]
-// 		if !ok {
-// 			categoryName = "Unknown" // Kategori tidak ditemukan, bisa disesuaikan dengan kebutuhan Anda
-// 		}
-
-// 		// Membuat respons produk dengan informasi yang sesuai
-// 		productResponses[i] = &dto.ProductResponse{
-// 			ID:          product.ID.String(),
-// 			ProductName: product.ProductName,
-// 			Description: product.Description,
-// 			Price:       product.Price,
-// 			Stock:       product.Stock,
-// 			Image:       product.Image,
-// 			Video:       product.Video,
-// 			Category:    categoryName,
-// 			AuthorID:    product.AuthorID.String(),
-// 		}
-// 	}
-
-// 	return productResponses, nil
-// }
+	return products, nil
+}
