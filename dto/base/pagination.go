@@ -1,8 +1,9 @@
 package dto
 
 type PaginationRequest struct {
-	Limit int        `json:"limit" validate:"required,gt=0"`
-	Page  int        `json:"offset" validate:"required,gt=0"`
+	Limit  int    `json:"limit" query:"limit" validate:"required,gt=0"`
+	Page   int    `json:"page" query:"page" validate:"required,gt=0"`
+	SortBy string `json:"sort_by" query:"sort_by,omitempty"`
 }
 
 type PaginationResponse struct {

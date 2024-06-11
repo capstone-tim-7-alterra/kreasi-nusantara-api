@@ -35,4 +35,7 @@ const (
 	// Images
 	UPLOAD_IMAGE_SUCCESS = "image uploaded successfully!"
 	DELETE_IMAGE_SUCCESS = "image deleted successfully!"
+
+	// Products
+	GET_PRODUCTS_SUCCESS = "products retrieved successfully!"
 )

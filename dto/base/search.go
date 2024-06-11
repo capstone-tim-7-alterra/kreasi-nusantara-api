@@ -16,4 +16,5 @@ type SearchRequest struct {
 	Item   string `json:"item" validate:"required,min=3"`
 	Limit  int    `json:"limit" validate:"required,gt=0"`
 	Offset *int   `json:"offset" validate:"required,gte=0"`
+	SortBy string `json:"sort_by" query:"sort_by,omitempty"`
 }

@@ -48,7 +48,7 @@ const (
 	FAILED_CREATE_USER_ADDRESSES = "failed to create user addresses!"
 	FAILED_UPDATE_USER_ADDRESSES = "failed to update user addresses!"
 	FAILED_DELETE_USER_ADDRESSES = "failed to delete user addresses!"
-	FAILED_CHANGE_PASSWORD = "failed to change password!"
+	FAILED_CHANGE_PASSWORD       = "failed to change password!"
 
 	//Admin
 	FAILED_CREATE_ADMIN        = "failed to create admin!"
@@ -62,23 +62,34 @@ const (
 	ADMIN_NOT_FOUND            = "admin not found"
 
 	//Product Admin
-	FAILED_CREATE_CATEGORY = "failed to create category"
-	FAILED_PARSE_CATEGORY  = "failed to parse category id"
-	FAILED_UPDATE_CATEGORY = "failed to update category"
-	FAILED_DELETE_CATEGORY = "failed to delete category"
-	FAILED_SEARCH_CATEGORY = "failed to search category by name"
-	CATEGORY_NOT_FOUND     = "category not found"
-	FAILED_CREATE_PRODUCT  = "failed to create product"
-	FAILED_PARSE_PRODUCT   = "failed to parse product id"
-	FAILED_UPDATE_PRODUCT  = "failed to update product"
-	FAILED_DELETE_PRODUCT  = "failed to delete product"
-	FAILED_SEARCH_PRODUCT  = "failed to search product by name"
-	PRODUCT_NOT_FOUND      = "product not found"
-
+	FAILED_CREATE_CATEGORY        = "failed to create category"
+	FAILED_PARSE_CATEGORY         = "failed to parse category id"
+	FAILED_UPDATE_CATEGORY        = "failed to update category"
+	FAILED_DELETE_CATEGORY        = "failed to delete category"
+	FAILED_SEARCH_CATEGORY        = "failed to search category by name"
+	CATEGORY_NOT_FOUND            = "category not found"
+	FAILED_CREATE_PRODUCT         = "failed to create product"
+	FAILED_PARSE_PRODUCT          = "failed to parse product id"
+	FAILED_UPDATE_PRODUCT         = "failed to update product"
+	FAILED_DELETE_PRODUCT         = "failed to delete product"
+	FAILED_SEARCH_PRODUCT         = "failed to search product by name"
+	PRODUCT_NOT_FOUND             = "product not found"
+	INVALID_MIN_ORDER             = "invalid min order"
+	INVALID_CATEGORY_ID           = "invalid category id"
+	FAILED_READ_IMAGE_FILE        = "failed to read image file"
+	FAILED_READ_VIDEO_FILE        = "failed to read video file"
+	INVALID_PRODUCT_VARIANT_PRICE = "invalid product variant price"
+	INVALID_PRODUCT_VARIANT_STOCK = "invalid product variant stock"
+	INVALID_ORIGINAL_PRICE        = "invalid original price"
+	INVALID_DISCOUNT_PERCENT      = "invalid discount percent"
+	
 	// Pages
 	PAGE_NOT_FOUND = "page not found!"
 
 	// Images
 	FAILED_UPLOAD_IMAGE = "failed to upload image!"
 	FAILED_DELETE_IMAGE = "failed to delete image!"
+
+	// Products
+	FAILED_GET_PRODUCTS = "failed to get products!"
 )
