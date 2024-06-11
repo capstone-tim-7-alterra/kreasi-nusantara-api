@@ -59,11 +59,20 @@ func migrate(db *gorm.DB) {
 		&entities.UserAddresses{},
 		&entities.Admin{},
 		&entities.ProductCategory{},
-		&entities.Products{},
-		&entities.ProductPricing{},
+    &entities.ProductPricing{},
 		&entities.ProductVariants{},
 		&entities.ProductImages{},
 		&entities.ProductVideos{},
+		&entities.Products{},
+		&entities.Articles{},
+		&entities.ArticleComments{},
+		&entities.ArticleLikes{},
+		&entities.EventCategories{},
+		&entities.EventLocations{},
+		&entities.EventPhotos{},
+		&entities.EventTicketType{},
+		&entities.EventPrices{},
+		&entities.Events{},
 	)
 	if err != nil {
 		log.Fatal(msg.FAILED_MIGRATE_DB)

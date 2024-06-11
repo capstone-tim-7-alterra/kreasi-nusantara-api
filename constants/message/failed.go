@@ -92,4 +92,18 @@ const (
 
 	// Products
 	FAILED_GET_PRODUCTS = "failed to get products!"
+
+	// Articles
+	FAILED_GET_ARTICLES  = "failed to get articles!"
+	FAILED_GET_COMMENTS  = "failed to get comments!"
+	FAILED_ADD_COMMENT   = "failed to add comments!"
+	FAILED_REPLY_COMMENT = "failed to reply comment!"
+	FAILED_LIKE_ARTICLE  = "failed to like article!"
+	FAILED_UNLIKE_ARTICLE = "failed to unlike article!"
+
+	// Events
+	FAILED_GET_EVENTS = "failed to get events!"
+
+	// Chatbot
+	FAILED_ANSWER_CHAT = "maaf saya belum bisa menjawab pertanyaan yang anda ajukan. Silahkan coba pertanyaan lain"
 )

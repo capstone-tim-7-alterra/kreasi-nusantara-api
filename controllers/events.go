@@ -14,24 +14,24 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type productController struct {
-	productUseCase usecases.ProductUseCase
-	validator      *validation.Validator
+type eventController struct {
+	eventUseCase usecases.EventUseCase
+	validator    *validation.Validator
 }
 
-func NewProductController(productUseCase usecases.ProductUseCase, validator *validation.Validator) *productController {
-	return &productController{
-		productUseCase: productUseCase,
-		validator:      validator,
+func NewEventController(eventUseCase usecases.EventUseCase, validator *validation.Validator) *eventController {
+	return &eventController{
+		eventUseCase: eventUseCase,
+		validator:    validator,
 	}
 }
 
-func (pc *productController) GetProducts(c echo.Context) error {
+func (ec *eventController) GetEvents(c echo.Context) error {
 	page := strings.TrimSpace(c.QueryParam("page"))
 	limit := strings.TrimSpace(c.QueryParam("limit"))
 	sortBy := c.QueryParam("sort_by")
 
-	intPage, intLimit, err := pc.convertQueryParams(page, limit)
+	intPage, intLimit, err := ec.convertQueryParams(page, limit)
 	if err != nil {
 		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.MISMATCH_DATA_TYPE)
 	}
@@ -42,35 +42,35 @@ func (pc *productController) GetProducts(c echo.Context) error {
 		SortBy: sortBy,
 	}
 
-	if err := pc.validator.Validate(req); err != nil {
+	if err := ec.validator.Validate(req); err != nil {
 		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.INVALID_REQUEST_DATA)
 	}
 
-	result, meta, link, err := pc.productUseCase.GetProducts(c, req)
+	result, meta, link, err := ec.eventUseCase.GetEvents(c, req)
 	if err != nil {
-		return http_util.HandleErrorResponse(c, http.StatusInternalServerError, msg.FAILED_GET_PRODUCTS)
+		return http_util.HandleErrorResponse(c, http.StatusInternalServerError, msg.FAILED_GET_EVENTS)
 	}
 
-	return http_util.HandlePaginationResponse(c, msg.GET_PRODUCTS_SUCCESS, result, meta, link)
+	return http_util.HandlePaginationResponse(c, msg.GET_EVENTS_SUCCESS, result, meta, link)
 }
 
-func (pc *productController) GetProductByID(c echo.Context) error {
-	productId := c.Param("product_id")
-	productUUID, err := uuid.Parse(productId)
+func (ec *eventController) GetEventByID(c echo.Context) error {
+	eventId := c.Param("event_id")
+	eventUUID, err := uuid.Parse(eventId)
 
 	if err != nil {
 		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.INVALID_UUID)
 	}
 
-	result, err := pc.productUseCase.GetProductByID(c, productUUID)
+	result, err := ec.eventUseCase.GetEventByID(c, eventUUID)
 	if err != nil {
-		return http_util.HandleErrorResponse(c, http.StatusInternalServerError, msg.FAILED_GET_PRODUCTS)
+		return http_util.HandleErrorResponse(c, http.StatusInternalServerError, msg.FAILED_GET_EVENTS)
 	}
 
-	return http_util.HandleSuccessResponse(c, http.StatusOK, msg.GET_PRODUCTS_SUCCESS, result)
+	return http_util.HandleSuccessResponse(c, http.StatusOK, msg.GET_EVENTS_SUCCESS, result)
 }
 
-func (pc *productController) GetProductsByCategory(c echo.Context) error {
+func (ec *eventController) GetEventsByCategory(c echo.Context) error {
 	categoryIdStr := c.Param("category_id")
 	categoryId, err := strconv.Atoi(categoryIdStr)
 	if err != nil {
@@ -81,30 +81,30 @@ func (pc *productController) GetProductsByCategory(c echo.Context) error {
 	limit := strings.TrimSpace(c.QueryParam("limit"))
 	sortBy := c.QueryParam("sort_by")
 
-	intPage, intLimit, err := pc.convertQueryParams(page, limit)
+	intPage, intLimit, err := ec.convertQueryParams(page, limit)
 	if err != nil {
 		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.MISMATCH_DATA_TYPE)
 	}
 
 	req := &dto_base.PaginationRequest{
-		Page:  intPage,
-		Limit: intLimit,
+		Page:   intPage,
+		Limit:  intLimit,
 		SortBy: sortBy,
 	}
 
-	if err := pc.validator.Validate(req); err != nil {
+	if err := ec.validator.Validate(req); err != nil {
 		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.INVALID_REQUEST_DATA)
 	}
 
-	result, meta, link, err := pc.productUseCase.GetProductsByCategory(c, categoryId, req)
+	result, meta, link, err := ec.eventUseCase.GetEventsByCategory(c, categoryId, req)
 	if err != nil {
-		return http_util.HandleErrorResponse(c, http.StatusInternalServerError, msg.FAILED_GET_PRODUCTS)
+		return http_util.HandleErrorResponse(c, http.StatusInternalServerError, msg.FAILED_GET_EVENTS)
 	}
 
-	return http_util.HandlePaginationResponse(c, msg.GET_PRODUCTS_SUCCESS, result, meta, link)
+	return http_util.HandlePaginationResponse(c, msg.GET_EVENTS_SUCCESS, result, meta, link)
 }
 
-func (pc *productController) SearchProducts(c echo.Context) error {
+func (ec *eventController) SearchEvents(c echo.Context) error {
 	item := strings.TrimSpace(c.QueryParam("item"))
 	limit := strings.TrimSpace(c.QueryParam("limit"))
 	offset := strings.TrimSpace(c.QueryParam("offset"))
@@ -128,22 +128,22 @@ func (pc *productController) SearchProducts(c echo.Context) error {
 		Item:   item,
 		Limit:  intLimit,
 		Offset: &intOffset,
-		SortBy:	sortBy,
+		SortBy: sortBy,
 	}
 
-	if err := pc.validator.Validate(req); err != nil {
+	if err := ec.validator.Validate(req); err != nil {
 		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.INVALID_REQUEST_DATA)
 	}
 
-	products, meta, err := pc.productUseCase.SearchProducts(c, req)
+	result, meta, err := ec.eventUseCase.SearchEvents(c, req)
 	if err != nil {
-		return http_util.HandleErrorResponse(c, http.StatusInternalServerError, msg.FAILED_GET_PRODUCTS)
+		return http_util.HandleErrorResponse(c, http.StatusInternalServerError, msg.FAILED_GET_EVENTS)
 	}
 
-	return http_util.HandleSearchResponse(c, msg.GET_PRODUCTS_SUCCESS, products, meta)
+	return http_util.HandleSearchResponse(c, msg.GET_EVENTS_SUCCESS, result, meta)
 }
 
-func (pc *productController) convertQueryParams(page, limit string) (int, int, error) {
+func (ec *eventController) convertQueryParams(page, limit string) (int, int, error) {
 	if page == "" {
 		page = "1"
 	}
