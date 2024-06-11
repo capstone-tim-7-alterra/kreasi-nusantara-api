@@ -95,4 +95,7 @@ const (
 
 	// Events
 	FAILED_GET_EVENTS = "failed to get events!"
+
+	// Chatbot
+	FAILED_ANSWER_CHAT = "maaf saya belum bisa menjawab pertanyaan yang anda ajukan. Silahkan coba pertanyaan lain"
 )
