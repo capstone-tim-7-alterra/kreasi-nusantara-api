@@ -7,7 +7,6 @@ import (
 	"kreasi-nusantara-api/routes/products"
 	"kreasi-nusantara-api/routes/products_admin"
 	"kreasi-nusantara-api/routes/user"
-	"kreasi-nusantara-api/routes/products"
 	"kreasi-nusantara-api/utils/validation"
 
 	"github.com/labstack/echo/v4"
