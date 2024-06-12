@@ -21,7 +21,6 @@ type ProductPricingRequest struct {
 }
 
 type ProductVariantsRequest struct {
-	Price int    `json:"price" form:"price" validate:"required"`
 	Stock int    `json:"stock" form:"stock" validate:"required"`
 	Size  string `json:"size" form:"size" validate:"required"`
 }

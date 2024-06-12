@@ -44,7 +44,7 @@ func (pr *productRepository) GetProducts(ctx context.Context, req *dto_base.Pagi
 	var totalData int64
 
 	offset := (req.Page - 1) * req.Limit
-	query := pr.DB.WithContext(ctx).Model(&entities.Products{}).Order(req.SortBy).Count(&totalData).Limit(req.Limit).Offset(offset)
+	query := pr.DB.WithContext(ctx).Model(&entities.Products{}).Preload(clause.Associations).Preload("ProductImages").Order(req.SortBy).Count(&totalData).Limit(req.Limit).Offset(offset)
 
 	err := query.Find(&products).Error
 	if err != nil {
@@ -78,7 +78,7 @@ func (pr *productRepository) GetProductsByCategory(ctx context.Context, category
 	var totalData int64
 
 	offset := (req.Page - 1) * req.Limit
-	query := pr.DB.WithContext(ctx).Model(&entities.Products{}).Where("category_id = ?", categoryId).Order(req.SortBy).Count(&totalData).Limit(req.Limit).Offset(offset)
+	query := pr.DB.WithContext(ctx).Model(&entities.Products{}).Preload(clause.Associations).Preload("ProductImages").Where("category_id = ?", categoryId).Order(req.SortBy).Count(&totalData).Limit(req.Limit).Offset(offset)
 
 	err := query.Find(&products).Error
 	if err != nil {
@@ -99,13 +99,13 @@ func (pr *productRepository) SearchProducts(ctx context.Context, req *dto_base.S
 	offset := *req.Offset
 
 	// Query untuk menghitung total data yang sesuai
-	countQuery := pr.DB.WithContext(ctx).Model(&entities.Products{}).Where("product_name ILIKE ?", "%"+req.Item+"%")
+	countQuery := pr.DB.WithContext(ctx).Model(&entities.Products{}).Where("name ILIKE ?", "%"+req.Item+"%")
 	if err := countQuery.Count(&totalData).Error; err != nil {
 		return nil, 0, err
 	}
 
 	// Query untuk mengambil data sesuai dengan limit dan offset
-	query := pr.DB.WithContext(ctx).Where("product_name ILIKE ?", "%"+req.Item+"%").Order(req.SortBy).Limit(req.Limit).Offset(offset)
+	query := pr.DB.WithContext(ctx).Where("name ILIKE ?", "%"+req.Item+"%").Preload(clause.Associations).Preload("ProductImages").Order(req.SortBy).Limit(req.Limit).Offset(offset)
 	if err := query.Find(&products).Error; err != nil {
 		return nil, 0, err
 	}
@@ -131,7 +131,7 @@ func (pr *productRepository) GetProductReview(ctx context.Context, productId uui
 	var totalData int64
 
 	offset := (req.Page - 1) * req.Limit
-	query := pr.DB.WithContext(ctx).Model(&entities.ProductReviews{}).Where("product_id = ?", productId).Order(req.SortBy).Count(&totalData).Limit(req.Limit).Offset(offset)
+	query := pr.DB.WithContext(ctx).Model(&entities.ProductReviews{}).Preload(clause.Associations).Where("product_id = ?", productId).Order(req.SortBy).Count(&totalData).Limit(req.Limit).Offset(offset)
 
 	err := query.Find(&productReviews).Error
 	if err != nil {
@@ -142,19 +142,19 @@ func (pr *productRepository) GetProductReview(ctx context.Context, productId uui
 }
 
 func (pr *productRepository) GetAllAverageRatingsAndTotalReviews(ctx context.Context) ([]entities.RatingSummary, error) {
-    var summaries []entities.RatingSummary
+	var summaries []entities.RatingSummary
 
-    // Query untuk menghitung rata-rata rating dan total review untuk semua produk
-    err := pr.DB.WithContext(ctx).Model(&entities.ProductReviews{}).
-        Select("product_id, AVG(rating) as average_rating, COUNT(*) as total_review").
-        Group("product_id").
-        Scan(&summaries).Error
+	// Query untuk menghitung rata-rata rating dan total review untuk semua produk
+	err := pr.DB.WithContext(ctx).Model(&entities.ProductReviews{}).
+		Select("product_id, AVG(rating) as average_rating, COUNT(*) as total_review").
+		Group("product_id").
+		Scan(&summaries).Error
 
-    if err != nil {
-        return nil, err
-    }
+	if err != nil {
+		return nil, err
+	}
 
-    return summaries, nil
+	return summaries, nil
 }
 
 func (pr *productRepository) GetAverageRatingAndTotalReview(ctx context.Context, productId uuid.UUID) (float64, int, error) {

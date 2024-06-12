@@ -144,13 +144,7 @@ func (c *ProductsAdminController) CreateProduct(ctx echo.Context) error {
 		variants := dto.ProductVariantsRequest{
 			Size: form.Value["product_variants.size"][i],
 		}
-		price, err := strconv.Atoi(form.Value["product_variants.price"][i])
-		if err != nil {
-
-			return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Invalid product_variants.price")
-		}
-
-		variants.Price = price
+		
 		stock, err := strconv.Atoi(form.Value["product_variants.stock"][i])
 		if err != nil {
 
@@ -311,12 +305,6 @@ func (c *ProductsAdminController) UpdateProduct(ctx echo.Context) error {
         variants := dto.ProductVariantsRequest{
             Size: form.Value["product_variants.size"][i],
         }
-
-        price, err := strconv.Atoi(form.Value["product_variants.price"][i])
-        if err != nil {
-            return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Invalid product_variants.price")
-        }
-        variants.Price = price
 
         stock, err := strconv.Atoi(form.Value["product_variants.stock"][i])
         if err != nil {
