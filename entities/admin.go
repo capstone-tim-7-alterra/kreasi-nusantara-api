@@ -18,6 +18,7 @@ type Admin struct {
 	Token        string     `gorm:"-"`
 	IsSuperAdmin bool       `gorm:"default:false"`
 	Products     []Products `gorm:"foreignKey:AuthorID"`
+	Articles     []Articles `gorm:"foreignKey:AuthorID"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	DeletedAt    gorm.DeletedAt `gorm:"index"`

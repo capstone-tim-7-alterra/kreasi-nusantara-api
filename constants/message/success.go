@@ -35,4 +35,20 @@ const (
 	// Images
 	UPLOAD_IMAGE_SUCCESS = "image uploaded successfully!"
 	DELETE_IMAGE_SUCCESS = "image deleted successfully!"
+
+	// Products
+	GET_PRODUCTS_SUCCESS        = "products retrieved successfully!"
+	GET_PRODUCT_REVIEWS_SUCCESS = "product reviews retrieved successfully!"
+	CREATE_REVIEW_SUCCESS       = "review created successfully!"
+
+	// Articles
+	GET_ARTICLES_SUCCESS   = "articles retrieved successfully!"
+	GET_COMMENTS_SUCCESS   = "comments retrieved successfully!"
+	ADD_COMMENT_SUCCESS    = "comment added successfully!"
+	REPLY_COMMENT_SUCCESS  = "comment replied successfully!"
+	LIKE_ARTICLE_SUCCESS   = "article liked successfully!"
+	UNLIKE_ARTICLE_SUCCESS = "article unliked successfully!"
+
+	// Events
+	GET_EVENTS_SUCCESS = "events retrieved successfully!"
 )

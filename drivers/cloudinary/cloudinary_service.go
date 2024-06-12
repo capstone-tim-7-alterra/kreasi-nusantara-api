@@ -32,12 +32,10 @@ func (cs *cloudinaryService) UploadImage(ctx context.Context, input multipart.Fi
 	uploadParams := uploader.UploadParams{
 		Folder: folder,
 	}
-
 	result, err := cs.cloudinary.Upload.Upload(ctx, input, uploadParams)
 	if err != nil {
 		return "", err
 	}
-
 	return result.SecureURL, nil
 }
 
@@ -45,12 +43,10 @@ func (cs *cloudinaryService) UploadVideo(ctx context.Context, input multipart.Fi
 	uploadParams := uploader.UploadParams{
 		Folder: folder,
 	}
-
 	result, err := cs.cloudinary.Upload.Upload(ctx, input, uploadParams)
 	if err != nil {
 		return "", err
 	}
-
 	return result.SecureURL, nil
 }
 
@@ -76,7 +72,7 @@ func extractPublicID(imageURL string) (string, error) {
 
 	// Extract the public ID from the URL path
 	publicIDWithExt := pathSegments[len(pathSegments)-1]
-	publicID := strings.TrimSuffix(publicIDWithExt, filepath.Ext(publicIDWithExt))        
+	publicID := strings.TrimSuffix(publicIDWithExt, filepath.Ext(publicIDWithExt))
 	folderPath := strings.Join(pathSegments[len(pathSegments)-3:len(pathSegments)-1], "/")
 	return folderPath + "/" + publicID, nil
 }
