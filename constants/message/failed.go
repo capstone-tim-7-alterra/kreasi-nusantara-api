@@ -82,7 +82,7 @@ const (
 	INVALID_PRODUCT_VARIANT_STOCK = "invalid product variant stock"
 	INVALID_ORIGINAL_PRICE        = "invalid original price"
 	INVALID_DISCOUNT_PERCENT      = "invalid discount percent"
-	
+
 	// Pages
 	PAGE_NOT_FOUND = "page not found!"
 
@@ -91,14 +91,16 @@ const (
 	FAILED_DELETE_IMAGE = "failed to delete image!"
 
 	// Products
-	FAILED_GET_PRODUCTS = "failed to get products!"
+	FAILED_GET_PRODUCTS        = "failed to get products!"
+	FAILED_GET_PRODUCT_REVIEWS = "failed to get product reviews!"
+	FAILED_CREATE_REVIEW       = "failed to create review!"
 
 	// Articles
-	FAILED_GET_ARTICLES  = "failed to get articles!"
-	FAILED_GET_COMMENTS  = "failed to get comments!"
-	FAILED_ADD_COMMENT   = "failed to add comments!"
-	FAILED_REPLY_COMMENT = "failed to reply comment!"
-	FAILED_LIKE_ARTICLE  = "failed to like article!"
+	FAILED_GET_ARTICLES   = "failed to get articles!"
+	FAILED_GET_COMMENTS   = "failed to get comments!"
+	FAILED_ADD_COMMENT    = "failed to add comments!"
+	FAILED_REPLY_COMMENT  = "failed to reply comment!"
+	FAILED_LIKE_ARTICLE   = "failed to like article!"
 	FAILED_UNLIKE_ARTICLE = "failed to unlike article!"
 
 	// Events

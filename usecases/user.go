@@ -204,14 +204,13 @@ func (uc *userUseCase) GetUserByID(c echo.Context, id uuid.UUID) (*dto.UserProfi
 	}
 
 	return &dto.UserProfileResponse{
-		Username:    user.Username,
-		FirstName:   user.FirstName,
-		LastName:    user.LastName,
-		Email:       user.Email,
-		Phone:       user.Phone,
-		Photo:       user.Photo,
-		Gender:      user.Gender,
-		DateOfBirth: user.DateOfBirth,
+		Username:  user.Username,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Email:     user.Email,
+		Phone:     user.Phone,
+		Photo:     user.Photo,
+		Bio:       user.Bio,
 	}, nil
 }
 
@@ -220,12 +219,11 @@ func (uc *userUseCase) UpdateProfile(c echo.Context, id uuid.UUID, req *dto.Upda
 	defer cancel()
 
 	user := &entities.User{
-		ID:          id,
-		FirstName:   req.FirstName,
-		LastName:    req.LastName,
-		Phone:       req.Phone,
-		Gender:      req.Gender,
-		DateOfBirth: req.DateOfBirth,
+		ID:        id,
+		FirstName: req.FirstName,
+		LastName:  req.LastName,
+		Phone:     req.Phone,
+		Bio:       req.Bio,
 	}
 	if err := uc.userRepo.UpdateProfile(ctx, user); err != nil {
 		return err

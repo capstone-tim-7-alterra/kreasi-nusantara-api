@@ -2,7 +2,6 @@ package dto
 
 import (
 	"mime/multipart"
-	"time"
 )
 
 type RegisterRequest struct {
@@ -45,22 +44,20 @@ type ResetPasswordRequest struct {
 }
 
 type UserProfileResponse struct {
-	Username    string     `json:"username"`
-	FirstName   string     `json:"first_name"`
-	LastName    string     `json:"last_name"`
-	Email       string     `json:"email"`
-	Phone       *string    `json:"phone"`
-	Photo       *string    `json:"photo"`
-	Gender      *string    `json:"gender"`
-	DateOfBirth *time.Time `json:"date_of_birth"`
+	Username  string  `json:"username"`
+	FirstName string  `json:"first_name"`
+	LastName  string  `json:"last_name"`
+	Email     string  `json:"email"`
+	Phone     *string `json:"phone"`
+	Photo     *string `json:"photo"`
+	Bio       *string `json:"bio"`
 }
 
 type UpdateProfileRequest struct {
-	FirstName   string     `json:"first_name" validate:"required"`
-	LastName    string     `json:"last_name" validate:"required"`
-	Phone       *string    `json:"phone"`
-	Gender      *string    `json:"gender"`
-	DateOfBirth *time.Time `json:"date_of_birth"`
+	FirstName string  `json:"first_name" validate:"required"`
+	LastName  string  `json:"last_name" validate:"required"`
+	Phone     *string `json:"phone"`
+	Bio       *string `json:"bio"`
 }
 
 type UserProfilePhotoRequest struct {

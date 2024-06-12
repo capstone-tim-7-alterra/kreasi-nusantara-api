@@ -165,7 +165,6 @@ func (pu *productAdminUseCase) CreateProduct(c echo.Context, req *dto.ProductReq
 			productVariants[i] = entities.ProductVariants{
 				ID:        uuid.New(),
 				ProductID: productID,
-				Price:     variant.Price,
 				Stock:     variant.Stock,
 				Size:      variant.Size,
 			}
@@ -237,7 +236,6 @@ func (pu *productAdminUseCase) GetAllProduct(ctx echo.Context, page, limit int) 
 		if product.ProductVariants != nil {
 			for _, variant := range *product.ProductVariants {
 				productVariants = append(productVariants, dto.ProductVariantsResponse{
-					Price: variant.Price,
 					Stock: variant.Stock,
 					Size:  variant.Size,
 				})
@@ -311,7 +309,6 @@ func (pu *productAdminUseCase) UpdateProduct(c echo.Context, productID uuid.UUID
 		*existingProduct.ProductVariants = append(*existingProduct.ProductVariants, entities.ProductVariants{
 			ID:        uuid.New(),
 			ProductID: existingProduct.ID,
-			Price:     variant.Price,
 			Stock:     variant.Stock,
 			Size:      variant.Size,
 		})

@@ -18,6 +18,7 @@ type Products struct {
 	ProductVariants *[]ProductVariants `gorm:"foreignKey:ProductID;references:ID"`
 	ProductImages   []ProductImages    `gorm:"foreignKey:ProductID;references:ID"`
 	ProductVideos   []ProductVideos    `gorm:"foreignKey:ProductID;references:ID"`
+	ProductReviews  *[]ProductReviews  `gorm:"foreignKey:ProductID;references:ID"`
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 	DeletedAt       gorm.DeletedAt `gorm:"index"`
@@ -37,9 +38,8 @@ type ProductPricing struct {
 type ProductVariants struct {
 	ID        uuid.UUID `gorm:"primaryKey;type:uuid"`
 	ProductID uuid.UUID `gorm:"type:uuid"`
-	Price     int      `gorm:"type:int"`
-	Stock     int      `gorm:"type:int"`
-	Size      string   `gorm:"type:varchar(255)"`
+	Stock     int       `gorm:"type:int"`
+	Size      string    `gorm:"type:varchar(255)"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
@@ -70,4 +70,20 @@ type ProductCategory struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
+}
+
+type ProductReviews struct {
+	ID        uuid.UUID `gorm:"primaryKey;type:uuid"`
+	UserID    uuid.UUID `gorm:"type:uuid"`
+	ProductID uuid.UUID `gorm:"type:uuid"`
+	Rating    int
+	Review    string `gorm:"type:varchar(255)"`
+	CreatedAt time.Time
+	User      User
+}
+
+type RatingSummary struct {
+	ProductID     uuid.UUID `gorm:"type:uuid"`
+	AverageRating float64   
+	TotalReview   int       `gorm:"type:int"`
 }

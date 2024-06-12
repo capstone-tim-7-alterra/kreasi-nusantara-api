@@ -15,11 +15,17 @@ import (
 func InitProductsRoute(g *echo.Group, db *gorm.DB, v *validation.Validator) {
 	productRepo := repositories.NewProductRepository(db)
 	productUseCase := usecases.NewProductUseCase(productRepo)
-	productController := controllers.NewProductController(productUseCase, v)
+
+	tokenUtil := token.NewTokenUtil()
+
+	productController := controllers.NewProductController(productUseCase, v, tokenUtil)
 
 	g.Use(echojwt.WithConfig(token.GetJWTConfig()))
 	g.GET("/products", productController.GetProducts)
 	g.GET("/products/:product_id", productController.GetProductByID)
 	g.GET("/products/search", productController.SearchProducts)
 	g.GET("/products/category/:category_id", productController.GetProductsByCategory)
+
+	g.POST("/products/:product_id/reviews", productController.CreateProductReview)
+	g.GET("/products/:product_id/reviews", productController.GetProductReviews)
 }

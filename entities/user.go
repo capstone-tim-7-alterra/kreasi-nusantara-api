@@ -16,8 +16,7 @@ type User struct {
 	Password        string             `gorm:"type:varchar(100); not null"`
 	Phone           *string            `gorm:"type:varchar(20)"`
 	Photo           *string            `gorm:"type:varchar(255)"`
-	Gender          *string            `gorm:"type:char(1)"`
-	DateOfBirth     *time.Time         `gorm:"type:date"`
+	Bio             *string            `gorm:"type:varchar(255)"`
 	IsVerified      bool               `gorm:"default:false"`
 	Addresses       *[]UserAddresses   `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	ArticleComments *[]ArticleComments `gorm:"foreignKey:ArticleID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
