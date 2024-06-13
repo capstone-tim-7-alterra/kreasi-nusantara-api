@@ -1,108 +1,149 @@
 package repositories
 
-import (
-	"context"
-	dto_base "kreasi-nusantara-api/dto/base"
-	"kreasi-nusantara-api/entities"
+// import (
+// 	"context"
+// 	dto_base "kreasi-nusantara-api/dto/base"
+// 	"kreasi-nusantara-api/entities"
 
-	"github.com/google/uuid"
-	"gorm.io/gorm"
-)
+// 	"github.com/google/uuid"
+// 	"gorm.io/gorm"
+// )
 
-type EventAdminRepository interface {
-	GetEventsAdmin(ctx context.Context, req *dto_base.PaginationRequest) ([]entities.Events, int64, error)
-	CreateEventsAdmin(ctx context.Context, events *entities.Events) error
-	GetEventsByID(ctx context.Context, eventId uuid.UUID) (*entities.Events, error)
-	SearchEventsAdmin(ctx context.Context, req *dto_base.SearchRequest) ([]entities.Events, int64, error)
-	CreateTicket(ctx context.Context, ticket *entities.EventPrices) error
-	GetTicketByID(ctx context.Context, eventId uuid.UUID) (*entities.EventPrices, error)
-}
+// type EventAdminRepository interface {
+// 	GetEventsAdmin(ctx context.Context, req *dto_base.PaginationRequest) ([]entities.Events, int64, error)
+// 	CreateEventsAdmin(ctx context.Context, events *entities.Events) error
+// 	GetEventsByID(ctx context.Context, eventId uuid.UUID) (*entities.Events, error)
+// 	SearchEventsAdmin(ctx context.Context, req *dto_base.SearchRequest) ([]entities.Events, int64, error)
 
-type eventAdminRepository struct {
-	DB *gorm.DB
-}
+// 	// Categories
+// 	GetCategories(ctx context.Context) ([]entities.EventCategories, error)
+// 	CreateCategories(ctx context.Context, categories *entities.EventCategories) error
+// 	UpdateCategories(ctx context.Context, categories *entities.EventCategories	) error
+// 	DeleteCategories(ctx context.Context, categoryId int) error
+// }
 
-func NewEventAdminRepository(db *gorm.DB) EventAdminRepository {
-	return &eventAdminRepository{
-		DB: db,
-	}
-}
+// type eventAdminRepository struct {
+// 	DB *gorm.DB
+// }
 
-func (er *eventAdminRepository) GetEventsAdmin(ctx context.Context, req *dto_base.PaginationRequest) ([]entities.Events, int64, error) {
-	if err := ctx.Err(); err != nil {
-		return nil, 0, err
-	}
+// func NewEventAdminRepository(db *gorm.DB) EventAdminRepository {
+// 	return &eventAdminRepository{
+// 		DB: db,
+// 	}
+// }
 
-	var events []entities.Events
-	var totalData int64
+// func (er *eventAdminRepository) GetEventsAdmin(ctx context.Context, req *dto_base.PaginationRequest) ([]entities.Events, int64, error) {
+// 	if err := ctx.Err(); err != nil {
+// 		return nil, 0, err
+// 	}
 
-	offset := (req.Page - 1) * req.Limit
-	query := er.DB.WithContext(ctx).Preload("Photos").Preload("Prices").Order(req.SortBy).Count(&totalData).Limit(req.Limit).Offset(offset)
+// 	var events []entities.Events
+// 	var totalData int64
 
-	err := query.Find(&events).Error
-	if err != nil {
-		return nil, 0, err
-	}
+// 	offset := (req.Page - 1) * req.Limit
+// 	query := er.DB.WithContext(ctx).Preload("Photos").Preload("Prices").Order(req.SortBy).Count(&totalData).Limit(req.Limit).Offset(offset)
 
-	return events, totalData, nil
-}
+// 	err := query.Find(&events).Error
+// 	if err != nil {
+// 		return nil, 0, err
+// 	}
 
-func (r *eventAdminRepository) CreateEventsAdmin(ctx context.Context, events *entities.Events) error {
-    if err := r.DB.WithContext(ctx).Create(&events).Error; err != nil {
-		return err
-	}
+// 	return events, totalData, nil
+// }
 
-	return nil
-}
+// func (r *eventAdminRepository) CreateEventsAdmin(ctx context.Context, events *entities.Events) error {
+//     if err := r.DB.WithContext(ctx).Create(&events).Error; err != nil {
+// 		return err
+// 	}
 
-// Implementasi metode GetEventsByID
-func (r *eventAdminRepository) GetEventsByID(ctx context.Context, eventId uuid.UUID) (*entities.Events, error) {
-    var event entities.Events
+// 	return nil
+// }
 
-    if err := r.DB.WithContext(ctx).First(&event, "id = ?", eventId).Error; err != nil {
-        return nil, err
-    }
+// // Implementasi metode GetEventsByID
+// func (r *eventAdminRepository) GetEventsByID(ctx context.Context, eventId uuid.UUID) (*entities.Events, error) {
+//     var event entities.Events
 
-    return &event, nil
-}
+//     if err := r.DB.WithContext(ctx).First(&event, "id = ?", eventId).Error; err != nil {
+//         return nil, err
+//     }
 
-func (r *eventAdminRepository) SearchEventsAdmin(ctx context.Context, req *dto_base.SearchRequest) ([]entities.Events, int64, error) {
-	if err := ctx.Err(); err != nil {
-		return nil, 0, err
-	}
+//     return &event, nil
+// }
 
-	var events []entities.Events
-	var totalData int64
+// func (r *eventAdminRepository) SearchEventsAdmin(ctx context.Context, req *dto_base.SearchRequest) ([]entities.Events, int64, error) {
+// 	if err := ctx.Err(); err != nil {
+// 		return nil, 0, err
+// 	}
 
-	offset := * req.Offset
+// 	var events []entities.Events
+// 	var totalData int64
 
-	countQuery := r.DB.WithContext(ctx).Model(&entities.Events{}).Where("name ILIKE ?", "%"+req.Item+"%")
-	if err := countQuery.Count(&totalData).Error; err != nil {
-		return nil, 0, err
-	}
+// 	offset := * req.Offset
 
-	query := r.DB.WithContext(ctx).Model(&entities.Events{}).Where("name ILIKE ?", "%"+req.Item+"%").Order(req.SortBy).Limit(req.Limit).Offset(offset)
-	if err := query.Find(&events).Error; err != nil {
-		return nil, 0, err
-	}
+// 	countQuery := r.DB.WithContext(ctx).Model(&entities.Events{}).Where("name ILIKE ?", "%"+req.Item+"%")
+// 	if err := countQuery.Count(&totalData).Error; err != nil {
+// 		return nil, 0, err
+// 	}
 
-	return events, totalData, nil
-}
+// 	query := r.DB.WithContext(ctx).Model(&entities.Events{}).Where("name ILIKE ?", "%"+req.Item+"%").Order(req.SortBy).Limit(req.Limit).Offset(offset)
+// 	if err := query.Find(&events).Error; err != nil {
+// 		return nil, 0, err
+// 	}
 
-func (r *eventAdminRepository) CreateTicket(ctx context.Context, ticket *entities.EventPrices) error {
-	if err := r.DB.WithContext(ctx).Create(&ticket).Error; err != nil {
-		return err
-	}
+// 	return events, totalData, nil
+// }
 
-	return nil
-}
+// // Categories
+// func (r *eventAdminRepository) GetCategories(ctx context.Context) ([]entities.EventCategories, error) {
+// 	var categories []entities.EventCategories
 
-func (r *eventAdminRepository) GetTicketByID(ctx context.Context, eventId uuid.UUID) (*entities.EventPrices, error) {
-	var ticket entities.EventPrices
+// 	if err := r.DB.WithContext(ctx).Find(&categories).Error; err != nil {
+// 		return nil, err
+// 	}
 
-	if err := r.DB.WithContext(ctx).First(&ticket, "event_id = ?", eventId).Error; err != nil {
-		return nil, err
-	}
+// 	return categories, nil
+// }
 
-	return &ticket, nil
-}
+// func (r *eventAdminRepository) CreateCategories(ctx context.Context, categories *entities.EventCategories) error {
+// 	if err := r.DB.WithContext(ctx).Create(&categories).Error; err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+// }
+
+// func (r *eventAdminRepository) UpdateCategories(ctx context.Context, categories *entities.EventCategories) error {
+// 	if err := r.DB.WithContext(ctx).Model(&entities.EventCategories{}).Where("id = ?", categories.ID).Updates(&categories).Error; err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+// }
+
+// func (r *eventAdminRepository) DeleteCategories(ctx context.Context, categoryId int) error {
+// 	if err := r.DB.WithContext(ctx).Where("id = ?", categoryId).Delete(&entities.EventCategories{}).Error; err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+// }
+
+
+
+// func (r *eventAdminRepository) CreateTicket(ctx context.Context, ticket *entities.EventPrices) error {
+// 	if err := r.DB.WithContext(ctx).Create(&ticket).Error; err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+// }
+
+// func (r *eventAdminRepository) GetTicketByID(ctx context.Context, eventId uuid.UUID) (*entities.EventPrices, error) {
+// 	var ticket entities.EventPrices
+
+// 	if err := r.DB.WithContext(ctx).First(&ticket, "event_id = ?", eventId).Error; err != nil {
+// 		return nil, err
+// 	}
+
+// 	return &ticket, nil
+// }
