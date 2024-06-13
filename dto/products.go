@@ -50,6 +50,6 @@ type ProductVariantResponse struct {
 }
 
 type UserReview struct {
-	ImageURL string `json:"image_url"`
-	Username string `json:"username"`
+	ImageURL *string `json:"image_url"`
+	Username string  `json:"username"`
 }

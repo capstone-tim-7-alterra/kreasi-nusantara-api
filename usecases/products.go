@@ -138,7 +138,7 @@ func (puc *productUseCase) GetProductByID(c echo.Context, productId uuid.UUID) (
 	if latestReview != nil {
 		latestReviewResponse = &dto.ProductReviewResponse{
 			User: dto.UserReview{
-				ImageURL: *latestReview.User.Photo,
+				ImageURL: latestReview.User.Photo,
 				Username: latestReview.User.Username,
 			},
 			Rating:    latestReview.Rating,
@@ -341,7 +341,7 @@ func (puc *productUseCase) GetProductReviews(c echo.Context, productId uuid.UUID
 	for i, review := range reviews {
 		productReviewResponse[i] = dto.ProductReviewResponse{
 			User: dto.UserReview{
-				ImageURL: *review.User.Photo,
+				ImageURL: review.User.Photo,
 				Username: review.User.Username,
 			},
 			Rating:    review.Rating,
