@@ -1,7 +1,6 @@
 package dto
 
 import (
-	"kreasi-nusantara-api/entities"
 	"time"
 
 	"github.com/google/uuid"
@@ -17,19 +16,19 @@ type ArticleResponse struct {
 type ArticleAdminResponse struct {
 	ID        uuid.UUID `json:"id"`
 	Title     string    `json:"title"`
-	Author   string    `json:"author"`
+	Author    string    `json:"author"`
 	Image     string    `json:"image"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
 type ArticleDetailResponse struct {
-	ID            uuid.UUID      `json:"id"`
-	Title         string         `json:"title"`
-	Content       string         `json:"content"`
-	LikesCount    int            `json:"likes_count"`
-	CommentsCount int            `json:"comments_count"`
-	CreatedAt     time.Time      `json:"created_at"`
-	Author        entities.Admin `json:"author"`
+	ID            uuid.UUID         `json:"id"`
+	Title         string            `json:"title"`
+	Content       string            `json:"content"`
+	LikesCount    int               `json:"likes_count"`
+	CommentsCount int               `json:"comments_count"`
+	CreatedAt     time.Time         `json:"created_at"`
+	Author        AuthorInformation `json:"author"`
 }
 
 type ArticleCommentResponse struct {
@@ -47,4 +46,9 @@ type ArticleRequest struct {
 	Image   string `json:"image" form:"image"`
 	Content string `json:"content" form:"content"`
 	Tags    string `json:"tags" form:"tags"`
+}
+
+type AuthorInformation struct {
+	ImageURL string `json:"image_url"`
+	Username string `json:"username"`
 }

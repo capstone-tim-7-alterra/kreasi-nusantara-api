@@ -61,6 +61,7 @@ func (auc *articleUseCase) GetArticles(c echo.Context, req *dto_base.PaginationR
 	for i, article := range articles {
 		articleResponse[i] = dto.ArticleResponse{
 			ID:        article.ID,
+			Image:     article.Image,
 			Title:     article.Title,
 			CreatedAt: article.CreatedAt,
 		}
@@ -109,6 +110,10 @@ func (auc *articleUseCase) GetArticleByID(c echo.Context, articleId uuid.UUID) (
 		LikesCount:    article.LikesCount,
 		CommentsCount: article.CommentsCount,
 		CreatedAt:     article.CreatedAt,
+		Author: dto.AuthorInformation{
+			ImageURL: *article.Author.Photo,
+			Username: article.Author.Username,
+		},
 	}
 
 	return articleDetailResponse, nil
@@ -202,16 +207,17 @@ func (auc *articleUseCase) AddCommentToArticle(c echo.Context, userId uuid.UUID,
 	ctx, cancel := context.WithCancel(c.Request().Context())
 	defer cancel()
 
+
 	comment := entities.ArticleComments{
 		ID:              uuid.New(),
 		UserID:          userId,
 		ArticleID:       articleId,
-		ParentCommentID: nil,
 		Content:         req.Content,
 	}
 
 	err := auc.articleRepository.AddCommentToArticle(ctx, &comment)
 	if err != nil {
+		fmt.Println("Error: ", err)
 		return err
 	}
 
@@ -222,15 +228,15 @@ func (auc *articleUseCase) ReplyToComment(c echo.Context, userId uuid.UUID, arti
 	ctx, cancel := context.WithCancel(c.Request().Context())
 	defer cancel()
 
-	comment := entities.ArticleComments{
+	replies := entities.ArticleCommentReplies{
 		ID:              uuid.New(),
 		UserID:          userId,
 		ArticleID:       articleId,
-		ParentCommentID: &commentId,
+		CommentID:       commentId,
 		Content:         req.Content,
 	}
 
-	err := auc.articleRepository.ReplyToComment(ctx, &comment)
+	err := auc.articleRepository.ReplyToComment(ctx, &replies)
 	if err != nil {
 		return err
 	}
