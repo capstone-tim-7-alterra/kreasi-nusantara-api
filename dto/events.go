@@ -19,7 +19,7 @@ type EventDetailResponse struct {
 type EventCreateRequest struct {
 	Name        string               `json:"name" form:"name" validate:"required"`
 	Description string               `json:"description" form:"description" validate:"required"`
-	CategoryID  int                  `json:"category_id" form:category_id" validate:"required"`
+	CategoryID  int                  `json:"category_id" form:"category_id" validate:"required"`
 	LocationID  uuid.UUID            `json:"location_id" form:"location_id" validate:"required"`
 	Date        string               `json:"date" form:"date" validate:"required"`
 	Photos      []EventPhotosRequest `json:"photos" form:"photos"`
