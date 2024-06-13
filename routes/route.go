@@ -4,6 +4,7 @@ import (
 	"kreasi-nusantara-api/routes/admin"
 	"kreasi-nusantara-api/routes/articles"
 	"kreasi-nusantara-api/routes/events"
+	"kreasi-nusantara-api/routes/events_admin"
 	"kreasi-nusantara-api/routes/products"
 	"kreasi-nusantara-api/routes/products_admin"
 	"kreasi-nusantara-api/routes/user"
@@ -22,6 +23,7 @@ func InitRoute(e *echo.Echo, db *gorm.DB, v *validation.Validator) {
 	productsRoute := baseRoute.Group("")
 	eventsRoute := baseRoute.Group("")
 	chatBotRoute := baseRoute.Group("")
+	eventsadminRoute := baseRoute.Group("")
 
 	user.InitUserRoute(userRoute, db, v)
 	user.InitUserAddressesRoute(userRoute, db, v)
@@ -31,4 +33,5 @@ func InitRoute(e *echo.Echo, db *gorm.DB, v *validation.Validator) {
 	products.InitProductsRoute(productsRoute, db, v)
 	articles.InitArticlesRoute(baseRoute, db, v)
 	events.InitEventsRoute(eventsRoute, db, v)
+	events_admin.InitEventsAdminRoute(eventsadminRoute, db, v)
 }
