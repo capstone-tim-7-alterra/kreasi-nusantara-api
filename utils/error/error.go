@@ -24,4 +24,6 @@ var (
 
 	// pages
 	ErrPageNotFound = errors.New(message.PAGE_NOT_FOUND)
+
+	ErrNotFound = errors.New(message.NOT_FOUND)
 )
