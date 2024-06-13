@@ -12,6 +12,7 @@ type Events struct {
 	Name        string    `gorm:"type:varchar(100);not null"`
 	CategoryID  int       `gorm:"type:int;not null"`
 	LocationID  uuid.UUID `gorm:"type:uuid;not null"`
+	Status      bool      `gorm:"default:true"`
 	Date        time.Time
 	Photos      []EventPhotos `gorm:"foreignKey:EventID"`
 	Description string        `gorm:"type:text;not null"`
@@ -57,6 +58,8 @@ type EventPrices struct {
 	TicketTypeID int       `gorm:"type:int;not null"`
 	Price        int       `gorm:"type:int;not null"`
 	NoOfTicket   int       `gorm:"type:int;not null"`
+	Publish      time.Time
+	EndPublish   time.Time
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }

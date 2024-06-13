@@ -108,4 +108,20 @@ const (
 
 	// Chatbot
 	FAILED_ANSWER_CHAT = "maaf saya belum bisa menjawab pertanyaan yang anda ajukan. Silahkan coba pertanyaan lain"
+
+	// Events Admin
+	FAILED_CREATE_EVENTS = "failed to create events!"
+	FAILED_UPDATE_EVENTS = "failed to update events!"
+	FAILED_DELETE_EVENTS = "failed to delete events!"
+	FAILED_SEARCH_EVENTS = "failed to search events by name"
+
+	// Articles
+	FAILED_CREATE_ARTICLE = "failed to create article!"
+	FAILED_UPDATE_ARTICLE = "failed to update article!"
+	FAILED_DELETE_ARTICLE = "failed to delete article!"
+	FAILED_SEARCH_ARTICLE = "failed to search article by name"
+	ARTICLE_NOT_FOUND     = "article not found!"
+	NOT_FOUND             = "not found"
+	
 )
+

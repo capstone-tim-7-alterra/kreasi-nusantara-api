@@ -51,4 +51,14 @@ const (
 
 	// Events
 	GET_EVENTS_SUCCESS = "events retrieved successfully!"
+
+
+	// events Admin
+	CREATE_EVENTS_SUCCESS = "event created successfully!"
+
+	//Articles Admin
+	CREATE_ARTICLE_SUCCESS = "article created successfully!"
+	UPDATE_ARTICLE_SUCCESS = "article updated successfully!"
+	DELETE_ARTICLE_SUCCESS = "article deleted successfully!"
+
 )
