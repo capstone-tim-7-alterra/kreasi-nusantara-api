@@ -68,7 +68,14 @@ func (puc *productUseCase) GetProducts(c echo.Context, req *dto_base.PaginationR
 
     productResponse := make([]dto.ProductResponse, len(products))
     for i, product := range products {
-        summary := ratingReviewMap[product.ID]
+        summary, exists := ratingReviewMap[product.ID]
+        if !exists {
+            // If there are no reviews for the product, set default values
+            summary = entities.RatingSummary{
+                AverageRating: 0,
+                TotalReview:   0,
+            }
+        }
         productResponse[i] = dto.ProductResponse{
             ID:              product.ID,
             Image:           *product.ProductImages[0].ImageUrl,
