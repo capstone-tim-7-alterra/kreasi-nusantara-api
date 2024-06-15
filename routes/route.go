@@ -23,7 +23,7 @@ func InitRoute(e *echo.Echo, db *gorm.DB, v *validation.Validator) {
 	productsRoute := baseRoute.Group("")
 	eventsRoute := baseRoute.Group("")
 	chatBotRoute := baseRoute.Group("")
-	eventsadminRoute := baseRoute.Group("")
+	eventsadminRoute := baseRoute.Group("/admin")
 
 	user.InitUserRoute(userRoute, db, v)
 	user.InitUserAddressesRoute(userRoute, db, v)

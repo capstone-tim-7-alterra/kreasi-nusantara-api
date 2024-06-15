@@ -52,7 +52,25 @@ const (
 	// Events
 	GET_EVENTS_SUCCESS = "events retrieved successfully!"
 
-
 	// events Admin
 	CREATE_EVENTS_SUCCESS = "event created successfully!"
+	UPDATE_EVENTS_SUCCESS = "event updated successfully!"
+	DELETE_EVENTS_SUCCESS = "event deleted successfully!"
+
+	// Categories Event
+	GET_CATEGORY_SUCCESS    = "categories retrieved successfully!"
+	UPDATE_CATEGORY_SUCCESS = "category updated successfully!"
+	DELETE_CATEGORY_SUCCESS = "category deleted successfully!"
+	CREATE_CATEGORY_SUCCESS = "category created successfully!"
+
+	CREATE_TICKET_TYPE_SUCCESS = "ticket type created successfully!"
+	UPDATE_TICKET_TYPE_SUCCESS = "ticket type updated successfully!"
+	DELETE_TICKET_TYPE_SUCCESS = "ticket type deleted successfully!"
+	GET_TICKET_TYPE_SUCCESS    = "ticket type retrieved successfully!"
+	
+
+	GET_PRICES = "prices retrieved successfully!"
+	GET_DETAIL_PRICES = "detail prices retrieved successfully!"
+	DELETE_PRICES = "prices deleted successfully!"
+	UPDATE_PRICES = "prices updated successfully!"
 )

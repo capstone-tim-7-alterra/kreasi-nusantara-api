@@ -11,6 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/sirupsen/logrus"
 )
 
 type adminController struct {
@@ -26,22 +27,25 @@ func NewAdminController(adminUsecase usecases.AdminUsecase, validator *validatio
 }
 
 func (ac *adminController) Register(c echo.Context) error {
+	var log = logrus.New()
 	request := new(dto.RegisterRequest)
 	if err := c.Bind(request); err != nil {
+		log.WithError(err).Error("Error binding request")
 		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.MISMATCH_DATA_TYPE)
 	}
 
 	if err := ac.validator.Validate(request); err != nil {
-		fmt.Println(err)
+		log.WithError(err).Error("Validation error")
 		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.INVALID_REQUEST_DATA)
 	}
 
 	err := ac.adminUsecase.Register(c, request)
 	if err != nil {
-		fmt.Println("Error: ", err)
+		log.WithError(err).Error("Error registering admin")
 		return http_util.HandleErrorResponse(c, http.StatusInternalServerError, msg.FAILED_CREATE_ADMIN)
 	}
 
+	log.Info("Admin registered successfully.")
 	return http_util.HandleSuccessResponse(c, http.StatusCreated, msg.ADMIN_CREATED_SUCCESS, nil)
 }
 
@@ -102,7 +106,6 @@ func (ac *adminController) UpdateAdmin(c echo.Context) error {
 	return http_util.HandleSuccessResponse(c, http.StatusOK, msg.ADMIN_UPDATED_SUCCESS, nil)
 }
 
-
 func (ac *adminController) DeleteAdmin(c echo.Context) error {
 	adminID := c.Param("id")
 	id, err := uuid.Parse(adminID)
@@ -125,7 +128,7 @@ func (ac *adminController) SearchAdminByUsername(c echo.Context) error {
 	if username == "" {
 		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.MISSING_USERNAME_PARAMETER)
 	}
-	
+
 	admins, err := ac.adminUsecase.SearchAdminByUsername(c, username)
 	if err != nil {
 		return http_util.HandleErrorResponse(c, http.StatusInternalServerError, msg.FAILED_SEARCH_ADMIN)
@@ -133,5 +136,3 @@ func (ac *adminController) SearchAdminByUsername(c echo.Context) error {
 
 	return http_util.HandleSuccessResponse(c, http.StatusOK, msg.SUCCES_SEARCH_ADMIN, admins)
 }
-
-

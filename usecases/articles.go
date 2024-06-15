@@ -63,6 +63,7 @@ func (auc *articleUseCase) GetArticles(c echo.Context, req *dto_base.PaginationR
 			ID:        article.ID,
 			Title:     article.Title,
 			CreatedAt: article.CreatedAt,
+			Image:     article.Image,
 		}
 	}
 

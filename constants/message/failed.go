@@ -114,5 +114,15 @@ const (
 	FAILED_UPDATE_EVENTS = "failed to update events!"
 	FAILED_DELETE_EVENTS = "failed to delete events!"
 	FAILED_SEARCH_EVENTS = "failed to search events by name"
-)
+	EVENT_NOT_FOUND      = "event not found"
 
+	// Categories
+	FAILED_GET_CATEGORIES = "failed to get categories!"
+
+	FAILED_CREATE_TICKET_TYPE = "failed to create ticket type!"
+	FAILED_UPDATE_TICKET_TYPE = "failed to update ticket type!"
+	FAILED_DELETE_TICKET_TYPE = "failed to delete ticket type!"
+	FAILED_SEARCH_TICKET_TYPE = "failed to search ticket type by name"
+	TICKET_TYPE_NOT_FOUND     = "ticket type not found"
+	FAILED_GET_TICKET_TYPE    = "failed to get ticket type!"
+)
