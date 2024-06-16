@@ -67,6 +67,7 @@ func migrate(db *gorm.DB) {
 		&entities.Products{},
 		&entities.Articles{},
 		&entities.ArticleComments{},
+		&entities.ArticleCommentReplies{},
 		&entities.ArticleLikes{},
 		&entities.EventCategories{},
 		&entities.EventLocations{},

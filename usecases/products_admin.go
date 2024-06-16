@@ -2,11 +2,16 @@ package usecases
 
 import (
 	"context"
+	"fmt"
+	dto_base "kreasi-nusantara-api/dto/base"
 	dto "kreasi-nusantara-api/dto/products_admin"
 	"kreasi-nusantara-api/entities"
 	"kreasi-nusantara-api/repositories"
+	err_util "kreasi-nusantara-api/utils/error"
 	"kreasi-nusantara-api/utils/token"
+	"math"
 	"net/http"
+	"strconv"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -14,10 +19,11 @@ import (
 
 type ProductAdminUseCase interface {
 	CreateProduct(ctx echo.Context, req *dto.ProductRequest) error
-	GetAllProduct(ctx echo.Context, page, limit int) (*[]dto.ProductResponse, error)
+	GetAllProduct(c echo.Context, req *dto_base.PaginationRequest) (*[]dto.ProductResponseAdmin, *dto_base.PaginationMetadata, *dto_base.Link, error)
 	UpdateProduct(c echo.Context, productID uuid.UUID, req *dto.ProductRequest) error
 	DeleteProduct(c echo.Context, productID uuid.UUID) error
-	SearchProductByName(c echo.Context, name string, page, limit int) ([]*entities.Products, error)
+	SearchProductByName(c echo.Context, req *dto_base.SearchRequest) ([]dto.ProductResponseAdmin, *dto_base.MetadataResponse, error)
+	GetProductByID(c echo.Context, productID uuid.UUID) (*dto.ProductResponse, error)
 	// Category
 	CreateCategory(ctx echo.Context, req *dto.CategoryRequest) error
 	GetAllCategory(ctx echo.Context) ([]*dto.CategoryResponse, error)
@@ -28,13 +34,15 @@ type ProductAdminUseCase interface {
 
 type productAdminUseCase struct {
 	productAdminRepository repositories.ProductAdminRepository
+	productRepository      repositories.ProductRepository
 	tokenUtil              token.TokenUtil
 }
 
-func NewProductAdminUseCase(productAdminRepository repositories.ProductAdminRepository, tokenUtil token.TokenUtil) *productAdminUseCase {
+func NewProductAdminUseCase(productAdminRepository repositories.ProductAdminRepository, tokenUtil token.TokenUtil, productRepository repositories.ProductRepository,) *productAdminUseCase {
 	return &productAdminUseCase{
 		productAdminRepository: productAdminRepository,
 		tokenUtil:              tokenUtil,
+		productRepository:      productRepository,
 	}
 }
 
@@ -199,46 +207,63 @@ func (pu *productAdminUseCase) CreateProduct(c echo.Context, req *dto.ProductReq
 	return pu.productAdminRepository.CreateProduct(ctx, product)
 }
 
-func (pu *productAdminUseCase) GetAllProduct(ctx echo.Context, page, limit int) (*[]dto.ProductResponse, error) {
-	products, err := pu.productAdminRepository.GetAllProduct(ctx.Request().Context(), page, limit)
-	if err != nil {
-		return nil, err
+func (pu *productAdminUseCase) GetAllProduct(c echo.Context, req *dto_base.PaginationRequest) (*[]dto.ProductResponseAdmin, *dto_base.PaginationMetadata, *dto_base.Link, error) {
+	ctx, cancel := context.WithCancel(c.Request().Context())
+	defer cancel()
+
+	baseURL := fmt.Sprintf(
+		"%s?limit=%d&page=",
+		c.Request().URL.Path,
+		req.Limit,
+	)
+
+	var (
+		next = ""
+		prev = ""
+	)
+
+	if req.Page > 1 {
+		prev = baseURL + strconv.Itoa(req.Page-1)
 	}
 
-	categories, err := pu.productAdminRepository.GetAllCategory(ctx.Request().Context())
+	products, totalData, err := pu.productAdminRepository.GetAllProduct(ctx, req)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 
-	// Membuat peta untuk memetakan CategoryID ke CategoryResponse
+	categories, err := pu.productAdminRepository.GetAllCategory(ctx)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	rating, err := pu.productRepository.GetAllAverageRatingsAndTotalReviews(ctx)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	ratingReviewMap := make(map[uuid.UUID]entities.RatingSummary)
+	for _, summary := range rating {
+		ratingReviewMap[summary.ProductID] = summary
+	}
+
 	categoryMap := make(map[int]string)
 	for _, category := range categories {
 		categoryMap[category.ID] = category.Name
 	}
 
-	var productResponses []dto.ProductResponse
+	var productResponses []dto.ProductResponseAdmin
 
 	for _, product := range products {
 		categoryName, ok := categoryMap[product.CategoryID]
 		if !ok {
 			categoryName = "Unknown" // Kategori tidak ditemukan, bisa disesuaikan dengan kebutuhan Anda
 		}
-
-		// Konversi entitas ProductPricing ke DTO
-		productPricing := dto.ProductPricingResponse{
-			OriginalPrice:   product.ProductPricing.OriginalPrice,
-			DiscountPercent: product.ProductPricing.DiscountPercent,
-			DiscountPrice:   product.ProductPricing.DiscountPrice,
-		}
-
-		// Konversi entitas ProductVariants ke DTO
-		var productVariants []dto.ProductVariantsResponse
-		if product.ProductVariants != nil {
-			for _, variant := range *product.ProductVariants {
-				productVariants = append(productVariants, dto.ProductVariantsResponse{
-					Stock: variant.Stock,
-					Size:  variant.Size,
-				})
+		summary, exists := ratingReviewMap[product.ID]
+		if !exists {
+			// If there are no reviews for the product, set default values
+			summary = entities.RatingSummary{
+				AverageRating: 0,
+				TotalReview:   0,
 			}
 		}
 
@@ -250,29 +275,44 @@ func (pu *productAdminUseCase) GetAllProduct(ctx echo.Context, page, limit int) 
 			})
 		}
 
-		// Konversi entitas ProductVideos ke DTO
-		var productVideos []dto.ProductVideosResponse
-		for _, video := range product.ProductVideos {
-			productVideos = append(productVideos, dto.ProductVideosResponse{
-				VideoUrl: video.VideoUrl,
-			})
-		}
-
-		productResponses = append(productResponses, dto.ProductResponse{
-			ID:              product.ID,
-			Name:            product.Name,
-			Description:     product.Description,
-			MinOrder:        product.MinOrder,
-			AuthorID:        product.AuthorID,
-			CategoryName:    categoryName,
-			ProductPricing:  productPricing,
-			ProductVariants: &productVariants,
-			ProductImages:   productImages,
-			ProductVideos:   productVideos,
+		productResponses = append(productResponses, dto.ProductResponseAdmin{
+			ID:            product.ID,
+			Name:          product.Name,
+			MinOrder:      product.MinOrder,
+			CategoryName:  categoryName,
+			Price:         product.ProductPricing.OriginalPrice,
+			ProductImages: productImages,
+			Rating:        summary.AverageRating,
 		})
 	}
 
-	return &productResponses, nil
+	totalPage := int(math.Ceil(float64(totalData) / float64(req.Limit)))
+	paginationMetadata := &dto_base.PaginationMetadata{
+		TotalData:   totalData,
+		TotalPage:   totalPage,
+		CurrentPage: req.Page,
+	}
+
+	if req.Page > totalPage {
+		return nil, nil, nil, err_util.ErrPageNotFound
+	}
+
+	if req.Page == 1 {
+		prev = ""
+	}
+
+	if req.Page == totalPage {
+		next = ""
+	} else {
+		next = baseURL + strconv.Itoa(req.Page+1)
+	}
+
+	link := &dto_base.Link{
+		Next: next,
+		Prev: prev,
+	}
+
+	return &productResponses, paginationMetadata, link, nil
 }
 
 func (pu *productAdminUseCase) UpdateProduct(c echo.Context, productID uuid.UUID, req *dto.ProductRequest) error {
@@ -355,18 +395,157 @@ func (pu *productAdminUseCase) DeleteProduct(c echo.Context, productID uuid.UUID
 	return nil
 }
 
-func (pu *productAdminUseCase) SearchProductByName(c echo.Context, name string, page, limit int) ([]*entities.Products, error) {
+func (pu *productAdminUseCase) SearchProductByName(c echo.Context, req *dto_base.SearchRequest) ([]dto.ProductResponseAdmin, *dto_base.MetadataResponse, error) {
 	ctx, cancel := context.WithCancel(c.Request().Context())
 	defer cancel()
 
-	if claims := pu.tokenUtil.GetClaims(c); claims == nil {
-		return nil, echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
-	}
-
-	products, err := pu.productAdminRepository.SearchProductByName(ctx, name, page, limit)
+	products, totalData, err := pu.productAdminRepository.SearchProductByName(ctx, req)
 	if err != nil {
-		return nil, echo.NewHTTPError(http.StatusInternalServerError, "Failed to search products")
+		return nil, nil, err
 	}
 
-	return products, nil
+	categories, err := pu.productAdminRepository.GetAllCategory(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	rating, err := pu.productRepository.GetAllAverageRatingsAndTotalReviews(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	ratingReviewMap := make(map[uuid.UUID]entities.RatingSummary)
+	for _, summary := range rating {
+		ratingReviewMap[summary.ProductID] = summary
+	}
+
+	categoryMap := make(map[int]string)
+	for _, category := range categories {
+		categoryMap[category.ID] = category.Name
+	}
+
+	var productResponses []dto.ProductResponseAdmin
+
+	for _, product := range products {
+		categoryName, ok := categoryMap[product.CategoryID]
+		if !ok {
+			categoryName = "Unknown" // Kategori tidak ditemukan, bisa disesuaikan dengan kebutuhan Anda
+		}
+		summary, exists := ratingReviewMap[product.ID]
+		if !exists {
+			// If there are no reviews for the product, set default values
+			summary = entities.RatingSummary{
+				AverageRating: 0,
+				TotalReview:   0,
+			}
+		}
+
+		// Konversi entitas ProductImages ke DTO
+		var productImages []dto.ProductImagesResponse
+		for _, image := range product.ProductImages {
+			productImages = append(productImages, dto.ProductImagesResponse{
+				ImageUrl: image.ImageUrl,
+			})
+		}
+
+		productResponses = append(productResponses, dto.ProductResponseAdmin{
+			ID:            product.ID,
+			Name:          product.Name,
+			MinOrder:      product.MinOrder,
+			CategoryName:  categoryName,
+			Price:         product.ProductPricing.OriginalPrice,
+			ProductImages: productImages,
+			Rating:        summary.AverageRating,
+		})
+	}
+
+	metadataResponse := &dto_base.MetadataResponse{
+		TotalData:   int(totalData),
+		TotalCount:  int(totalData),
+		NextOffset:  *req.Offset + req.Limit,
+		HasLoadMore: *req.Offset+req.Limit < int(totalData),
+	}
+
+	return productResponses, metadataResponse, nil
+}
+
+func (pu *productAdminUseCase) GetProductByID(c echo.Context, productID uuid.UUID) (*dto.ProductResponse, error) {
+	ctx, cancel := context.WithCancel(c.Request().Context())
+	defer cancel()
+
+	// Mengambil data produk berdasarkan ID
+	product, err := pu.productAdminRepository.GetProductByID(ctx, productID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Mengambil semua kategori produk
+	categories, err := pu.productAdminRepository.GetAllCategory(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Mengambil rating rata-rata produk
+	rating, err := pu.productRepository.GetAllAverageRatingsAndTotalReviews(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Membuat peta untuk memetakan rating rata-rata berdasarkan ID produk
+	ratingMap := make(map[uuid.UUID]entities.RatingSummary)
+	for _, summary := range rating {
+		ratingMap[summary.ProductID] = summary
+	}
+
+	// Membuat peta untuk memetakan kategori berdasarkan ID kategori
+	categoryMap := make(map[int]string)
+	for _, category := range categories {
+		categoryMap[category.ID] = category.Name
+	}
+
+	// Mengambil data foto produk
+	var photos []dto.ProductImagesResponse
+	for _, photo := range product.ProductImages {
+		photos = append(photos, dto.ProductImagesResponse{
+			ImageUrl: photo.ImageUrl,
+		})
+	}
+
+	// Mengambil data variant produk
+	var variants []dto.ProductVariantsResponse
+	for _, variant := range *product.ProductVariants {
+		variants = append(variants, dto.ProductVariantsResponse{
+			Stock: variant.Stock,
+			Size:  variant.Size,
+		})
+	}
+
+	// Mengambil data video produk
+	var videos []dto.ProductVideosResponse
+	for _, video := range product.ProductVideos {
+		videos = append(videos, dto.ProductVideosResponse{
+			VideoUrl: video.VideoUrl,
+		})
+	}
+
+	// Membuat respons produk akhir dengan menggabungkan semua informasi yang diperlukan
+	productResponse := dto.ProductResponse{
+		ID:           product.ID,
+		Name:         product.Name,
+		Description:  product.Description,
+		MinOrder:     product.MinOrder,
+		AuthorID:     product.AuthorID,
+		CategoryName: categoryMap[product.CategoryID],
+		ProductPricing: dto.ProductPricingResponse{
+			OriginalPrice:   product.ProductPricing.OriginalPrice,
+			DiscountPercent: product.ProductPricing.DiscountPercent,
+			DiscountPrice:   product.ProductPricing.DiscountPrice,
+		},
+		ProductVariants: variants,
+		ProductImages:   photos,
+		ProductVideos:   videos,
+		Rating:          ratingMap[product.ID].AverageRating,
+	}
+
+	return &productResponse, nil
 }

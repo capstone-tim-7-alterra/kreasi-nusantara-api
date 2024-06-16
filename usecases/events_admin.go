@@ -616,27 +616,6 @@ func (pu *eventAdminUseCase) GetTicketType(c echo.Context) ([]dto.EventTicketTyp
 	return response, nil
 }
 
-// func (pu *eventAdminUseCase) UpdateTicketType(c echo.Context, req *dto.EventTicketTypeRequest) error {
-// 	ctx, cancel := context.WithCancel(c.Request().Context())
-// 	defer cancel()
-
-// 	ticketTypeIDStr := c.Param("id")
-// 	ticketTypeID, err := strconv.Atoi(ticketTypeIDStr)
-// 	if err != nil {
-// 		return fmt.Errorf("invalid ticket type ID")
-// 	}
-
-// 	ticketType := entities.EventTicketType{
-// 		ID:   ticketTypeID,
-// 		Name: req.Name,
-// 	}
-
-// 	if err := pu.eventAdminRepository.UpdateTicketType(ctx, &ticketType); err != nil {
-// 		return err
-// 	}
-
-// 	return nil
-// }
 
 func (pu *eventAdminUseCase) DeleteTicketType(c echo.Context, ticketTypeID int) error {
 	ctx, cancel := context.WithCancel(c.Request().Context())

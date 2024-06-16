@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type ArticleRepository interface {
@@ -17,7 +18,7 @@ type ArticleRepository interface {
 
 	GetCommentsByArticleID(ctx context.Context, articleId uuid.UUID, req *dto_base.PaginationRequest) ([]entities.ArticleComments, int64, error)
 	AddCommentToArticle(ctx context.Context, comment *entities.ArticleComments) error
-	ReplyToComment(ctx context.Context, reply *entities.ArticleComments) error
+	ReplyToComment(ctx context.Context, reply *entities.ArticleCommentReplies) error
 	LikeArticle(ctx context.Context, userId uuid.UUID, articleId uuid.UUID) error
 	UnlikeArticle(ctx context.Context, userId uuid.UUID, articleId uuid.UUID) error
 }
@@ -58,7 +59,7 @@ func (ar *articleRepository) GetArticleByID(ctx context.Context, articleId uuid.
 
 	var article entities.Articles
 
-	err := ar.DB.WithContext(ctx).Preload("Comments").Where("id = ?", articleId).Find(&article).Error
+	err := ar.DB.WithContext(ctx).Preload(clause.Associations).Where("id = ?", articleId).Find(&article).Error
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +136,7 @@ func (ar *articleRepository) AddCommentToArticle(ctx context.Context, comment *e
 	return err
 }
 
-func (ar *articleRepository) ReplyToComment(ctx context.Context, reply *entities.ArticleComments) error {
+func (ar *articleRepository) ReplyToComment(ctx context.Context, reply *entities.ArticleCommentReplies) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}

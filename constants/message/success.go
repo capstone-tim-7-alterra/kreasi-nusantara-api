@@ -23,6 +23,7 @@ const (
 	ADMIN_DELETED_SUCCESS   = "admin deleted successfully!"
 	SUCCESS_FETCH_DATA      = "Successfully fetched data"
 	SUCCES_SEARCH_ADMIN     = "Successfully search admin"
+	GET_ADMIN_SUCCESS       = "admin retrieved successfully!"
 
 	//Products Admin
 	PRODUCT_CREATED_SUCCESS  = "product created successfully!"
@@ -48,6 +49,7 @@ const (
 	REPLY_COMMENT_SUCCESS  = "comment replied successfully!"
 	LIKE_ARTICLE_SUCCESS   = "article liked successfully!"
 	UNLIKE_ARTICLE_SUCCESS = "article unliked successfully!"
+	GET_ARTICLE_SUCCESS    = "article retrieved successfully!"
 
 	// Events
 	GET_EVENTS_SUCCESS = "events retrieved successfully!"
@@ -73,4 +75,10 @@ const (
 	GET_DETAIL_PRICES = "detail prices retrieved successfully!"
 	DELETE_PRICES = "prices deleted successfully!"
 	UPDATE_PRICES = "prices updated successfully!"
+
+	//Articles Admin
+	CREATE_ARTICLE_SUCCESS = "article created successfully!"
+	UPDATE_ARTICLE_SUCCESS = "article updated successfully!"
+	DELETE_ARTICLE_SUCCESS = "article deleted successfully!"
+
 )

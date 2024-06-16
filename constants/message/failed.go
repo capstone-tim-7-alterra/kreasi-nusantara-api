@@ -60,6 +60,7 @@ const (
 	MISSING_USERNAME_PARAMETER = "Missing username parameter"
 	FAILED_SEARCH_ADMIN        = "failed to search admin by username"
 	ADMIN_NOT_FOUND            = "admin not found"
+	FAILED_GET_ADMIN           = "failed to get admin!"
 
 	//Product Admin
 	FAILED_CREATE_CATEGORY        = "failed to create category"
@@ -102,6 +103,7 @@ const (
 	FAILED_REPLY_COMMENT  = "failed to reply comment!"
 	FAILED_LIKE_ARTICLE   = "failed to like article!"
 	FAILED_UNLIKE_ARTICLE = "failed to unlike article!"
+	FAILED_GET_ARTICLE    = "failed to get article!"
 
 	// Events
 	FAILED_GET_EVENTS = "failed to get events!"
@@ -116,13 +118,23 @@ const (
 	FAILED_SEARCH_EVENTS = "failed to search events by name"
 	EVENT_NOT_FOUND      = "event not found"
 
-	// Categories
-	FAILED_GET_CATEGORIES = "failed to get categories!"
+	// Articles
+	FAILED_CREATE_ARTICLE = "failed to create article!"
+	FAILED_UPDATE_ARTICLE = "failed to update article!"
+	FAILED_DELETE_ARTICLE = "failed to delete article!"
+	FAILED_SEARCH_ARTICLE = "failed to search article by name"
+	ARTICLE_NOT_FOUND     = "article not found!"
+	NOT_FOUND             = "not found"
 
-	FAILED_CREATE_TICKET_TYPE = "failed to create ticket type!"
-	FAILED_UPDATE_TICKET_TYPE = "failed to update ticket type!"
-	FAILED_DELETE_TICKET_TYPE = "failed to delete ticket type!"
-	FAILED_SEARCH_TICKET_TYPE = "failed to search ticket type by name"
-	TICKET_TYPE_NOT_FOUND     = "ticket type not found"
-	FAILED_GET_TICKET_TYPE    = "failed to get ticket type!"
+		// Categories
+		FAILED_GET_CATEGORIES = "failed to get categories!"
+
+		FAILED_CREATE_TICKET_TYPE = "failed to create ticket type!"
+		FAILED_UPDATE_TICKET_TYPE = "failed to update ticket type!"
+		FAILED_DELETE_TICKET_TYPE = "failed to delete ticket type!"
+		FAILED_SEARCH_TICKET_TYPE = "failed to search ticket type by name"
+		TICKET_TYPE_NOT_FOUND     = "ticket type not found"
+		FAILED_GET_TICKET_TYPE    = "failed to get ticket type!"
+	
+
 )
