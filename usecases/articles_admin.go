@@ -135,7 +135,7 @@ func (auc *articleUseCaseAdmin) SearchArticles(c echo.Context, req *dto_base.Sea
 	ctx, cancel := context.WithCancel(c.Request().Context())
 	defer cancel()
 
-	articles, totalData, err := auc.articleAdminRepository.SearchArticleAdmin(ctx, req)
+	articles, _, err := auc.articleAdminRepository.SearchArticleAdmin(ctx, req)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -145,6 +145,9 @@ func (auc *articleUseCaseAdmin) SearchArticles(c echo.Context, req *dto_base.Sea
 	sortBy := c.QueryParam("sort_by")
 
 	intPage, intLimit, err := auc.convertQueryParams(page, limit)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	pagination := &dto_base.PaginationRequest{
 		Limit:  intLimit,
@@ -279,6 +282,10 @@ func (auc *articleUseCaseAdmin) GetArticleByID(c echo.Context, articleId uuid.UU
 	sortBy := c.QueryParam("sort_by")
 
 	intPage, intLimit, err := auc.convertQueryParams(page, limit)
+
+	if err != nil {
+		return nil, err
+	}
 
 	pagination := &dto_base.PaginationRequest{
 		Limit:  intLimit,

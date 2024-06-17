@@ -16,7 +16,7 @@ type Events struct {
 	Date        time.Time
 	Photos      []EventPhotos `gorm:"foreignKey:EventID;references:ID"`
 	Description string        `gorm:"type:text;not null"`
-	Prices      []EventPrices `gorm:"foreignKey:EventID"references:ID"`
+	Prices      []EventPrices `gorm:"foreignKey:EventID;references:ID"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   gorm.DeletedAt `gorm:"index"`

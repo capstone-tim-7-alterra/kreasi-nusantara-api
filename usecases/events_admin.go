@@ -67,8 +67,8 @@ func (pu *eventAdminUseCase) GetEventsAdmin(c echo.Context, req *dto_base.Pagina
 	)
 
 	var (
-		next = ""
-		prev = ""
+		next = baseURL + strconv.Itoa(req.Page+1)
+		prev = baseURL + strconv.Itoa(req.Page-1)
 	)
 
 	if req.Page > 1 {
