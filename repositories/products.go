@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"context"
-	"errors"
 	dto_base "kreasi-nusantara-api/dto/base"
 	"kreasi-nusantara-api/entities"
 
@@ -22,7 +21,7 @@ type ProductRepository interface {
 	GetProductReview(ctx context.Context, productId uuid.UUID, req *dto_base.PaginationRequest) ([]entities.ProductReviews, int64, error)
 	GetAllAverageRatingsAndTotalReviews(ctx context.Context) ([]entities.RatingSummary, error)
 	GetAverageRatingAndTotalReview(ctx context.Context, productId uuid.UUID) (float64, int, error)
-	GetLatestReview(ctx context.Context, productId uuid.UUID) (*entities.ProductReviews, error)
+	GetLatestReviews(ctx context.Context, productId uuid.UUID) ([]*entities.ProductReviews, error)
 }
 
 type productRepository struct {
@@ -173,22 +172,19 @@ func (pr *productRepository) GetAverageRatingAndTotalReview(ctx context.Context,
 	return summary.AverageRating, summary.TotalReview, nil
 }
 
-func (pr *productRepository) GetLatestReview(ctx context.Context, productId uuid.UUID) (*entities.ProductReviews, error) {
-	var review entities.ProductReviews
+func (pr *productRepository) GetLatestReviews(ctx context.Context, productId uuid.UUID) ([]*entities.ProductReviews, error) {
+	var reviews []*entities.ProductReviews
 
 	result := pr.DB.WithContext(ctx).Model(&entities.ProductReviews{}).
 		Where("product_id = ?", productId).
 		Order("created_at DESC").
+		Limit(3).
 		Preload("User").
-		First(&review)
-
-	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, nil
-	}
+		Find(&reviews)
 
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
-	return &review, nil
+	return reviews, nil
 }
