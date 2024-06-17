@@ -40,6 +40,7 @@ type ProductVariants struct {
 	ProductID uuid.UUID `gorm:"type:uuid"`
 	Stock     int       `gorm:"type:int"`
 	Size      string    `gorm:"type:varchar(255)"`
+	CartItems *[]CartItems `gorm:"foreignKey:ProductVariantID"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
