@@ -20,12 +20,13 @@ import (
 
 func InitAdminRoute(g *echo.Group, db *gorm.DB, v *validation.Validator) {
 
-	adminRepo := repositories.NewAdminRepository(db)
+	
 	passwordUtil := password.NewPasswordUtil()
 	tokenUtil := token.NewTokenUtil()
 	cloudinaryInstance, _ := config.SetupCloudinary()
 	cloudinaryService := cloudinary.NewCloudinaryService(cloudinaryInstance)
 
+	adminRepo := repositories.NewAdminRepository(db)
 	adminUseCase := usecases.NewAdminUsecase(adminRepo, passwordUtil, cloudinaryService, tokenUtil)
 	adminController := controllers.NewAdminController(adminUseCase, v)
 
@@ -36,6 +37,7 @@ func InitAdminRoute(g *echo.Group, db *gorm.DB, v *validation.Validator) {
 	g.Use(echojwt.WithConfig(token.GetJWTConfig()), middlewares.IsSuperAdmin)
 
 	g.GET("/admin", adminController.GetAllAdmins)
+	g.GET("/admin/:id", adminController.GetAdminByID)
 	g.DELETE("/admin/:id", adminController.DeleteAdmin)
 	g.PUT("/admin/:id", adminController.UpdateAdmin)
 	g.GET("/admin/search", adminController.SearchAdminByUsername)

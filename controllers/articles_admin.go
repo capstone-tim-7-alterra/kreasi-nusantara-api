@@ -6,8 +6,8 @@ import (
 	"kreasi-nusantara-api/dto"
 	dto_base "kreasi-nusantara-api/dto/base"
 	"kreasi-nusantara-api/usecases"
-	http_util "kreasi-nusantara-api/utils/http"
 	err_util "kreasi-nusantara-api/utils/error"
+	http_util "kreasi-nusantara-api/utils/http"
 	"kreasi-nusantara-api/utils/validation"
 	"net/http"
 	"strconv"
@@ -31,7 +31,11 @@ func NewArticlesAdminController(articleUseCaseAdmin usecases.ArticleUseCaseAdmin
 	}
 }
 
+
+
 func (ac *ArticlesAdminController) GetArticles(c echo.Context) error {
+
+
 	page := strings.TrimSpace(c.QueryParam("page"))
 	limit := strings.TrimSpace(c.QueryParam("limit"))
 	sortBy := c.QueryParam("sort_by")
@@ -56,10 +60,13 @@ func (ac *ArticlesAdminController) GetArticles(c echo.Context) error {
 		return http_util.HandleErrorResponse(c, http.StatusInternalServerError, msg.FAILED_GET_ARTICLES)
 	}
 
+
 	return http_util.HandlePaginationResponse(c, msg.GET_ARTICLES_SUCCESS, result, meta, link)
 }
 
 func (ac *ArticlesAdminController) SearchArticles(c echo.Context) error {
+
+
 	item := strings.TrimSpace(c.QueryParam("item"))
 	limit := strings.TrimSpace(c.QueryParam("limit"))
 	offset := strings.TrimSpace(c.QueryParam("offset"))
@@ -195,7 +202,6 @@ func (ac *ArticlesAdminController) UpdateArticlesAdmin(c echo.Context) error {
 		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.INVALID_REQUEST_DATA)
 	}
 
-
 	var request dto.ArticleRequest
 	request.Title = form.Value["title"][0]
 	if request.Title == "" {
@@ -274,4 +280,26 @@ func (ac *ArticlesAdminController) DeleteArticlesAdmin(c echo.Context) error {
 	}
 
 	return http_util.HandleSuccessResponse(c, http.StatusOK, msg.DELETE_ARTICLE_SUCCESS, nil)
+}
+
+func (ac *ArticlesAdminController) GetArticleByID(c echo.Context) error {
+	articleIDStr := c.Param("id")
+	if articleIDStr == "" {
+		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.INVALID_REQUEST_DATA)
+	}
+
+	articleID, err := uuid.Parse(articleIDStr)
+	if err != nil {
+		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.INVALID_REQUEST_DATA)
+	}
+
+	article, err := ac.articleUseCaseAdmin.GetArticleByID(c, articleID)
+	if err != nil {
+		if err == err_util.ErrNotFound {
+			return http_util.HandleErrorResponse(c, http.StatusNotFound, msg.ARTICLE_NOT_FOUND)
+		}
+		return http_util.HandleErrorResponse(c, http.StatusInternalServerError, msg.FAILED_GET_ARTICLE)
+	}
+
+	return http_util.HandleSuccessResponse(c, http.StatusOK, msg.GET_ARTICLE_SUCCESS, article)
 }
