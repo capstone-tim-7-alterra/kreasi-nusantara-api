@@ -116,68 +116,71 @@ func (puc *productUseCase) GetProducts(c echo.Context, req *dto_base.PaginationR
 }
 
 func (puc *productUseCase) GetProductByID(c echo.Context, productId uuid.UUID) (*dto.ProductDetailResponse, error) {
-	ctx, cancel := context.WithCancel(c.Request().Context())
-	defer cancel()
+    ctx, cancel := context.WithCancel(c.Request().Context())
+    defer cancel()
 
-	product, err := puc.productRepository.GetProductByID(ctx, productId)
-	if err != nil {
-		return nil, err
-	}
+    product, err := puc.productRepository.GetProductByID(ctx, productId)
+    if err != nil {
+        return nil, err
+    }
 
-	averageRating, totalReview, err := puc.productRepository.GetAverageRatingAndTotalReview(ctx, productId)
-	if err != nil {
-		return nil, err
-	}
+    averageRating, totalReview, err := puc.productRepository.GetAverageRatingAndTotalReview(ctx, productId)
+    if err != nil {
+        return nil, err
+    }
 
-	latestReview, err := puc.productRepository.GetLatestReview(ctx, productId)
-	if err != nil {
-		return nil, err
-	}
+    latestReviews, err := puc.productRepository.GetLatestReviews(ctx, productId)
+    if err != nil {
+        return nil, err
+    }
 
-	var latestReviewResponse *dto.ProductReviewResponse
-	if latestReview != nil {
-		latestReviewResponse = &dto.ProductReviewResponse{
-			User: dto.UserReview{
-				ImageURL: *latestReview.User.Photo,
-				Username: latestReview.User.Username,
-			},
-			Rating:    latestReview.Rating,
-			Review:    latestReview.Review,
-			CreatedAt: latestReview.CreatedAt,
-		}
-	}
+    var latestReviewResponses []*dto.ProductReviewResponse
+    for _, review := range latestReviews {
+        if review != nil {
+            latestReviewResponses = append(latestReviewResponses, &dto.ProductReviewResponse{
+                User: dto.UserReview{
+                    ImageURL: review.User.Photo,
+                    Username: review.User.Username,
+                },
+                Rating:    review.Rating,
+                Review:    review.Review,
+                CreatedAt: review.CreatedAt,
+            })
+        }
+    }
 
-	productDetailResponse := &dto.ProductDetailResponse{
-		ID:              product.ID,
-		Name:            product.Name,
-		Description:     product.Description,
-		Images:          make([]string, len(product.ProductImages)),
-		Videos:          make([]string, len(product.ProductVideos)),
-		OriginalPrice:   product.ProductPricing.OriginalPrice,
-		DiscountPercent: product.ProductPricing.DiscountPercent,
-		DiscountPrice:   product.ProductPricing.DiscountPrice,
-		AverageRating:   averageRating,
-		TotalReview:     totalReview,
-		LatestReview:    latestReviewResponse,
-		Variants:        make([]dto.ProductVariantResponse, len(*product.ProductVariants)),
-	}
+    productDetailResponse := &dto.ProductDetailResponse{
+        ID:              product.ID,
+        Name:            product.Name,
+        Description:     product.Description,
+        Images:          make([]string, len(product.ProductImages)),
+        Videos:          make([]string, len(product.ProductVideos)),
+        OriginalPrice:   product.ProductPricing.OriginalPrice,
+        DiscountPercent: product.ProductPricing.DiscountPercent,
+        DiscountPrice:   product.ProductPricing.DiscountPrice,
+        AverageRating:   averageRating,
+        TotalReview:     totalReview,
+        LatestReview:   latestReviewResponses,
+        Variants:        make([]dto.ProductVariantResponse, len(*product.ProductVariants)),
+    }
 
-	for i, img := range product.ProductImages {
-		productDetailResponse.Images[i] = *img.ImageUrl
-	}
-	for i, vid := range product.ProductVideos {
-		productDetailResponse.Videos[i] = *vid.VideoUrl
-	}
+    for i, img := range product.ProductImages {
+        productDetailResponse.Images[i] = *img.ImageUrl
+    }
+    for i, vid := range product.ProductVideos {
+        productDetailResponse.Videos[i] = *vid.VideoUrl
+    }
 
-	for i, variant := range *product.ProductVariants {
+    for i, variant := range *product.ProductVariants {
         productDetailResponse.Variants[i] = dto.ProductVariantResponse{
             Size:  variant.Size,
             Stock: variant.Stock,
         }
     }
 
-	return productDetailResponse, nil
+    return productDetailResponse, nil
 }
+
 
 func (puc *productUseCase) GetProductsByCategory(c echo.Context, categoryId int, req *dto_base.PaginationRequest) ([]dto.ProductResponse, *dto_base.PaginationMetadata, *dto_base.Link, error) {
     ctx, cancel := context.WithCancel(c.Request().Context())
@@ -341,7 +344,7 @@ func (puc *productUseCase) GetProductReviews(c echo.Context, productId uuid.UUID
 	for i, review := range reviews {
 		productReviewResponse[i] = dto.ProductReviewResponse{
 			User: dto.UserReview{
-				ImageURL: *review.User.Photo,
+				ImageURL: review.User.Photo,
 				Username: review.User.Username,
 			},
 			Rating:    review.Rating,
