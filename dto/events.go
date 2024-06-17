@@ -5,14 +5,29 @@ import (
 )
 
 type EventResponse struct {
-	ID   uuid.UUID `json:"id"`
-	Name string    `json:"name"`
+	ID       uuid.UUID           `json:"id"`
+	Name     string              `json:"name"`
+	Image    string              `json:"image"`
+	Category string              `json:"category"`
+	Location EventLocationDetail `json:"location"`
+	Date     string              `json:"date"`
+	MinPrice int                 `json:"min_price"`
 }
 
 type EventDetailResponse struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
+	ID          uuid.UUID             `json:"id"`
+	Name        string                `json:"name"`
+	Description string                `json:"description"`
+	Images      []string              `json:"images"`
+	Location    EventLocationDetail   `json:"location"`
+	Date        string                `json:"date"`
+	Ticket      []EventPricesResponse `json:"ticket"`
+}
+
+type EventLocationDetail struct {
+	Building    string `json:"building"`
+	Subdistrict string `json:"subdistrict"`
+	City        string `json:"city"`
 }
 
 type EventRequest struct {
@@ -111,7 +126,6 @@ type EventCategoriesResponse struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
 }
-
 
 type Province struct {
 	ID   string `json:"id"`

@@ -22,4 +22,5 @@ func InitEventsRoute(g *echo.Group, db *gorm.DB, v *validation.Validator) {
 	g.GET("/events/:event_id", eventController.GetEventByID)
 	g.GET("/events/category/:category_id", eventController.GetEventsByCategory)
 	g.GET("/events/search", eventController.SearchEvents)
+	g.GET("/events/upcoming", eventController.GetUpcomingEvents)
 }

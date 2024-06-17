@@ -20,6 +20,8 @@ type Events struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
+	Category    EventCategories
+	Location    EventLocations
 }
 
 type EventCategories struct {
@@ -47,7 +49,7 @@ type EventLocations struct {
 type EventPhotos struct {
 	ID        uuid.UUID `gorm:"primaryKey;type:uuid"`
 	EventID   uuid.UUID `gorm:"type:uuid;not null"`
-	Image     string    `gorm:"type:varchar(255);not null"`
+	Image     *string    `gorm:"type:varchar(255);not null"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -55,7 +57,7 @@ type EventPhotos struct {
 type EventPrices struct {
 	ID           uuid.UUID       `gorm:"primaryKey;type:uuid"`
 	EventID      uuid.UUID       `gorm:"type:uuid;not null"`
-	TicketTypeID int             `gorm:"type:int;not null"` // Ini adalah kunci asing ke EventTicketType
+	TicketTypeID int             `gorm:"type:int;not null"`
 	Price        int             `gorm:"type:int;not null"`
 	NoOfTicket   int             `gorm:"type:int;not null"`
 	TicketType   EventTicketType `gorm:"foreignKey:TicketTypeID"`

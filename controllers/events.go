@@ -104,6 +104,16 @@ func (ec *eventController) GetEventsByCategory(c echo.Context) error {
 	return http_util.HandlePaginationResponse(c, msg.GET_EVENTS_SUCCESS, result, meta, link)
 }
 
+func (ec *eventController) GetUpcomingEvents(c echo.Context) error {
+	result, err := ec.eventUseCase.GetUpcomingEvents(c)
+
+	if err != nil {
+		return http_util.HandleErrorResponse(c, http.StatusInternalServerError, msg.FAILED_GET_EVENTS)
+	}
+
+	return http_util.HandleSuccessResponse(c, http.StatusOK, msg.GET_EVENTS_SUCCESS, result)
+}
+
 func (ec *eventController) SearchEvents(c echo.Context) error {
 	item := strings.TrimSpace(c.QueryParam("item"))
 	limit := strings.TrimSpace(c.QueryParam("limit"))
