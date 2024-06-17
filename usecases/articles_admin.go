@@ -96,6 +96,7 @@ func (auc *articleUseCaseAdmin) GetArticles(c echo.Context, req *dto_base.Pagina
 
 		articleResponse[i] = dto.ArticleAdminResponse{
 			ID:        article.ID,
+			Tags:      article.Tags,
 			Title:     article.Title,
 			Author:    authorName,
 			Image:     article.Image,
@@ -315,6 +316,7 @@ func (auc *articleUseCaseAdmin) GetArticleByID(c echo.Context, articleId uuid.UU
 	// Membuat respons artikel
 	articleResponse := dto.ArticleAdminResponse{
 		ID:        article.ID,
+		Tags:      article.Tags,
 		Title:     article.Title,
 		Author:    authorName,
 		Image:     article.Image,
