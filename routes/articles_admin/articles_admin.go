@@ -2,9 +2,9 @@ package articles_admin
 
 import (
 	"kreasi-nusantara-api/config"
+	"kreasi-nusantara-api/controllers"
 	"kreasi-nusantara-api/drivers/cloudinary"
 	"kreasi-nusantara-api/middlewares"
-	"kreasi-nusantara-api/controllers"
 	"kreasi-nusantara-api/repositories"
 	"kreasi-nusantara-api/usecases"
 	"kreasi-nusantara-api/utils/token"
@@ -22,9 +22,8 @@ func InitArticleAdminRoute(g *echo.Group, db *gorm.DB, v *validation.Validator) 
 	tokenUtil := token.NewTokenUtil()
 	adminRepo := repositories.NewAdminRepository(db)
 
-
 	articleAdminRepo := repositories.NewArticleAdminRepository(db)
-	articleAdminUsecase := usecases.NewArticleUseCaseAdmin(articleAdminRepo, tokenUtil, adminRepo )
+	articleAdminUsecase := usecases.NewArticleUseCaseAdmin(articleAdminRepo, tokenUtil, adminRepo)
 	articleAdminController := controllers.NewArticlesAdminController(articleAdminUsecase, v, cloudinaryService)
 
 	g.Use(echojwt.WithConfig(token.GetJWTConfig()), middlewares.IsAdminOrSuperAdmin)
@@ -33,4 +32,5 @@ func InitArticleAdminRoute(g *echo.Group, db *gorm.DB, v *validation.Validator) 
 	g.DELETE("/articles/:id", articleAdminController.DeleteArticlesAdmin)
 	g.PUT("/articles/:id", articleAdminController.UpdateArticlesAdmin)
 	g.GET("/articles/search", articleAdminController.SearchArticles)
+	g.GET("/articles/:id", articleAdminController.GetArticleByID)
 }

@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"kreasi-nusantara-api/dto"
 	dto_base "kreasi-nusantara-api/dto/base"
@@ -12,6 +13,7 @@ import (
 	"math"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,11 +21,13 @@ import (
 )
 
 type ArticleUseCaseAdmin interface {
-	GetArticles(c echo.Context, req *dto_base.PaginationRequest) ([]dto.ArticleAdminResponse, *dto_base.PaginationMetadata, *dto_base.Link, error)
+	GetArticles(c echo.Context, req *dto_base.PaginationRequest) (*[]dto.ArticleAdminResponse, *dto_base.PaginationMetadata, *dto_base.Link, error)
 	SearchArticles(c echo.Context, req *dto_base.SearchRequest) ([]dto.ArticleAdminResponse, *dto_base.MetadataResponse, error)
 	CreateArticles(c echo.Context, req *dto.ArticleRequest) error
 	UpdateArticles(c echo.Context, articleId uuid.UUID, req *dto.ArticleRequest) error
 	DeleteArticles(c echo.Context, articleId uuid.UUID) error
+	GetArticleByID(c echo.Context, articleId uuid.UUID) (*dto.ArticleAdminResponse, error)
+	convertQueryParams(page, limit string) (int, int, error)
 }
 
 type articleUseCaseAdmin struct {
@@ -40,7 +44,9 @@ func NewArticleUseCaseAdmin(articleAdminRepository repositories.ArticleAdminRepo
 	}
 }
 
-func (auc *articleUseCaseAdmin) GetArticles(c echo.Context, req *dto_base.PaginationRequest) ([]dto.ArticleAdminResponse, *dto_base.PaginationMetadata, *dto_base.Link, error) {
+func (auc *articleUseCaseAdmin) GetArticles(c echo.Context, req *dto_base.PaginationRequest) (*[]dto.ArticleAdminResponse, *dto_base.PaginationMetadata, *dto_base.Link, error) {
+
+
 	ctx, cancel := context.WithCancel(c.Request().Context())
 	defer cancel()
 
@@ -55,12 +61,21 @@ func (auc *articleUseCaseAdmin) GetArticles(c echo.Context, req *dto_base.Pagina
 		prev = baseURL + strconv.Itoa(req.Page-1)
 	)
 
+	if auc.adminRepo == nil {
+		return nil, nil, nil, errors.New("adminRepo is nil")
+	}
+
 	articles, totalData, err := auc.articleAdminRepository.GetArticlesAdmin(ctx, req)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	author, err := auc.adminRepo.GetAllAdmin(c.Request().Context())
+	if articles == nil {
+		return nil, nil, nil, errors.New("articles is nil")
+	}
+
+
+	author, _, err := auc.adminRepo.GetAllAdmin(ctx, req)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -70,20 +85,21 @@ func (auc *articleUseCaseAdmin) GetArticles(c echo.Context, req *dto_base.Pagina
 		authorMap[a.ID] = a.FirstName + " " + a.LastName
 	}
 
-
-
 	articleResponse := make([]dto.ArticleAdminResponse, len(articles))
 	for i, article := range articles {
 		authorName, ok := authorMap[article.AuthorID]
 		if !ok {
 			authorName = ""
 		}
+
+		createdAtStr := article.CreatedAt.Format("Jan 2, 2006")
+
 		articleResponse[i] = dto.ArticleAdminResponse{
 			ID:        article.ID,
 			Title:     article.Title,
 			Author:    authorName,
 			Image:     article.Image,
-			CreatedAt: article.CreatedAt,
+			CreatedAt: createdAtStr,
 		}
 	}
 
@@ -111,19 +127,35 @@ func (auc *articleUseCaseAdmin) GetArticles(c echo.Context, req *dto_base.Pagina
 		Prev: prev,
 	}
 
-	return articleResponse, paginationMetadata, link, nil
+
+	return &articleResponse, paginationMetadata, link, nil
 }
 
 func (auc *articleUseCaseAdmin) SearchArticles(c echo.Context, req *dto_base.SearchRequest) ([]dto.ArticleAdminResponse, *dto_base.MetadataResponse, error) {
 	ctx, cancel := context.WithCancel(c.Request().Context())
 	defer cancel()
 
-	articles, totalData, err := auc.articleAdminRepository.SearchArticleAdmin(ctx, req)
+	articles, _, err := auc.articleAdminRepository.SearchArticleAdmin(ctx, req)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	author, err := auc.adminRepo.GetAllAdmin(c.Request().Context())
+	page := strings.TrimSpace(c.QueryParam("page"))
+	limit := strings.TrimSpace(c.QueryParam("limit"))
+	sortBy := c.QueryParam("sort_by")
+
+	intPage, intLimit, err := auc.convertQueryParams(page, limit)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	pagination := &dto_base.PaginationRequest{
+		Limit:  intLimit,
+		Page:   intPage,
+		SortBy: sortBy,
+	}
+
+	author, totalData, err := auc.adminRepo.GetAllAdmin(ctx, pagination)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -133,19 +165,19 @@ func (auc *articleUseCaseAdmin) SearchArticles(c echo.Context, req *dto_base.Sea
 		authorMap[a.ID] = a.FirstName + " " + a.LastName
 	}
 
-
 	articleResponse := make([]dto.ArticleAdminResponse, len(articles))
 	for i, article := range articles {
 		authorName, ok := authorMap[article.AuthorID]
 		if !ok {
 			authorName = ""
 		}
+		CreatedAtStr := article.CreatedAt.Format("Jan 2, 2006")
 		articleResponse[i] = dto.ArticleAdminResponse{
 			ID:        article.ID,
 			Title:     article.Title,
 			Author:    authorName,
 			Image:     article.Image,
-			CreatedAt: article.CreatedAt,
+			CreatedAt: CreatedAtStr,
 		}
 	}
 
@@ -174,13 +206,15 @@ func (auc *articleUseCaseAdmin) CreateArticles(c echo.Context, req *dto.ArticleR
 	}
 
 	article := &entities.Articles{
-		ID:        uuid.New(),
-		Title:     req.Title,
-		Content:   req.Content,
-		Tags:      req.Tags,
-		Image:     req.Image,
-		CreatedAt: time.Now(),
-		AuthorID:  claims.ID,
+		ID:            uuid.New(),
+		Title:         req.Title,
+		Content:       req.Content,
+		Tags:          req.Tags,
+		Image:         req.Image,
+		CreatedAt:     time.Now(),
+		AuthorID:      claims.ID,
+		LikesCount:    0,
+		CommentsCount: 0,
 	}
 
 	err := auc.articleAdminRepository.CreateArticleAdmin(ctx, article)
@@ -232,4 +266,87 @@ func (auc *articleUseCaseAdmin) DeleteArticles(c echo.Context, articleId uuid.UU
 	}
 
 	return nil
+}
+
+func (auc *articleUseCaseAdmin) GetArticleByID(c echo.Context, articleId uuid.UUID) (*dto.ArticleAdminResponse, error) {
+	ctx := c.Request().Context()
+
+	// Mengambil artikel berdasarkan ID
+	article, err := auc.articleAdminRepository.GetArticleByIDAdmin(ctx, articleId)
+	if err != nil {
+		return nil, err
+	}
+
+	page := strings.TrimSpace(c.QueryParam("page"))
+	limit := strings.TrimSpace(c.QueryParam("limit"))
+	sortBy := c.QueryParam("sort_by")
+
+	intPage, intLimit, err := auc.convertQueryParams(page, limit)
+
+	if err != nil {
+		return nil, err
+	}
+
+	pagination := &dto_base.PaginationRequest{
+		Limit:  intLimit,
+		Page:   intPage,
+		SortBy: sortBy,
+	}
+
+	// Mengambil semua admin
+	authors, _, err := auc.adminRepo.GetAllAdmin(ctx, pagination)
+	if err != nil {
+		return nil, err
+	}
+
+	// Membuat peta untuk memetakan ID penulis ke nama penulis
+	authorMap := make(map[uuid.UUID]string)
+	for _, a := range authors {
+		authorMap[a.ID] = a.FirstName + " " + a.LastName
+	}
+
+	// Mendapatkan nama penulis dari peta
+	authorName, ok := authorMap[article.AuthorID]
+	if !ok {
+		authorName = ""
+	}
+
+	CreatedAtStr := article.CreatedAt.Format("Jan 2, 2006")
+	// Membuat respons artikel
+	articleResponse := dto.ArticleAdminResponse{
+		ID:        article.ID,
+		Title:     article.Title,
+		Author:    authorName,
+		Image:     article.Image,
+		CreatedAt: CreatedAtStr,
+	}
+
+	return &articleResponse, nil
+}
+
+func (auc *articleUseCaseAdmin) convertQueryParams(page, limit string) (int, int, error) {
+	if page == "" {
+		page = "1"
+	}
+
+	if limit == "" {
+		limit = "10"
+	}
+
+	var (
+		intPage, intLimit int
+		err               error
+	)
+
+	intPage, err = strconv.Atoi(page)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	intLimit, err = strconv.Atoi(limit)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	return intPage, intLimit, nil
 }

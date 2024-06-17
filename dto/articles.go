@@ -18,7 +18,7 @@ type ArticleAdminResponse struct {
 	Title     string    `json:"title"`
 	Author    string    `json:"author"`
 	Image     string    `json:"image"`
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt string `json:"created_at"`
 }
 
 type ArticleDetailResponse struct {
@@ -30,6 +30,8 @@ type ArticleDetailResponse struct {
 	CreatedAt     time.Time         `json:"created_at"`
 	Author        AuthorInformation `json:"author"`
 }
+
+
 
 type ArticleCommentResponse struct {
 	ID        uuid.UUID `json:"id"`
