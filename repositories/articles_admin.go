@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type ArticleAdminRepository interface {
@@ -37,12 +38,15 @@ func (ar *articleAdminRepository) GetArticlesAdmin(ctx context.Context, req *dto
 	var totalData int64
 
 	offset := (req.Page - 1) * req.Limit
-
-	query := ar.DB.WithContext(ctx).Model(&entities.Articles{}).Order(req.SortBy).Count(&totalData).Limit(req.Limit).Offset(offset)
-
-	err := query.Find(&articles).Error
-	if err != nil {
+	// Menghitung total data
+	if err := ar.DB.WithContext(ctx).Model(&entities.Articles{}).Count(&totalData).Error; err != nil {
 		return nil, 0, err
+	}
+
+	query := ar.DB.WithContext(ctx).Model(&entities.Articles{}).Order(req.SortBy).Count(&totalData).Limit(req.Limit).Offset(offset).Find(&articles)
+
+	if query.Error != nil {
+		return nil, 0, query.Error
 	}
 
 	return articles, totalData, nil
@@ -55,7 +59,7 @@ func (ar *articleAdminRepository) GetArticleByIDAdmin(ctx context.Context, artic
 
 	var article entities.Articles
 
-	err := ar.DB.WithContext(ctx).Preload("Comments").Where("id = ?", articleID).Find(&article).Error
+	err := ar.DB.WithContext(ctx).Preload(clause.Associations).Where("id = ?", articleID).Find(&article).Error
 	if err != nil {
 		return nil, err
 	}

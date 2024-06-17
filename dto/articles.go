@@ -15,10 +15,11 @@ type ArticleResponse struct {
 
 type ArticleAdminResponse struct {
 	ID        uuid.UUID `json:"id"`
+	Tags      string    `json:"tags"`
 	Title     string    `json:"title"`
 	Author    string    `json:"author"`
 	Image     string    `json:"image"`
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt string    `json:"created_at"`
 }
 
 type ArticleDetailResponse struct {

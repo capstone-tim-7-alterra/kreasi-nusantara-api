@@ -7,8 +7,10 @@ import (
 	"kreasi-nusantara-api/utils/validation"
 	"net/http"
 	"strconv"
+	"strings"
 
 	msg "kreasi-nusantara-api/constants/message"
+	dto_base "kreasi-nusantara-api/dto/base"
 	dto "kreasi-nusantara-api/dto/products_admin"
 
 	// "github.com/google/uuid"
@@ -144,7 +146,7 @@ func (c *ProductsAdminController) CreateProduct(ctx echo.Context) error {
 		variants := dto.ProductVariantsRequest{
 			Size: form.Value["product_variants.size"][i],
 		}
-		
+
 		stock, err := strconv.Atoi(form.Value["product_variants.stock"][i])
 		if err != nil {
 
@@ -218,202 +220,256 @@ func (c *ProductsAdminController) CreateProduct(ctx echo.Context) error {
 	return http_util.HandleSuccessResponse(ctx, http.StatusCreated, msg.PRODUCT_CREATED_SUCCESS, nil)
 }
 
-func (c *ProductsAdminController) GetAllProducts(ctx echo.Context) error {
-	page, err := strconv.Atoi(ctx.QueryParam("page"))
-	if err != nil || page <= 0 {
-		page = 1 // Set nilai default page ke 1 jika tidak valid atau tidak ada
+func (pc *ProductsAdminController) GetAllProducts(c echo.Context) error {
+	page := strings.TrimSpace(c.QueryParam("page"))
+	limit := strings.TrimSpace(c.QueryParam("limit"))
+	sortBy := c.QueryParam("sort_by")
+
+	intPage, intLimit, err := pc.convertQueryParams(page, limit)
+	if err != nil {
+		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.MISMATCH_DATA_TYPE)
 	}
 
-	limit, err := strconv.Atoi(ctx.QueryParam("limit"))
-	if err != nil || limit <= 0 {
-		limit = 0 // Set limit ke 0 untuk mengambil semua data jika tidak valid atau tidak ada
+	req := &dto_base.PaginationRequest{
+		Page:   intPage,
+		Limit:  intLimit,
+		SortBy: sortBy,
 	}
 
-	var products *[]dto.ProductResponse
-	if page > 0 && limit > 0 {
-		products, err = c.productAdminUseCase.GetAllProduct(ctx, page, limit)
-		if err != nil {
-			return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, msg.FAILED_FETCH_DATA)
-		}
-	} else {
-		// Jika page atau limit tidak valid, set limit ke 0 untuk mengambil semua data
-		products, err = c.productAdminUseCase.GetAllProduct(ctx, 0, 0)
-		if err != nil {
-			return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, msg.FAILED_FETCH_DATA)
-		}
+	if err := pc.validator.Validate(req); err != nil {
+		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.INVALID_REQUEST_DATA)
 	}
 
-	return http_util.HandleSuccessResponse(ctx, http.StatusOK, msg.SUCCESS_FETCH_DATA, products)
+	result, meta, link, err := pc.productAdminUseCase.GetAllProduct(c, req)
+	if err != nil {
+		return http_util.HandleErrorResponse(c, http.StatusInternalServerError, msg.FAILED_GET_EVENTS)
+	}
+
+	return http_util.HandlePaginationResponse(c, msg.GET_EVENTS_SUCCESS, result, meta, link)
+
 }
 
 func (c *ProductsAdminController) UpdateProduct(ctx echo.Context) error {
-    var logger = logrus.New()
-    productIDStr := ctx.Param("id")
-    if productIDStr == "" {
-        return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Missing product ID")
-    }
+	var logger = logrus.New()
+	productIDStr := ctx.Param("id")
+	if productIDStr == "" {
+		return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Missing product ID")
+	}
 
-    productID, err := uuid.Parse(productIDStr)
-    if err != nil {
-        return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Invalid product ID format")
-    }
+	productID, err := uuid.Parse(productIDStr)
+	if err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Invalid product ID format")
+	}
 
-    form, err := ctx.MultipartForm()
-    if err != nil {
-        return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, msg.MISMATCH_DATA_TYPE)
-    }
+	form, err := ctx.MultipartForm()
+	if err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, msg.MISMATCH_DATA_TYPE)
+	}
 
+	var request dto.ProductRequest
 
-    var request dto.ProductRequest
+	request.Name = form.Value["name"][0]
+	if request.Name == "" {
+		return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Invalid name")
+	}
+	request.Description = form.Value["description"][0]
+	if request.Description == "" {
+		return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Invalid description")
+	}
+	minOrder, err := strconv.Atoi(form.Value["min_order"][0])
+	if err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Invalid min_order")
+	}
+	request.MinOrder = minOrder
+	categoryID, err := strconv.Atoi(form.Value["category_id"][0])
+	if err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Invalid category_id")
+	}
+	request.CategoryID = categoryID
 
-    request.Name = form.Value["name"][0]
-    if request.Name == "" {
-        return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Invalid name")
-    }
-    request.Description = form.Value["description"][0]
-    if request.Description == "" {
-        return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Invalid description")
-    }
-    minOrder, err := strconv.Atoi(form.Value["min_order"][0])
-    if err != nil {
-        return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Invalid min_order")
-    }
-    request.MinOrder = minOrder
-    categoryID, err := strconv.Atoi(form.Value["category_id"][0])
-    if err != nil {
-        return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Invalid category_id")
-    }
-    request.CategoryID = categoryID
+	originalPrice, err := strconv.Atoi(form.Value["original_price"][0])
+	if err != nil {
+		logger.Error("Failed to get original_price", err)
+		return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Invalid original_price")
+	}
+	discountPercent, err := strconv.Atoi(form.Value["discount_percent"][0])
+	if err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Invalid discount_percent")
+	}
+	request.ProductPricing = dto.ProductPricingRequest{
+		OriginalPrice:   originalPrice,
+		DiscountPercent: &discountPercent,
+	}
 
-    originalPrice, err := strconv.Atoi(form.Value["original_price"][0])
-    if err != nil {
-        logger.Error("Failed to get original_price", err)
-        return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Invalid original_price")
-    }
-    discountPercent, err := strconv.Atoi(form.Value["discount_percent"][0])
-    if err != nil {
-        return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Invalid discount_percent")
-    }
-    request.ProductPricing = dto.ProductPricingRequest{
-        OriginalPrice:   originalPrice,
-        DiscountPercent: &discountPercent,
-    }
+	// Process product variants
+	request.ProductVariants = &[]dto.ProductVariantsRequest{} // Initialize the slice
+	for i := 0; i < len(form.Value["product_variants.size"]); i++ {
+		variants := dto.ProductVariantsRequest{
+			Size: form.Value["product_variants.size"][i],
+		}
 
-    // Process product variants
-    request.ProductVariants = &[]dto.ProductVariantsRequest{} // Initialize the slice
-    for i := 0; i < len(form.Value["product_variants.size"]); i++ {
-        variants := dto.ProductVariantsRequest{
-            Size: form.Value["product_variants.size"][i],
-        }
+		stock, err := strconv.Atoi(form.Value["product_variants.stock"][i])
+		if err != nil {
+			return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Invalid product_variants.stock")
+		}
+		variants.Stock = stock
 
-        stock, err := strconv.Atoi(form.Value["product_variants.stock"][i])
-        if err != nil {
-            return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Invalid product_variants.stock")
-        }
-        variants.Stock = stock
+		*request.ProductVariants = append(*request.ProductVariants, variants)
+	}
 
-        *request.ProductVariants = append(*request.ProductVariants, variants)
-    }
+	// Process images
+	files := form.File["product_images.image_url"]
+	for _, file := range files {
+		src, err := file.Open()
+		if err != nil {
+			return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Failed to open image file")
+		}
 
-    // Process images
-    files := form.File["product_images.image_url"]
-    for _, file := range files {
-        src, err := file.Open()
-        if err != nil {
-            return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Failed to open image file")
-        }
+		defer src.Close()
 
-        defer src.Close()
+		secureURL, err := c.cloudinaryService.UploadImage(ctx.Request().Context(), src, "kreasinusantara/products/images")
+		if err != nil {
+			return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, msg.FAILED_UPLOAD_IMAGE)
+		}
 
-        secureURL, err := c.cloudinaryService.UploadImage(ctx.Request().Context(), src, "kreasinusantara/products/images")
-        if err != nil {
-            return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, msg.FAILED_UPLOAD_IMAGE)
-        }
+		images := dto.ProductImagesRequest{
+			ImageUrl: &secureURL,
+		}
+		request.ProductImages = append(request.ProductImages, images)
+	}
 
-        images := dto.ProductImagesRequest{
-            ImageUrl: &secureURL,
-        }
-        request.ProductImages = append(request.ProductImages, images)
-    }
+	// Process videos
+	files = form.File["product_videos.video_url"]
+	for _, file := range files {
+		src, err := file.Open()
+		if err != nil {
+			return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Failed to open video file")
+		}
 
-    // Process videos
-    files = form.File["product_videos.video_url"]
-    for _, file := range files {
-        src, err := file.Open()
-        if err != nil {
-            return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Failed to open video file")
-        }
+		defer src.Close()
 
-        defer src.Close()
+		secureURL, err := c.cloudinaryService.UploadVideo(ctx.Request().Context(), src, "kreasinusantara/products/videos")
+		if err != nil {
+			return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, msg.FAILED_UPLOAD_IMAGE)
+		}
 
-        secureURL, err := c.cloudinaryService.UploadVideo(ctx.Request().Context(), src, "kreasinusantara/products/videos")
-        if err != nil {
-            return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, msg.FAILED_UPLOAD_IMAGE)
-        }
+		videos := dto.ProductVideosRequest{
+			VideoUrl: &secureURL,
+		}
+		request.ProductVideos = append(request.ProductVideos, videos)
+	}
 
-        videos := dto.ProductVideosRequest{
-            VideoUrl: &secureURL,
-        }
-        request.ProductVideos = append(request.ProductVideos, videos)
-    }
+	// Validate the request
+	if err := c.validator.Validate(request); err != nil {
+		logger.Error("Failed to validate request:", err)
+		return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Failed to validate request")
+	}
 
-    // Validate the request
-    if err := c.validator.Validate(request); err != nil {
-        logger.Error("Failed to validate request:", err)
-        return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Failed to validate request")
-    }
+	// Call the use case to update product
+	if err := c.productAdminUseCase.UpdateProduct(ctx, productID, &request); err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, msg.FAILED_UPDATE_PRODUCT)
+	}
 
-    // Call the use case to update product
-    if err := c.productAdminUseCase.UpdateProduct(ctx, productID, &request); err != nil {
-        return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, msg.FAILED_UPDATE_PRODUCT)
-    }
-
-    // Handle response if successful
-    return http_util.HandleSuccessResponse(ctx, http.StatusOK, msg.PRODUCT_UPDATED_SUCCESS, nil)
+	// Handle response if successful
+	return http_util.HandleSuccessResponse(ctx, http.StatusOK, msg.PRODUCT_UPDATED_SUCCESS, nil)
 }
-
-
 
 func (c *ProductsAdminController) DeleteProduct(ctx echo.Context) error {
 
-    // Extract product ID from the path
-    productID, err := uuid.Parse(ctx.Param("id"))
-    if err != nil {
-        return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Invalid product ID")
-    }
+	// Extract product ID from the path
+	productID, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Invalid product ID")
+	}
 
-    // Call the use case to delete the product
-    if err := c.productAdminUseCase.DeleteProduct(ctx, productID); err != nil {
-        return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, "Failed to delete product")
-    }
+	// Call the use case to delete the product
+	if err := c.productAdminUseCase.DeleteProduct(ctx, productID); err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, "Failed to delete product")
+	}
 
-    return http_util.HandleSuccessResponse(ctx, http.StatusOK, "Product deleted successfully", nil)
+	return http_util.HandleSuccessResponse(ctx, http.StatusOK, "Product deleted successfully", nil)
 }
 
-func (c *ProductsAdminController) SearchProductByName(ctx echo.Context) error {
-    
-    // Extract search parameters
-    name := ctx.QueryParam("name")
-    if name == "" {
-        return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Missing search parameter: name")
-    }
-    
-    page, err := strconv.Atoi(ctx.QueryParam("page"))
-    if err != nil {
-        page = 1 // Default to the first page if no page is specified
-    }
-    
-    limit, err := strconv.Atoi(ctx.QueryParam("limit"))
-    if err != nil {
-        limit = 10 // Default to a limit of 10 if no limit is specified
-    }
-    
-    // Call the use case to search for products
-    products, err := c.productAdminUseCase.SearchProductByName(ctx, name, page, limit)
-    if err != nil {
-        return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, "Failed to search products")
-    }
-    
-    return http_util.HandleSuccessResponse(ctx, http.StatusOK, "Products found", products)
+func (pc *ProductsAdminController) SearchProductByName(c echo.Context) error {
+
+	item := strings.TrimSpace(c.QueryParam("item"))
+	limit := strings.TrimSpace(c.QueryParam("limit"))
+	offset := strings.TrimSpace(c.QueryParam("offset"))
+	sortBy := c.QueryParam("sort_by")
+
+	if item == "" {
+		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.INVALID_REQUEST_DATA)
+	}
+
+	intLimit, err := strconv.Atoi(limit)
+	if err != nil || intLimit <= 0 {
+		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.MISMATCH_DATA_TYPE)
+	}
+
+	intOffset, err := strconv.Atoi(offset)
+	if err != nil || intOffset < 0 {
+		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.MISMATCH_DATA_TYPE)
+	}
+
+	req := &dto_base.SearchRequest{
+		Item:   item,
+		Limit:  intLimit,
+		Offset: &intOffset,
+		SortBy: sortBy,
+	}
+
+	if err := pc.validator.Validate(req); err != nil {
+		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.INVALID_REQUEST_DATA)
+	}
+
+	result, meta, err := pc.productAdminUseCase.SearchProductByName(c, req)
+	if err != nil {
+		return http_util.HandleErrorResponse(c, http.StatusInternalServerError, msg.FAILED_GET_EVENTS)
+	}
+
+	return http_util.HandleSearchResponse(c, msg.GET_EVENTS_SUCCESS, result, meta)
 }
 
+func (pc *ProductsAdminController) GetProductByID(c echo.Context) error {
+
+	// Extract product ID from the path
+	productID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return http_util.HandleErrorResponse(c, http.StatusBadRequest, "Invalid product ID")
+	}
+
+	// Call the use case to get the product
+	product, err := pc.productAdminUseCase.GetProductByID(c, productID)
+	if err != nil {
+		return http_util.HandleErrorResponse(c, http.StatusInternalServerError, "Failed to get product")
+	}
+
+	return http_util.HandleSuccessResponse(c, http.StatusOK, "Product retrieved successfully", product)
+}
+
+func (pc *ProductsAdminController) convertQueryParams(page, limit string) (int, int, error) {
+	if page == "" {
+		page = "1"
+	}
+
+	if limit == "" {
+		limit = "10"
+	}
+
+	var (
+		intPage, intLimit int
+		err               error
+	)
+
+	intPage, err = strconv.Atoi(page)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	intLimit, err = strconv.Atoi(limit)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	return intPage, intLimit, nil
+}

@@ -6,11 +6,15 @@ import (
 	"fmt"
 	"kreasi-nusantara-api/drivers/cloudinary"
 	dto "kreasi-nusantara-api/dto/admin"
+	dto_base "kreasi-nusantara-api/dto/base"
 	"kreasi-nusantara-api/entities"
 	"kreasi-nusantara-api/repositories"
+	err_util "kreasi-nusantara-api/utils/error"
 	"kreasi-nusantara-api/utils/password"
 	"kreasi-nusantara-api/utils/token"
+	"math"
 	"net/http"
+	"strconv"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -19,10 +23,11 @@ import (
 type AdminUsecase interface {
 	Register(c echo.Context, req *dto.RegisterRequest) error
 	Login(c echo.Context, req *dto.LoginRequest) (*dto.LoginResponse, error)
-	GetAllAdmin(ctx echo.Context) ([]*dto.AdminResponse, error)
+	GetAllAdmin(c echo.Context, req *dto_base.PaginationRequest) (*[]dto.AdminResponse, *dto_base.PaginationMetadata, *dto_base.Link, error)
 	UpdateAdmin(ctx echo.Context, adminID uuid.UUID, req *dto.UpdateAdminRequest) error
 	DeleteAdmin(ctx echo.Context, adminID uuid.UUID) error
-	SearchAdminByUsername(ctx echo.Context, username string) ([]*dto.AdminResponse, error)
+	SearchAdminByUsername(c echo.Context, req *dto_base.SearchRequest) ([]dto.AdminResponse, *dto_base.MetadataResponse, error)
+	GetAdminByID(c echo.Context, adminID uuid.UUID) (*dto.AdminResponse, error)
 }
 
 type adminUsecase struct {
@@ -89,7 +94,7 @@ func (au *adminUsecase) Register(c echo.Context, req *dto.RegisterRequest) error
 }
 
 func (au *adminUsecase) Login(c echo.Context, req *dto.LoginRequest) (*dto.LoginResponse, error) {
-	
+
 	ctx, cancel := context.WithCancel(c.Request().Context())
 	defer cancel()
 
@@ -101,10 +106,8 @@ func (au *adminUsecase) Login(c echo.Context, req *dto.LoginRequest) (*dto.Login
 		return nil, err
 	}
 
-	
-
 	var token string
-	
+
 	admin.Token = token
 
 	if admin.IsSuperAdmin {
@@ -114,11 +117,11 @@ func (au *adminUsecase) Login(c echo.Context, req *dto.LoginRequest) (*dto.Login
 	}
 
 	if err != nil {
-        return nil, fmt.Errorf("failed to generate token: %w", err)
-    }
+		return nil, fmt.Errorf("failed to generate token: %w", err)
+	}
 
-    admin.Token = token
-		
+	admin.Token = token
+
 	return &dto.LoginResponse{
 		Username: admin.Username,
 		Email:    admin.Email,
@@ -126,17 +129,36 @@ func (au *adminUsecase) Login(c echo.Context, req *dto.LoginRequest) (*dto.Login
 	}, nil
 }
 
-func (au *adminUsecase) GetAllAdmin(ctx echo.Context) ([]*dto.AdminResponse, error) {
-	admins, err := au.adminRepo.GetAllAdmin(ctx.Request().Context())
-	if err != nil {
-		return nil, err
+
+func (au *adminUsecase) GetAllAdmin(c echo.Context, req *dto_base.PaginationRequest) (*[]dto.AdminResponse, *dto_base.PaginationMetadata, *dto_base.Link, error) {
+	ctx, cancel := context.WithCancel(c.Request().Context())
+	defer cancel()
+
+	baseURL := fmt.Sprintf(
+		"%s?limit=%d&page=",
+		c.Request().URL.Path,
+		req.Limit,
+	)
+
+	var (
+		next string
+		prev string
+	)
+
+	if req.Page > 1 {
+		prev = baseURL + strconv.Itoa(req.Page-1)
 	}
 
-	adminResponses := make([]*dto.AdminResponse, len(admins))
-	for i, admin := range admins {
-		createdAtStr := admin.CreatedAt.Format("2006-01-02")
+	admins, totalData, err := au.adminRepo.GetAllAdmin(ctx, req)
+	if err != nil {
+		return nil, nil, nil, err
+	}
 
-		adminResponses[i] = &dto.AdminResponse{
+	adminResponses := make([]dto.AdminResponse, len(admins))
+	for i, admin := range admins {
+		createdAtStr := admin.CreatedAt.Format("24/05/2024")
+
+		adminResponses[i] = dto.AdminResponse{
 			ID:           admin.ID.String(),
 			FirstName:    admin.FirstName,
 			LastName:     admin.LastName,
@@ -148,20 +170,49 @@ func (au *adminUsecase) GetAllAdmin(ctx echo.Context) ([]*dto.AdminResponse, err
 		}
 	}
 
-	return adminResponses, nil
-}
-
-func (au *adminUsecase) SearchAdminByUsername(ctx echo.Context, username string) ([]*dto.AdminResponse, error) {
-	admins, err := au.adminRepo.GetSearchAdmin(ctx.Request().Context(), username)
-	if err != nil {
-		return nil, err
+	totalPage := int(math.Ceil(float64(totalData) / float64(req.Limit)))
+	paginationMetadata := &dto_base.PaginationMetadata{
+		TotalData:   totalData,
+		TotalPage:   totalPage,
+		CurrentPage: req.Page,
 	}
 
-	adminResponses := make([]*dto.AdminResponse, len(admins))
-	for i, admin := range admins {
-		createdAtStr := admin.CreatedAt.Format("2006-01-02")
+	if req.Page > totalPage {
+		return nil, nil, nil, err_util.ErrPageNotFound
+	}
 
-		adminResponses[i] = &dto.AdminResponse{
+	if req.Page == 1 {
+		prev = ""
+	}
+
+	if req.Page == totalPage {
+		next = ""
+	} else {
+		next = baseURL + strconv.Itoa(req.Page+1)
+	}
+
+	link := &dto_base.Link{
+		Next: next,
+		Prev: prev,
+	}
+	return &adminResponses, paginationMetadata, link, nil
+}
+
+
+func (au *adminUsecase) SearchAdminByUsername(c echo.Context, req *dto_base.SearchRequest) ([]dto.AdminResponse, *dto_base.MetadataResponse, error) {
+	ctx, cancel := context.WithCancel(c.Request().Context())
+	defer cancel()
+
+	admins, totalData, err := au.adminRepo.SearchAdminByUsername(ctx, req)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	adminResponses := make([]dto.AdminResponse, len(admins))
+	for i, admin := range admins {
+		createdAtStr := admin.CreatedAt.Format("24/05/2024")
+
+		adminResponses[i] = dto.AdminResponse{
 			ID:           admin.ID.String(),
 			FirstName:    admin.FirstName,
 			LastName:     admin.LastName,
@@ -173,8 +224,16 @@ func (au *adminUsecase) SearchAdminByUsername(ctx echo.Context, username string)
 		}
 	}
 
-	return adminResponses, nil
+	metadataResponse := &dto_base.MetadataResponse{
+		TotalData:   int(totalData),
+		TotalCount:  int(totalData),
+		NextOffset:  *req.Offset + req.Limit,
+		HasLoadMore: *req.Offset+req.Limit < int(totalData),
+	}
+
+	return adminResponses, metadataResponse, nil
 }
+
 
 func (au *adminUsecase) UpdateAdmin(ctx echo.Context, adminID uuid.UUID, req *dto.UpdateAdminRequest) error {
 	admin, err := au.adminRepo.GetAdminByID(ctx.Request().Context(), adminID)
@@ -244,4 +303,28 @@ func (au *adminUsecase) DeleteAdmin(ctx echo.Context, adminID uuid.UUID) error {
 	}
 
 	return nil
+}
+
+func (au *adminUsecase) GetAdminByID(c echo.Context, adminID uuid.UUID) (*dto.AdminResponse, error) {
+	ctx := c.Request().Context()
+
+	admins, err := au.adminRepo.GetAdminByID(ctx, adminID)
+	if err != nil {
+		return nil, err
+	}
+
+	createdAtStr := admins.CreatedAt.Format("24/05/2024")
+
+	adminResponse := &dto.AdminResponse{
+		ID:           admins.ID.String(),
+		FirstName:    admins.FirstName,
+		LastName:     admins.LastName,
+		Username:     admins.Username,
+		Email:        admins.Email,
+		IsSuperAdmin: admins.IsSuperAdmin,
+		Photo:        admins.Photo,
+		CreatedAt:    createdAtStr,
+	}
+
+	return adminResponse, nil
 }

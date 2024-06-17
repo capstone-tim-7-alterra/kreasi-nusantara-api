@@ -21,7 +21,7 @@ type Articles struct {
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	DeletedAt     gorm.DeletedAt `gorm:"index"`
-	Author        Admin
+	Author        *Admin
 }
 
 type ArticleComments struct {

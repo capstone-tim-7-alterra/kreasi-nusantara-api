@@ -14,12 +14,14 @@ type Events struct {
 	LocationID  uuid.UUID `gorm:"type:uuid;not null"`
 	Status      bool      `gorm:"default:true"`
 	Date        time.Time
-	Photos      []EventPhotos `gorm:"foreignKey:EventID"`
+	Photos      []EventPhotos `gorm:"foreignKey:EventID;references:ID"`
 	Description string        `gorm:"type:text;not null"`
-	Prices      []EventPrices `gorm:"foreignKey:EventID"`
+	Prices      []EventPrices `gorm:"foreignKey:EventID;references:ID"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
+	Category    EventCategories
+	Location    EventLocations
 }
 
 type EventCategories struct {
@@ -47,17 +49,18 @@ type EventLocations struct {
 type EventPhotos struct {
 	ID        uuid.UUID `gorm:"primaryKey;type:uuid"`
 	EventID   uuid.UUID `gorm:"type:uuid;not null"`
-	Image     string    `gorm:"type:varchar(255);not null"`
+	Image     *string    `gorm:"type:varchar(255);not null"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
 
 type EventPrices struct {
-	ID           uuid.UUID `gorm:"primaryKey;type:uuid"`
-	EventID      uuid.UUID `gorm:"type:uuid;not null"`
-	TicketTypeID int       `gorm:"type:int;not null"`
-	Price        int       `gorm:"type:int;not null"`
-	NoOfTicket   int       `gorm:"type:int;not null"`
+	ID           uuid.UUID       `gorm:"primaryKey;type:uuid"`
+	EventID      uuid.UUID       `gorm:"type:uuid;not null"`
+	TicketTypeID int             `gorm:"type:int;not null"`
+	Price        int             `gorm:"type:int;not null"`
+	NoOfTicket   int             `gorm:"type:int;not null"`
+	TicketType   EventTicketType `gorm:"foreignKey:TicketTypeID"`
 	Publish      time.Time
 	EndPublish   time.Time
 	CreatedAt    time.Time
