@@ -88,7 +88,7 @@ func (pu *eventAdminUseCase) GetEventsAdmin(c echo.Context, req *dto_base.Pagina
 		for _, photo := range event.Photos {
 			photos = append(photos, dto.EventPhotosResponse{
 				ID:       photo.ID,
-				ImageUrl: photo.Image,
+				ImageUrl: *photo.Image,
 			})
 		}
 
@@ -170,7 +170,7 @@ func (pu *eventAdminUseCase) CreateEventsAdmin(c echo.Context, req *dto.EventReq
 		photos[i] = entities.EventPhotos{
 			ID:      uuid.New(),
 			EventID: eventID,
-			Image:   photo.Image,
+			Image:   &photo.Image,
 		}
 	}
 
@@ -289,7 +289,7 @@ func (pu *eventAdminUseCase) GetEventByID(c echo.Context, eventID uuid.UUID) (*d
 	for _, photo := range event.Photos {
 		photos = append(photos, dto.EventPhotosResponse{
 			ID:       photo.ID,
-			ImageUrl: photo.Image,
+			ImageUrl: *photo.Image,
 		})
 	}
 
@@ -340,7 +340,7 @@ func (pu *eventAdminUseCase) SearchEventsAdmin(c echo.Context, req *dto_base.Sea
 		for _, photo := range event.Photos {
 			photos = append(photos, dto.EventPhotosResponse{
 				ID:       photo.ID,
-				ImageUrl: photo.Image,
+				ImageUrl: *photo.Image,
 			})
 		}
 
@@ -439,7 +439,7 @@ func (pu *eventAdminUseCase) UpdateEventsAdmin(c echo.Context, eventID uuid.UUID
 			existingEvent.Photos[i] = entities.EventPhotos{
 				ID:      uuid.New(),
 				EventID: eventID,
-				Image:   photo.Image,
+				Image:   &photo.Image,
 			}
 		}
 	}
