@@ -141,8 +141,8 @@ func (au *adminUsecase) GetAllAdmin(c echo.Context, req *dto_base.PaginationRequ
 	)
 
 	var (
-		next = baseURL + strconv.Itoa(req.Page+1)
-		prev = baseURL + strconv.Itoa(req.Page-1)
+		next string
+		prev string
 	)
 
 	if req.Page > 1 {

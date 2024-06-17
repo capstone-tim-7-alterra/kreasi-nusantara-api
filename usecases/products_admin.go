@@ -218,8 +218,8 @@ func (pu *productAdminUseCase) GetAllProduct(c echo.Context, req *dto_base.Pagin
 	)
 
 	var (
-		next = baseURL + strconv.Itoa(req.Page+1)
-		prev = baseURL + strconv.Itoa(req.Page-1)
+		next string
+		prev string
 	)
 
 	if req.Page > 1 {
