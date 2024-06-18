@@ -50,3 +50,38 @@ func (r *RedisClient) Del(key string) error {
 	}
 	return err
 }
+
+func (r *RedisClient) GetRecommendationProductsIds(key string) (*[]string, error) {
+	ctx := context.Background()
+
+	flag, err := r.Client.Exists(ctx, key).Result()
+	if err != nil {
+		return nil, err
+	}
+	if flag == 0 {
+		return nil, redis.Nil
+	}
+
+	result, err := r.Client.LRange(ctx, key, 0, -1).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+func (r *RedisClient) SetRecommendationProductsIds(key string, value []string) error {
+	ctx := context.Background()
+
+	err := r.Client.RPush(ctx, key, value).Err()
+	if err != nil {
+		return err
+	}
+
+	err = r.Client.Expire(ctx, key, time.Hour * 24).Err()
+	if err != nil {
+		return err
+	}
+
+	return err
+}
