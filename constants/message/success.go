@@ -81,4 +81,9 @@ const (
 	UPDATE_ARTICLE_SUCCESS = "article updated successfully!"
 	DELETE_ARTICLE_SUCCESS = "article deleted successfully!"
 
+	// Cart
+	ADD_TO_CART_SUCCESS = "items added to cart successfully!"
+	GET_CART_ITEMS_SUCCESS = "items retrieved successfully!"
+	UPDATE_CART_ITEMS_SUCCESS = "items updated successfully!"
+	DELETE_CART_ITEMS_SUCCESS = "items deleted successfully!"
 )

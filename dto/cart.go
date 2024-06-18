@@ -9,8 +9,7 @@ import (
 type CartItemResponse struct {
 	ID        uuid.UUID            `json:"id"`
 	Products  []ProductInformation `json:"products"`
-	Size      string               `json:"size"`
-	Quantity  int                  `json:"quantity"`
+	Total     float64              `json:"total"`
 	CreatedAt time.Time            `json:"created_at"`
 }
 
@@ -23,10 +22,17 @@ type UpdateCartItemRequest struct {
 	Quantity int `json:"quantity" form:"quantity"`
 }
 
+type RemoveCartItemRequest struct {
+	ProductVariantID uuid.UUID `json:"product_variant_id" form:"product_variant_id"`
+}
+
 type ProductInformation struct {
-	ProductID     uuid.UUID `json:"product_id"`
-	ProductName   string    `json:"product_name"`
-	ProductImage  string    `json:"product_image"`
-	OriginalPrice int       `json:"original_price"`
-	DiscountPrice float64   `json:"discount_price,omitempty"`
+	CartItemID       uuid.UUID `json:"cart_item_id" form:"cart_item_id"`
+	ProductVariantID uuid.UUID `json:"product_variant_id"`
+	ProductName      string    `json:"product_name"`
+	ProductImage     string    `json:"product_image"`
+	OriginalPrice    int       `json:"original_price"`
+	DiscountPrice    float64   `json:"discount_price,omitempty"`
+	Size             string    `json:"size"`
+	Quantity         int       `json:"quantity"`
 }
