@@ -8,7 +8,7 @@ import (
 
 type ProductResponse struct {
 	ID              uuid.UUID `json:"id"`
-	Image           *string    `json:"image"`
+	Image           string    `json:"image"`
 	Name            string    `json:"name"`
 	OriginalPrice   int       `json:"original_price"`
 	DiscountPercent *int      `json:"discount_percent"`

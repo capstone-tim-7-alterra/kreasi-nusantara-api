@@ -76,9 +76,9 @@ func (puc *productUseCase) GetProducts(c echo.Context, req *dto_base.PaginationR
             }
         }
 
-        var imageUrl *string
+        var imageUrl string
         if len(product.ProductImages) > 0 && product.ProductImages[0].ImageUrl != nil {
-            imageUrl = product.ProductImages[0].ImageUrl
+            imageUrl = *product.ProductImages[0].ImageUrl
         }
 
         productResponse[i] = dto.ProductResponse{
@@ -220,9 +220,9 @@ func (puc *productUseCase) GetProductsByCategory(c echo.Context, categoryId int,
 
     productResponse := make([]dto.ProductResponse, len(products))
     for i, product := range products {
-        var imageUrl *string
+        var imageUrl string
         if len(product.ProductImages) > 0 && product.ProductImages[0].ImageUrl != nil {
-            imageUrl = product.ProductImages[0].ImageUrl
+            imageUrl = *product.ProductImages[0].ImageUrl
         }
 
         summary := ratingReviewMap[product.ID]
@@ -286,9 +286,9 @@ func (puc *productUseCase) SearchProducts(c echo.Context, req *dto_base.SearchRe
 
     productResponse := make([]dto.ProductResponse, len(products))
     for i, product := range products {
-        var imageUrl *string
+        var imageUrl string
         if len(product.ProductImages) > 0 && product.ProductImages[0].ImageUrl != nil {
-            imageUrl = product.ProductImages[0].ImageUrl
+            imageUrl = *product.ProductImages[0].ImageUrl
         }
 
         summary := ratingReviewMap[product.ID]
