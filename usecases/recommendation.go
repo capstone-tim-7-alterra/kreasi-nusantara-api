@@ -72,10 +72,10 @@ func (rc *recommendationUseCase) GetProductRecommendation(c echo.Context, userId
 		recommendationProductResponse := make([]dto.ProductResponse, 0)
 
 		for _, product := range *recommendationProducts {
-			var productImage string
+			var productImage *string
 
 			if len(product.ProductImages) > 0 && product.ProductImages[0].ImageUrl != nil {
-				productImage = *product.ProductImages[0].ImageUrl
+				productImage = product.ProductImages[0].ImageUrl
 			}
 
 			summary, exists := ratingReviewMap[product.ID]
@@ -87,7 +87,7 @@ func (rc *recommendationUseCase) GetProductRecommendation(c echo.Context, userId
 			}
 			recommendationProductResponse = append(recommendationProductResponse, dto.ProductResponse{
 				ID:              product.ID,
-				Image:           productImage,
+				Image:           *productImage,
 				Name:            product.Name,
 				OriginalPrice:   product.ProductPricing.OriginalPrice,
 				DiscountPercent: product.ProductPricing.DiscountPercent,
@@ -153,10 +153,10 @@ func (rc *recommendationUseCase) GetProductRecommendation(c echo.Context, userId
 	recommendationProductResponse := make([]dto.ProductResponse, 0)
 
 	for _, product := range *recommendationProducts {
-		var productImage string
+		var productImage *string
 
 		if len(product.ProductImages) > 0 && product.ProductImages[0].ImageUrl != nil {
-			productImage = *product.ProductImages[0].ImageUrl
+			productImage = product.ProductImages[0].ImageUrl
 		}
 
 		summary, exists := ratingReviewMap[product.ID]
@@ -169,7 +169,7 @@ func (rc *recommendationUseCase) GetProductRecommendation(c echo.Context, userId
 
 		recommendationProductResponse = append(recommendationProductResponse, dto.ProductResponse{
 			ID:              product.ID,
-			Image:           productImage,
+			Image:           *productImage,
 			Name:            product.Name,
 			OriginalPrice:   product.ProductPricing.OriginalPrice,
 			DiscountPercent: product.ProductPricing.DiscountPercent,
