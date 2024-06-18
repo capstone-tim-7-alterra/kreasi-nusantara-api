@@ -34,6 +34,17 @@ func HandleSearchResponse(c echo.Context, message string, data any, metadata *dt
 	})
 }
 
+func HandleLoadResponse(c echo.Context, message string, data any, metadata *dto.MetadataResponse) error {
+	return c.JSON(http.StatusOK, &dto.LoadResponse{
+		BaseResponse: dto.BaseResponse{
+			Status:  status.STATUS_SUCCESS,
+			Message: message,
+			Data:    data,
+		},
+		Metadata: metadata,
+	})
+}
+
 func HandlePaginationResponse(c echo.Context, message string, data any, pagination *dto.PaginationMetadata, link *dto.Link) error {
 	return c.JSON(http.StatusOK, &dto.PaginationResponse{
 		BaseResponse: dto.BaseResponse{
