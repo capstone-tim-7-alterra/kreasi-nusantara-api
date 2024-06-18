@@ -3,6 +3,7 @@ package usecases
 import (
 	"kreasi-nusantara-api/drivers/openai"
 	"kreasi-nusantara-api/drivers/redis"
+	prompt_const "kreasi-nusantara-api/constants/prompt"
 	"strings"
 	"time"
 
@@ -40,7 +41,7 @@ func (cb *chatBotUseCase) AnswerChat(c echo.Context, userId uuid.UUID, question 
 
     prompt := limitedHistory + "\nUser: " + question
 
-    answer, err := cb.openAIService.AnswerChat(prompt)
+    answer, err := cb.openAIService.AnswerChat(prompt, prompt_const.CHATBOT_INSTRUCTION)
     if err != nil {
         return msg.FAILED_ANSWER_CHAT, err
     }

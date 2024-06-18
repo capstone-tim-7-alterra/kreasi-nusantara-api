@@ -95,6 +95,7 @@ const (
 	FAILED_GET_PRODUCTS        = "failed to get products!"
 	FAILED_GET_PRODUCT_REVIEWS = "failed to get product reviews!"
 	FAILED_CREATE_REVIEW       = "failed to create review!"
+	FAILED_GET_PRODUCT_RECOMMENDATION = "failed to get product recommendation!"
 
 	// Articles
 	FAILED_GET_ARTICLES   = "failed to get articles!"
@@ -126,15 +127,18 @@ const (
 	ARTICLE_NOT_FOUND     = "article not found!"
 	NOT_FOUND             = "not found"
 
-		// Categories
-		FAILED_GET_CATEGORIES = "failed to get categories!"
+	// Categories
+	FAILED_GET_CATEGORIES = "failed to get categories!"
+	FAILED_CREATE_TICKET_TYPE = "failed to create ticket type!"
+	FAILED_UPDATE_TICKET_TYPE = "failed to update ticket type!"
+	FAILED_DELETE_TICKET_TYPE = "failed to delete ticket type!"
+	FAILED_SEARCH_TICKET_TYPE = "failed to search ticket type by name"
+	TICKET_TYPE_NOT_FOUND     = "ticket type not found"
+	FAILED_GET_TICKET_TYPE    = "failed to get ticket type!"
 
-		FAILED_CREATE_TICKET_TYPE = "failed to create ticket type!"
-		FAILED_UPDATE_TICKET_TYPE = "failed to update ticket type!"
-		FAILED_DELETE_TICKET_TYPE = "failed to delete ticket type!"
-		FAILED_SEARCH_TICKET_TYPE = "failed to search ticket type by name"
-		TICKET_TYPE_NOT_FOUND     = "ticket type not found"
-		FAILED_GET_TICKET_TYPE    = "failed to get ticket type!"
-	
-
+	// Cart
+	FAILED_ADD_TO_CART = "failed to add to cart!"
+	FAILED_GET_CART_ITEMS = "failed to get cart items!"
+	FAILED_UPDATE_CART_ITEMS = "failed to update cart items!"
+	FAILED_DELETE_CART_ITEMS = "failed to delete cart items!"
 )

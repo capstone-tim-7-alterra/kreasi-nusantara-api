@@ -75,6 +75,8 @@ func migrate(db *gorm.DB) {
 		&entities.EventTicketType{},
 		&entities.EventPrices{},
 		&entities.Events{},
+		&entities.CartItems{},
+		&entities.Cart{},
 	)
 	if err != nil {
 		log.Fatal(msg.FAILED_MIGRATE_DB)

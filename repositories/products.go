@@ -15,7 +15,8 @@ type ProductRepository interface {
 	GetProductByID(ctx context.Context, productId uuid.UUID) (*entities.Products, error)
 	GetProductsByCategory(ctx context.Context, categoryId int, req *dto_base.PaginationRequest) ([]entities.Products, int64, error)
 	SearchProducts(ctx context.Context, req *dto_base.SearchRequest) ([]entities.Products, int64, error)
-
+	FindByManyIds(ids []string) (*[]entities.Products, error)
+	FindUnlistedProductId(Id []uuid.UUID) (*[]entities.Products, error)
 	// Review
 	CreateProductReview(ctx context.Context, productReview entities.ProductReviews) error
 	GetProductReview(ctx context.Context, productId uuid.UUID, req *dto_base.PaginationRequest) ([]entities.ProductReviews, int64, error)
@@ -187,4 +188,31 @@ func (pr *productRepository) GetLatestReviews(ctx context.Context, productId uui
 	}
 
 	return reviews, nil
+}
+
+func (pr *productRepository) FindByManyIds(ids []string) (*[]entities.Products, error) {
+	var products []entities.Products
+
+	if err := pr.DB.Where("id IN ?", ids).
+	Preload(clause.Associations).
+	Preload("ProductImages").
+	Find(&products).Error; err != nil {
+		return nil, err
+	}
+
+	return &products, nil
+}
+
+func (pr *productRepository) FindUnlistedProductId(Id []uuid.UUID) (*[]entities.Products, error) {
+	var products []entities.Products
+
+	if err := pr.DB.Model(&entities.Products{}).
+		Preload(clause.Associations).
+		Preload("ProductImages").
+		Where("id NOT IN (?)", Id).
+		Find(&products).Error; err != nil {
+		return nil, err
+	}
+
+	return &products, nil
 }

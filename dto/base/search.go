@@ -5,6 +5,11 @@ type SearchResponse struct {
 	Metadata *MetadataResponse `json:"metadata,omitempty"`
 }
 
+type LoadResponse struct {
+	BaseResponse
+	Metadata *MetadataResponse `json:"metadata,omitempty"`
+}
+
 type MetadataResponse struct {
 	TotalData   int  `json:"total_data"`
 	TotalCount  int  `json:"total_count"`
