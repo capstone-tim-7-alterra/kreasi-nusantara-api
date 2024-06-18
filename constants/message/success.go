@@ -38,9 +38,10 @@ const (
 	DELETE_IMAGE_SUCCESS = "image deleted successfully!"
 
 	// Products
-	GET_PRODUCTS_SUCCESS        = "products retrieved successfully!"
-	GET_PRODUCT_REVIEWS_SUCCESS = "product reviews retrieved successfully!"
-	CREATE_REVIEW_SUCCESS       = "review created successfully!"
+	GET_PRODUCTS_SUCCESS               = "products retrieved successfully!"
+	GET_PRODUCT_REVIEWS_SUCCESS        = "product reviews retrieved successfully!"
+	CREATE_REVIEW_SUCCESS              = "review created successfully!"
+	GET_PRODUCT_RECOMMENDATION_SUCCESS = "product recommendation retrieved successfully!"
 
 	// Articles
 	GET_ARTICLES_SUCCESS   = "articles retrieved successfully!"
@@ -69,12 +70,11 @@ const (
 	UPDATE_TICKET_TYPE_SUCCESS = "ticket type updated successfully!"
 	DELETE_TICKET_TYPE_SUCCESS = "ticket type deleted successfully!"
 	GET_TICKET_TYPE_SUCCESS    = "ticket type retrieved successfully!"
-	
 
-	GET_PRICES = "prices retrieved successfully!"
+	GET_PRICES        = "prices retrieved successfully!"
 	GET_DETAIL_PRICES = "detail prices retrieved successfully!"
-	DELETE_PRICES = "prices deleted successfully!"
-	UPDATE_PRICES = "prices updated successfully!"
+	DELETE_PRICES     = "prices deleted successfully!"
+	UPDATE_PRICES     = "prices updated successfully!"
 
 	//Articles Admin
 	CREATE_ARTICLE_SUCCESS = "article created successfully!"
@@ -82,8 +82,8 @@ const (
 	DELETE_ARTICLE_SUCCESS = "article deleted successfully!"
 
 	// Cart
-	ADD_TO_CART_SUCCESS = "items added to cart successfully!"
-	GET_CART_ITEMS_SUCCESS = "items retrieved successfully!"
+	ADD_TO_CART_SUCCESS       = "items added to cart successfully!"
+	GET_CART_ITEMS_SUCCESS    = "items retrieved successfully!"
 	UPDATE_CART_ITEMS_SUCCESS = "items updated successfully!"
 	DELETE_CART_ITEMS_SUCCESS = "items deleted successfully!"
 )

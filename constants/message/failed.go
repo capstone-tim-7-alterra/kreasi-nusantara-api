@@ -95,6 +95,7 @@ const (
 	FAILED_GET_PRODUCTS        = "failed to get products!"
 	FAILED_GET_PRODUCT_REVIEWS = "failed to get product reviews!"
 	FAILED_CREATE_REVIEW       = "failed to create review!"
+	FAILED_GET_PRODUCT_RECOMMENDATION = "failed to get product recommendation!"
 
 	// Articles
 	FAILED_GET_ARTICLES   = "failed to get articles!"
