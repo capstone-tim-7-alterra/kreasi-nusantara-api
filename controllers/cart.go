@@ -54,6 +54,14 @@ func (cc *cartController) GetCartItems(c echo.Context) error {
 	return http_util.HandleSuccessResponse(c, http.StatusOK, msg.GET_CART_ITEMS_SUCCESS, res)
 }
 
+func (cc *cartController) GetAllCarts(c echo.Context) error {
+	res, err := cc.cartUseCase.GetAllCarts(c)
+	if err != nil {
+		return http_util.HandleErrorResponse(c, http.StatusInternalServerError, msg.FAILED_GET_CART_ITEMS)
+	}
+	return http_util.HandleSuccessResponse(c, http.StatusOK, msg.FAILED_GET_CART_ITEMS, res)
+}
+
 func (cc *cartController) UpdateCartItems(c echo.Context) error {
 	cartItemID := uuid.MustParse(c.Param("cartItemID"))
 

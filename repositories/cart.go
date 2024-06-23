@@ -15,6 +15,7 @@ type CartRepository interface {
 	GetCartItems(ctx context.Context, userID uuid.UUID) (entities.Cart, error)
 	UpdateCartItems(ctx context.Context, cartItemID uuid.UUID, quantity int) error
 	DeleteCartItems(ctx context.Context, cartItemID uuid.UUID) error
+	GetAllCarts(ctx context.Context) ([]entities.Cart, error)
 }
 
 type cartRepository struct {
@@ -114,6 +115,21 @@ func (cr *cartRepository) GetCartItems(ctx context.Context, userID uuid.UUID) (e
 
 	return cart, nil
 }
+
+func (cr *cartRepository) GetAllCarts(ctx context.Context) ([]entities.Cart, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
+	var cart []entities.Cart
+	if err := cr.DB.Preload(clause.Associations).Preload("Items").Preload("Items.ProductVariant").Preload("Items.ProductVariant.Products").Preload("Items.ProductVariant.Products.ProductImages").Preload("Items.ProductVariant.Products.ProductPricing").Find(&cart).Error; err != nil {
+		return nil, err
+	}
+
+	return cart, nil
+}
+
+
 
 func (cr *cartRepository) UpdateCartItems(ctx context.Context, cartItemID uuid.UUID, quantity int) error {
 	if err := ctx.Err(); err != nil {

@@ -13,6 +13,8 @@ import (
 	"kreasi-nusantara-api/routes/user"
 	"kreasi-nusantara-api/routes/webhook"
 	"kreasi-nusantara-api/utils/validation"
+	"kreasi-nusantara-api/routes/product_dashboard"
+
 
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -32,6 +34,7 @@ func InitRoute(e *echo.Echo, db *gorm.DB, v *validation.Validator) {
 	cartRoute := baseRoute.Group("")
 	productTransactionRoute := baseRoute.Group("")
 	paymentNotifRoute := baseRoute.Group("")
+	productDashboardRoute := baseRoute.Group("/admin")
 
 	user.InitUserRoute(userRoute, db, v)
 	user.InitUserAddressesRoute(userRoute, db, v)
@@ -46,4 +49,5 @@ func InitRoute(e *echo.Echo, db *gorm.DB, v *validation.Validator) {
 	cart.InitCartRoute(cartRoute, db, v)
 	product_transactions.InitProductTransactionsRoute(productTransactionRoute, db, v)
 	webhook.InitWebhookRoute(paymentNotifRoute, db)
+	product_dashboard.InitProductDashboard(productDashboardRoute, db, v)
 }
