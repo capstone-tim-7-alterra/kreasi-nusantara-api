@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -151,6 +152,39 @@ func (ec *eventController) SearchEvents(c echo.Context) error {
 	}
 
 	return http_util.HandleSearchResponse(c, msg.GET_EVENTS_SUCCESS, result, meta)
+}
+
+func (ec *eventController) GetEventByMonthYear(c echo.Context) error {
+	month, err := strconv.Atoi(c.QueryParam("month"))
+	if err != nil {
+		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.MISMATCH_DATA_TYPE)
+	}
+
+	year, err := strconv.Atoi(c.QueryParam("year"))
+	if err != nil {
+		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.MISMATCH_DATA_TYPE)
+	}
+
+	events, err := ec.eventUseCase.GetEventsByMonthYear(c, year, month)
+	if err != nil {
+		return http_util.HandleErrorResponse(c, http.StatusInternalServerError, msg.FAILED_GET_EVENTS)
+	}
+
+	return http_util.HandleSuccessResponse(c, http.StatusOK, msg.GET_EVENTS_SUCCESS, events)
+}
+
+func (ec *eventController) GetEventByDate(c echo.Context) error {
+	dateParam := c.QueryParam("date")
+	date, err := time.Parse("2006-01-02", dateParam)
+	if err != nil {
+		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.MISMATCH_DATA_TYPE)
+	}
+	events, err := ec.eventUseCase.GetEventsByDate(c, date)
+	if err != nil {
+		return http_util.HandleErrorResponse(c, http.StatusInternalServerError, msg.FAILED_GET_EVENTS)
+	}
+
+	return http_util.HandleSuccessResponse(c, http.StatusOK, msg.GET_EVENTS_SUCCESS, events)
 }
 
 func (ec *eventController) convertQueryParams(page, limit string) (int, int, error) {
