@@ -43,6 +43,7 @@ type EventRequest struct {
 type EventLocationRequest struct {
 	Building    string `json:"building" form:"building" validate:"required"`
 	Address     string `json:"address" form:"address" validate:"required"`
+	Province    string `json:"province" form:"province" validate:"required"`
 	City        string `json:"city" form:"city" validate:"required"`
 	Subdistrict string `json:"subdistrict" form:"subdistrict" validate:"required"`
 	PostalCode  string `json:"postal_code" form:"postal_code" validate:"required"`
@@ -98,6 +99,7 @@ type EventLocationResponse struct {
 	ID          uuid.UUID `json:"id"`
 	Building    string    `json:"building"`
 	Address     string    `json:"address" `
+	Province    string    `json:"province" `
 	City        string    `json:"city" `
 	Subdistrict string    `json:"subdistrict" `
 	PostalCode  string    `json:"postal_code" `

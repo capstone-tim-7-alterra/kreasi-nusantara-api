@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -33,6 +34,7 @@ func NewUserController(userUseCase usecases.UserUseCase, validator *validation.V
 }
 
 func (uc *userController) Register(c echo.Context) error {
+	log := logrus.New()
 	request := new(dto.RegisterRequest)
 	if err := c.Bind(request); err != nil {
 		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.MISMATCH_DATA_TYPE)
@@ -44,6 +46,7 @@ func (uc *userController) Register(c echo.Context) error {
 
 	err := uc.userUseCase.Register(c, request)
 	if err != nil {
+		log.WithError(err).Error("Failed to register user")
 		var (
 			code    int
 			message string

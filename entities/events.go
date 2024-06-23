@@ -37,6 +37,7 @@ type EventLocations struct {
 	ID          uuid.UUID `gorm:"primaryKey;type:uuid"`
 	Building    string    `gorm:"type:varchar(100);not null"`
 	Address     string    `gorm:"type:varchar(100);not null"`
+	Province    string    `gorm:"type:varchar(100);not null"`
 	City        string    `gorm:"type:varchar(100);not null"`
 	Subdistrict string    `gorm:"type:varchar(100);not null"`
 	PostalCode  string    `gorm:"type:varchar(100);not null"`

@@ -46,7 +46,6 @@ func NewArticleUseCaseAdmin(articleAdminRepository repositories.ArticleAdminRepo
 
 func (auc *articleUseCaseAdmin) GetArticles(c echo.Context, req *dto_base.PaginationRequest) (*[]dto.ArticleAdminResponse, *dto_base.PaginationMetadata, *dto_base.Link, error) {
 
-
 	ctx, cancel := context.WithCancel(c.Request().Context())
 	defer cancel()
 
@@ -74,7 +73,6 @@ func (auc *articleUseCaseAdmin) GetArticles(c echo.Context, req *dto_base.Pagina
 		return nil, nil, nil, errors.New("articles is nil")
 	}
 
-
 	author, _, err := auc.adminRepo.GetAllAdmin(ctx, req)
 	if err != nil {
 		return nil, nil, nil, err
@@ -100,6 +98,7 @@ func (auc *articleUseCaseAdmin) GetArticles(c echo.Context, req *dto_base.Pagina
 			Title:     article.Title,
 			Author:    authorName,
 			Image:     article.Image,
+			Content:   article.Content,
 			CreatedAt: createdAtStr,
 		}
 	}
@@ -127,7 +126,6 @@ func (auc *articleUseCaseAdmin) GetArticles(c echo.Context, req *dto_base.Pagina
 		Next: next,
 		Prev: prev,
 	}
-
 
 	return &articleResponse, paginationMetadata, link, nil
 }
@@ -177,6 +175,7 @@ func (auc *articleUseCaseAdmin) SearchArticles(c echo.Context, req *dto_base.Sea
 			ID:        article.ID,
 			Title:     article.Title,
 			Author:    authorName,
+			Content:   article.Content,
 			Image:     article.Image,
 			CreatedAt: CreatedAtStr,
 		}
@@ -243,6 +242,7 @@ func (auc *articleUseCaseAdmin) UpdateArticles(c echo.Context, articleId uuid.UU
 	existingArticle.UpdatedAt = time.Now()
 	existingArticle.Content = req.Content
 	existingArticle.Title = req.Title
+	existingArticle.Image = req.Image
 
 	err = auc.articleAdminRepository.UpdateArticleAdmin(ctx, articleId, existingArticle)
 	if err != nil {
@@ -319,6 +319,7 @@ func (auc *articleUseCaseAdmin) GetArticleByID(c echo.Context, articleId uuid.UU
 		Tags:      article.Tags,
 		Title:     article.Title,
 		Author:    authorName,
+		Content:   article.Content,
 		Image:     article.Image,
 		CreatedAt: CreatedAtStr,
 	}
