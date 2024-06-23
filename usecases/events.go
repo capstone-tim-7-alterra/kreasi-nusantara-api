@@ -9,6 +9,7 @@ import (
 	err_util "kreasi-nusantara-api/utils/error"
 	"math"
 	"strconv"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -20,6 +21,9 @@ type EventUseCase interface {
 	GetEventsByCategory(c echo.Context, categoryId int, req *dto_base.PaginationRequest) ([]dto.EventResponse, *dto_base.PaginationMetadata, *dto_base.Link, error)
 	GetUpcomingEvents(c echo.Context) ([]dto.EventResponse, error)
 	SearchEvents(c echo.Context, req *dto_base.SearchRequest) ([]dto.EventResponse, *dto_base.MetadataResponse, error)
+
+	GetEventsByMonthYear(c echo.Context, year int, month int) ([]dto.EventResponse, error)
+	GetEventsByDate(c echo.Context, date time.Time) ([]dto.EventResponse, error)
 }
 
 type eventUseCase struct {
@@ -132,10 +136,10 @@ func (euc *eventUseCase) GetEventByID(c echo.Context, eventId uuid.UUID) (*dto.E
 
 	for i, ticket := range event.Prices {
 		eventDetailResponse.Ticket[i] = dto.EventPricesResponse{
-			ID:         ticket.ID,
-			Price:      ticket.Price,
+			ID:    ticket.ID,
+			Price: ticket.Price,
 			TicketType: dto.EventTicketTypeResponse{
-				ID: ticket.TicketType.ID, 
+				ID:   ticket.TicketType.ID,
 				Name: ticket.TicketType.Name,
 			},
 			NoOfTicket: ticket.NoOfTicket,
@@ -283,6 +287,93 @@ func (euc *eventUseCase) GetUpcomingEvents(c echo.Context) ([]dto.EventResponse,
 			ID:       event.ID,
 			Name:     event.Name,
 			Image:    *event.Photos[0].Image,
+			Category: event.Category.Name,
+			Location: dto.EventLocationDetail{
+				Building:    event.Location.Building,
+				Subdistrict: event.Location.Subdistrict,
+				City:        event.Location.City,
+			},
+			Date:     event.Date.Format("02-01-2006"),
+			MinPrice: minPrice,
+		}
+	}
+
+	return eventResponse, nil
+}
+
+func (euc *eventUseCase) GetEventsByMonthYear(c echo.Context, year int, month int) ([]dto.EventResponse, error) {
+	ctx, cancel := context.WithCancel(c.Request().Context())
+	defer cancel()
+
+	events, err := euc.eventRepository.GetEventsByMonthYear(ctx, year, month)
+	if err != nil {
+		return nil, err
+	}
+
+	eventResponse := make([]dto.EventResponse, len(events))
+	for i, event := range events {
+		minPrice := math.MaxInt64
+		for _, price := range event.Prices {
+			if price.Price < minPrice {
+				minPrice = price.Price
+			}
+		}
+
+		var imageUrl string
+
+		if len(event.Photos) > 0  && event.Photos[0].Image != nil {
+			imageUrl = *event.Photos[0].Image
+		} else {
+			imageUrl = ""
+		}
+
+		eventResponse[i] = dto.EventResponse{
+			ID:       event.ID,
+			Name:     event.Name,
+			Image:    imageUrl,
+			Category: event.Category.Name,
+			Location: dto.EventLocationDetail{
+				Building:    event.Location.Building,
+				Subdistrict: event.Location.Subdistrict,
+				City:        event.Location.City,
+			},
+			Date:     event.Date.Format("02-01-2006"),
+			MinPrice: minPrice,
+		}
+	}
+
+	return eventResponse, nil
+}
+
+func (euc *eventUseCase) GetEventsByDate(c echo.Context, date time.Time) ([]dto.EventResponse, error) {
+	ctx, cancel := context.WithCancel(c.Request().Context())
+	defer cancel()
+
+	events, err := euc.eventRepository.GetEventsByDate(ctx, date)
+	if err != nil {
+		return nil, err
+	}
+
+	eventResponse := make([]dto.EventResponse, len(events))
+	for i, event := range events {
+		minPrice := math.MaxInt64
+		for _, price := range event.Prices {
+			if price.Price < minPrice {
+				minPrice = price.Price
+			}
+		}
+
+		var imageUrl string
+		if len(event.Photos) > 0  && event.Photos[0].Image != nil {
+			imageUrl = *event.Photos[0].Image
+		} else {
+			imageUrl = ""
+		}
+
+		eventResponse[i] = dto.EventResponse{
+			ID:       event.ID,
+			Name:     event.Name,
+			Image:    imageUrl,
 			Category: event.Category.Name,
 			Location: dto.EventLocationDetail{
 				Building:    event.Location.Building,

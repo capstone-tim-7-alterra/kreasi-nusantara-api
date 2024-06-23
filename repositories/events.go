@@ -17,6 +17,9 @@ type EventRepository interface {
 	GetEventsByCategory(ctx context.Context, categoryId int, req *dto_base.PaginationRequest) ([]entities.Events, int64, error)
 	GetUpcomingEvents(ctx context.Context) ([]entities.Events, error)
 	SearchEvents(ctx context.Context, req *dto_base.SearchRequest) ([]entities.Events, int64, error)
+
+	GetEventsByMonthYear(ctx context.Context, year int, month int) ([]entities.Events, error)
+	GetEventsByDate(ctx context.Context, date time.Time) ([]entities.Events, error)
 }
 
 type eventRepository struct {
@@ -128,4 +131,32 @@ func (er *eventRepository) SearchEvents(ctx context.Context, req *dto_base.Searc
 	}
 
 	return events, totalData, nil
+}
+
+func (er *eventRepository) GetEventsByMonthYear(ctx context.Context, year int, month int) ([]entities.Events, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
+	var events []entities.Events
+	startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
+	endDate := startDate.AddDate(0, 1, -1)
+
+	if err := er.DB.Preload(clause.Associations).Where("date >= ? AND date <= ?", startDate, endDate).Find(&events).Error; err != nil {
+		return nil, err
+	}
+
+	return events, nil
+}
+
+func (er *eventRepository) GetEventsByDate(ctx context.Context, date time.Time) ([]entities.Events, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
+	var events []entities.Events
+	if err := er.DB.Model(&entities.Events{}).Preload(clause.Associations).Where("date = ?", date).Find(&events).Error; err != nil {
+		return nil, err
+	}
+	return events, nil
 }
