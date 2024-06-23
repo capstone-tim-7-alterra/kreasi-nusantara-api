@@ -28,7 +28,7 @@ type ProductDetailResponse struct {
 	DiscountPrice   *float64                 `json:"discount_price,omitempty"`
 	AverageRating   float64                  `json:"average_rating"`
 	TotalReview     int                      `json:"total_review"`
-	LatestReview    []*ProductReviewResponse   `json:"latest_review,omitempty"`
+	LatestReview    []*ProductReviewResponse `json:"latest_review,omitempty"`
 	Variants        []ProductVariantResponse `json:"variants"`
 }
 
@@ -45,8 +45,9 @@ type ProductReviewResponse struct {
 }
 
 type ProductVariantResponse struct {
-	Size  string `json:"size"`
-	Stock int    `json:"stock"`
+	ID    uuid.UUID `json:"id"`
+	Size  string    `json:"size"`
+	Stock int       `json:"stock"`
 }
 
 type UserReview struct {
