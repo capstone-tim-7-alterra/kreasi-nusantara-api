@@ -1,4 +1,4 @@
-package product_dashboard
+package dashboard
 
 import (
 	"kreasi-nusantara-api/controllers"
@@ -24,6 +24,9 @@ func InitProductDashboard(g *echo.Group, db *gorm.DB, v *validation.Validator) {
 	g.Use(echojwt.WithConfig(token.GetJWTConfig()), middlewares.IsAdminOrSuperAdmin)
 
 	g.GET("/products-report", productDashboardController.GetReportProducts)
-	g.GET("/products-header", productDashboardController.GetHeaderProduct)
+	g.GET("/dashboard-header", productDashboardController.GetHeaderProduct)
 	g.GET("/products-chart", productDashboardController.GetChartProduct)
+	g.GET("/events-report", productDashboardController.GetEventReport)
+	g.GET("/events-chart", productDashboardController.GetChartEvents)
+
 }

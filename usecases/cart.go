@@ -14,7 +14,6 @@ type CartUseCase interface {
 	GetUserCart(c echo.Context, userID uuid.UUID) (dto.CartItemResponse, error)
 	UpdateCartItem(c echo.Context, cartItemID uuid.UUID, req dto.UpdateCartItemRequest) error
 	DeleteCartItem(c echo.Context, cartItemID uuid.UUID) error
-	GetAllCarts(c echo.Context) ([]dto.CartItemResponse, error)
 }
 
 type cartUseCase struct {
@@ -100,59 +99,3 @@ func (cu *cartUseCase) DeleteCartItem(c echo.Context, cartItemID uuid.UUID) erro
 	return cu.cartRepository.DeleteCartItems(ctx, cartItemID)
 }
 
-func (cu *cartUseCase) GetAllCarts(c echo.Context) ([]dto.CartItemResponse, error) {
-	ctx, cancel := context.WithCancel(c.Request().Context())
-	defer cancel()
-
-	carts, err := cu.cartRepository.GetAllCarts(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var cartResponses []dto.CartItemResponse
-	for _, cart := range carts {
-		var cartItems []dto.ProductInformation
-
-		for _, item := range cart.Items {
-			var productImage string
-
-			if len(item.ProductVariant.Products.ProductImages) > 0 && item.ProductVariant.Products.ProductImages[0].ImageUrl != nil {
-				productImage = *item.ProductVariant.Products.ProductImages[0].ImageUrl
-			} else {
-				productImage = ""
-			}
-
-			productInfo := dto.ProductInformation{
-				CartItemID:       item.ID,
-				CartID:           item.CartID,
-				ProductVariantID: item.ProductVariantID,
-				ProductName:      item.ProductVariant.Products.Name,
-				ProductImage:     productImage,
-				OriginalPrice:    item.ProductVariant.Products.ProductPricing.OriginalPrice,
-				DiscountPrice:    *item.ProductVariant.Products.ProductPricing.DiscountPrice,
-				Size:             item.ProductVariant.Size,
-				Quantity:         item.Quantity,
-			}
-			cartItems = append(cartItems, productInfo)
-		}
-
-		var total float64
-		for _, product := range cartItems {
-			if product.DiscountPrice > 0 {
-				total += product.DiscountPrice * float64(product.Quantity)
-			} else {
-				total += float64(product.OriginalPrice) * float64(product.Quantity)
-			}
-		}
-
-		cartDTO := dto.CartItemResponse{
-			ID:       cart.ID,
-			Products: cartItems,
-			Total:    total,
-		}
-
-		cartResponses = append(cartResponses, cartDTO)
-	}
-
-	return cartResponses, nil
-}

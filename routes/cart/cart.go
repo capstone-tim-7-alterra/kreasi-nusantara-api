@@ -25,5 +25,4 @@ func InitCartRoute(g *echo.Group, db *gorm.DB, v *validation.Validator) {
 	g.GET("/carts", cartController.GetCartItems)
 	g.PUT("/carts/:cartItemID", cartController.UpdateCartItems)
 	g.DELETE("/carts/:cartItemID", cartController.DeleteCartItem)
-	g.GET("/carts-all", cartController.GetAllCarts)
 }
