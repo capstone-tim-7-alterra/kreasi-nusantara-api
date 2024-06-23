@@ -17,6 +17,7 @@ type ArticleAdminResponse struct {
 	ID        uuid.UUID `json:"id"`
 	Tags      string    `json:"tags"`
 	Title     string    `json:"title"`
+	Content   string    `json:"content"`
 	Author    string    `json:"author"`
 	Image     string    `json:"image"`
 	CreatedAt string    `json:"created_at"`
@@ -47,6 +48,7 @@ type ArticleRequest struct {
 	Image   string `json:"image" form:"image"`
 	Content string `json:"content" form:"content"`
 	Tags    string `json:"tags" form:"tags"`
+	Author  string `json:"author" form:"author"`
 }
 
 type AuthorInformation struct {

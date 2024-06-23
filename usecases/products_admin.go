@@ -38,7 +38,7 @@ type productAdminUseCase struct {
 	tokenUtil              token.TokenUtil
 }
 
-func NewProductAdminUseCase(productAdminRepository repositories.ProductAdminRepository, tokenUtil token.TokenUtil, productRepository repositories.ProductRepository,) *productAdminUseCase {
+func NewProductAdminUseCase(productAdminRepository repositories.ProductAdminRepository, tokenUtil token.TokenUtil, productRepository repositories.ProductRepository) *productAdminUseCase {
 	return &productAdminUseCase{
 		productAdminRepository: productAdminRepository,
 		tokenUtil:              tokenUtil,
@@ -275,14 +275,23 @@ func (pu *productAdminUseCase) GetAllProduct(c echo.Context, req *dto_base.Pagin
 			})
 		}
 
+		var productVariants []dto.ProductVariantsResponse
+		for _, variant := range *product.ProductVariants {
+			productVariants = append(productVariants, dto.ProductVariantsResponse{
+				Stock: variant.Stock,
+				Size:  variant.Size,
+			})
+		}
+
 		productResponses = append(productResponses, dto.ProductResponseAdmin{
-			ID:            product.ID,
-			Name:          product.Name,
-			MinOrder:      product.MinOrder,
-			CategoryName:  categoryName,
-			Price:         product.ProductPricing.OriginalPrice,
-			ProductImages: productImages,
-			Rating:        summary.AverageRating,
+			ID:              product.ID,
+			Name:            product.Name,
+			MinOrder:        product.MinOrder,
+			CategoryName:    categoryName,
+			Price:           product.ProductPricing.OriginalPrice,
+			ProductImages:   productImages,
+			ProductVariants: productVariants,
+			Rating:          summary.AverageRating,
 		})
 	}
 
@@ -448,14 +457,23 @@ func (pu *productAdminUseCase) SearchProductByName(c echo.Context, req *dto_base
 			})
 		}
 
+		var productVariants []dto.ProductVariantsResponse
+		for _, variant := range *product.ProductVariants {
+			productVariants = append(productVariants, dto.ProductVariantsResponse{
+				Stock: variant.Stock,
+				Size:  variant.Size,
+			})
+		}
+
 		productResponses = append(productResponses, dto.ProductResponseAdmin{
-			ID:            product.ID,
-			Name:          product.Name,
-			MinOrder:      product.MinOrder,
-			CategoryName:  categoryName,
-			Price:         product.ProductPricing.OriginalPrice,
-			ProductImages: productImages,
-			Rating:        summary.AverageRating,
+			ID:              product.ID,
+			Name:            product.Name,
+			MinOrder:        product.MinOrder,
+			CategoryName:    categoryName,
+			Price:           product.ProductPricing.OriginalPrice,
+			ProductImages:   productImages,
+			ProductVariants: productVariants,
+			Rating:          summary.AverageRating,
 		})
 	}
 

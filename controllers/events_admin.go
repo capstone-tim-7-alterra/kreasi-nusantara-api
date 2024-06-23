@@ -152,6 +152,7 @@ func (ec *EventAdminController) CreateEventsAdmin(c echo.Context) error {
 	location := dto.EventLocationRequest{
 		Building:    form.Value["location.building"][0],
 		Address:     form.Value["location.address"][0],
+		Province:    form.Value["location.province"][0],
 		City:        form.Value["location.city"][0],
 		Subdistrict: form.Value["location.subdistrict"][0],
 		PostalCode:  form.Value["location.postal_code"][0],
@@ -271,6 +272,7 @@ func (ec *EventAdminController) UpdateEventsAdmin(c echo.Context) error {
 	location := dto.EventLocationRequest{
 		Building:    form.Value["location.building"][0],
 		Address:     form.Value["location.address"][0],
+		Province:    form.Value["location.province"][0],
 		City:        form.Value["location.city"][0],
 		Subdistrict: form.Value["location.subdistrict"][0],
 		PostalCode:  form.Value["location.postal_code"][0],

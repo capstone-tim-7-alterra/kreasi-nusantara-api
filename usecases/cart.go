@@ -49,6 +49,8 @@ func (cu *cartUseCase) GetUserCart(c echo.Context, userID uuid.UUID) (dto.CartIt
 
 		if len(item.ProductVariant.Products.ProductImages) > 0 && item.ProductVariant.Products.ProductImages[0].ImageUrl != nil {
 			productImage = *item.ProductVariant.Products.ProductImages[0].ImageUrl
+		} else {
+			productImage = ""
 		}
 
 		productInfo := dto.ProductInformation{

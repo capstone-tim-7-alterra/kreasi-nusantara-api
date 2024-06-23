@@ -70,15 +70,20 @@ func (puc *productUseCase) GetProducts(c echo.Context, req *dto_base.PaginationR
     for i, product := range products {
         summary, exists := ratingReviewMap[product.ID]
         if !exists {
-            // If there are no reviews for the product, set default values
             summary = entities.RatingSummary{
                 AverageRating: 0,
                 TotalReview:   0,
             }
         }
+
+        var imageUrl string
+        if len(product.ProductImages) > 0 && product.ProductImages[0].ImageUrl != nil {
+            imageUrl = *product.ProductImages[0].ImageUrl
+        }
+
         productResponse[i] = dto.ProductResponse{
             ID:              product.ID,
-            Image:           *product.ProductImages[0].ImageUrl,
+            Image:           imageUrl,
             Name:            product.Name,
             OriginalPrice:   product.ProductPricing.OriginalPrice,
             DiscountPercent: product.ProductPricing.DiscountPercent,
@@ -114,6 +119,7 @@ func (puc *productUseCase) GetProducts(c echo.Context, req *dto_base.PaginationR
 
     return productResponse, paginationMetadata, link, nil
 }
+
 
 func (puc *productUseCase) GetProductByID(c echo.Context, productId uuid.UUID) (*dto.ProductDetailResponse, error) {
     ctx, cancel := context.WithCancel(c.Request().Context())
@@ -207,7 +213,6 @@ func (puc *productUseCase) GetProductsByCategory(c echo.Context, categoryId int,
         return nil, nil, nil, err
     }
 
-    // Membuat map untuk memudahkan pencarian rating dan review berdasarkan product ID
     ratingReviewMap := make(map[uuid.UUID]entities.RatingSummary)
     for _, summary := range averageRatingsAndReviews {
         ratingReviewMap[summary.ProductID] = summary
@@ -215,10 +220,15 @@ func (puc *productUseCase) GetProductsByCategory(c echo.Context, categoryId int,
 
     productResponse := make([]dto.ProductResponse, len(products))
     for i, product := range products {
+        var imageUrl string
+        if len(product.ProductImages) > 0 && product.ProductImages[0].ImageUrl != nil {
+            imageUrl = *product.ProductImages[0].ImageUrl
+        }
+
         summary := ratingReviewMap[product.ID]
         productResponse[i] = dto.ProductResponse{
             ID:              product.ID,
-            Image:           *product.ProductImages[0].ImageUrl,
+            Image:           imageUrl,
             Name:            product.Name,
             OriginalPrice:   product.ProductPricing.OriginalPrice,
             DiscountPercent: product.ProductPricing.DiscountPercent,
@@ -269,7 +279,6 @@ func (puc *productUseCase) SearchProducts(c echo.Context, req *dto_base.SearchRe
         return nil, nil, err
     }
 
-    // Membuat map untuk memudahkan pencarian rating dan review berdasarkan product ID
     ratingReviewMap := make(map[uuid.UUID]entities.RatingSummary)
     for _, summary := range averageRatingsAndReviews {
         ratingReviewMap[summary.ProductID] = summary
@@ -277,10 +286,15 @@ func (puc *productUseCase) SearchProducts(c echo.Context, req *dto_base.SearchRe
 
     productResponse := make([]dto.ProductResponse, len(products))
     for i, product := range products {
+        var imageUrl string
+        if len(product.ProductImages) > 0 && product.ProductImages[0].ImageUrl != nil {
+            imageUrl = *product.ProductImages[0].ImageUrl
+        }
+
         summary := ratingReviewMap[product.ID]
         productResponse[i] = dto.ProductResponse{
             ID:              product.ID,
-            Image:           *product.ProductImages[0].ImageUrl,
+            Image:           imageUrl,
             Name:            product.Name,
             OriginalPrice:   product.ProductPricing.OriginalPrice,
             DiscountPercent: product.ProductPricing.DiscountPercent,

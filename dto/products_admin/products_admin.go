@@ -34,27 +34,28 @@ type ProductVideosRequest struct {
 }
 
 type ProductResponse struct {
-	ID              uuid.UUID                  `json:"id"`
-	Name            string                     `json:"name"`
-	Description     string                     `json:"description"`
-	MinOrder        int                        `json:"min_order"`
-	AuthorID        uuid.UUID                  `json:"author_id"`
-	CategoryName    string                     `json:"category_name"` // Pastikan nama field benar
-	ProductPricing  ProductPricingResponse     `json:"product_pricing"`
+	ID              uuid.UUID                 `json:"id"`
+	Name            string                    `json:"name"`
+	Description     string                    `json:"description"`
+	MinOrder        int                       `json:"min_order"`
+	AuthorID        uuid.UUID                 `json:"author_id"`
+	CategoryName    string                    `json:"category_name"` // Pastikan nama field benar
+	ProductPricing  ProductPricingResponse    `json:"product_pricing"`
 	ProductVariants []ProductVariantsResponse `json:"product_variants"`
-	ProductImages   []ProductImagesResponse    `json:"product_images"`
-	ProductVideos   []ProductVideosResponse    `json:"product_videos"`
-	Rating        float64                 `json:"rating"`
+	ProductImages   []ProductImagesResponse   `json:"product_images"`
+	ProductVideos   []ProductVideosResponse   `json:"product_videos"`
+	Rating          float64                   `json:"rating"`
 }
 
 type ProductResponseAdmin struct {
-	ID            uuid.UUID               `json:"id"`
-	Name          string                  `json:"name"`
-	MinOrder      int                     `json:"min_order"`
-	CategoryName  string                  `json:"category_name"` // Pastikan nama field benar
-	Price         int                     `json:"price"`
-	ProductImages []ProductImagesResponse `json:"product_images"`
-	Rating        float64                 `json:"rating"`
+	ID              uuid.UUID                 `json:"id"`
+	Name            string                    `json:"name"`
+	MinOrder        int                       `json:"min_order"`
+	CategoryName    string                    `json:"category_name"` // Pastikan nama field benar
+	Price           int                       `json:"price"`
+	ProductImages   []ProductImagesResponse   `json:"product_images"`
+	Rating          float64                   `json:"rating"`
+	ProductVariants []ProductVariantsResponse `json:"product_variants"`
 }
 
 type ProductReviewResponse struct {
@@ -68,7 +69,6 @@ type ProductPricingResponse struct {
 }
 
 type ProductVariantsResponse struct {
-	Price int    `json:"price"`
 	Stock int    `json:"stock"`
 	Size  string `json:"size"`
 }
