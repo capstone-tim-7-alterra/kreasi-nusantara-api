@@ -7,11 +7,12 @@ import (
 )
 
 type Cart struct {
-	ID        uuid.UUID    `gorm:"primary_key;type:uuid"`
-	UserID    uuid.UUID    `gorm:"type:uuid;not null"`
-	Items     []CartItems `gorm:"foreignKey:CartID"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID                 uuid.UUID             `gorm:"primary_key;type:uuid"`
+	UserID             uuid.UUID             `gorm:"type:uuid;not null"`
+	Items              []CartItems           `gorm:"foreignKey:CartID"`
+	ProductTransaction *[]ProductTransaction `gorm:"foreignKey:CartId"`
+	CreatedAt          time.Time
+	UpdatedAt          time.Time
 }
 
 type CartItems struct {

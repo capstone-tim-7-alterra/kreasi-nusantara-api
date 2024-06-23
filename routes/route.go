@@ -7,6 +7,7 @@ import (
 	"kreasi-nusantara-api/routes/cart"
 	"kreasi-nusantara-api/routes/events"
 	"kreasi-nusantara-api/routes/events_admin"
+	"kreasi-nusantara-api/routes/event_transactions"
 	"kreasi-nusantara-api/routes/product_transactions"
 	"kreasi-nusantara-api/routes/products"
 	"kreasi-nusantara-api/routes/products_admin"
@@ -33,6 +34,7 @@ func InitRoute(e *echo.Echo, db *gorm.DB, v *validation.Validator) {
 	articlesAdminRoute := baseRoute.Group("/admin")
 	cartRoute := baseRoute.Group("")
 	productTransactionRoute := baseRoute.Group("")
+	eventTransactionRoute := baseRoute.Group("")
 	paymentNotifRoute := baseRoute.Group("")
 	productDashboardRoute := baseRoute.Group("/admin")
 
@@ -48,6 +50,7 @@ func InitRoute(e *echo.Echo, db *gorm.DB, v *validation.Validator) {
 	events_admin.InitEventsAdminRoute(eventsadminRoute, db, v)
 	cart.InitCartRoute(cartRoute, db, v)
 	product_transactions.InitProductTransactionsRoute(productTransactionRoute, db, v)
+	event_transactions.InitEventTransactionsRoute(eventTransactionRoute, db, v)
 	webhook.InitWebhookRoute(paymentNotifRoute, db)
 	product_dashboard.InitProductDashboard(productDashboardRoute, db, v)
 }

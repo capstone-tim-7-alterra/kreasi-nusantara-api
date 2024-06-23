@@ -2,11 +2,13 @@ package usecases
 
 import (
 	"kreasi-nusantara-api/config"
+	"kreasi-nusantara-api/drivers/redis"
 	"kreasi-nusantara-api/dto"
 	"kreasi-nusantara-api/entities"
 	"kreasi-nusantara-api/repositories"
 	"kreasi-nusantara-api/utils/token"
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -24,14 +26,16 @@ type productTransactionUseCase struct {
 	productRepository repositories.ProductTransactionRepository
 	tokenUtil         token.TokenUtil
 	cartUseCase       CartUseCase
+	redisClient       redis.RedisClient
 	config            config.MidtransConfig
 }
 
-func NewProductTransactionUseCase(productRepository repositories.ProductTransactionRepository, cartUseCase CartUseCase, tokenUtil token.TokenUtil, config config.MidtransConfig) *productTransactionUseCase {
+func NewProductTransactionUseCase(productRepository repositories.ProductTransactionRepository, cartUseCase CartUseCase, tokenUtil token.TokenUtil, redisClient redis.RedisClient, config config.MidtransConfig) *productTransactionUseCase {
 	return &productTransactionUseCase{
 		productRepository: productRepository,
-		cartUseCase:       cartUseCase,
 		tokenUtil:         tokenUtil,
+		cartUseCase:       cartUseCase,
+		redisClient:       redisClient,
 		config:            config,
 	}
 }
@@ -84,6 +88,12 @@ func (tu *productTransactionUseCase) CreateTransaction(c echo.Context, request d
 		return dto.TransactionResponse{}, echo.NewHTTPError(http.StatusInternalServerError, "Failed to create transaction in database")
 	}
 
+	key := "transaction-" + transactionData.ID
+	err = tu.redisClient.Set(key, "product", time.Hour*24)
+	if err != nil {
+		return dto.TransactionResponse{}, err
+	}
+
 	return dto.TransactionResponse{
 		ID:                transactionData.ID,
 		CartId:            transactionData.CartId,
@@ -94,7 +104,6 @@ func (tu *productTransactionUseCase) CreateTransaction(c echo.Context, request d
 	}, nil
 
 }
-
 
 func (tu *productTransactionUseCase) GetTransactionByID(c echo.Context, transactionId string) (dto.TransactionResponse, error) {
 	transactionData, err := tu.productRepository.GetTransactionByID(c.Request().Context(), transactionId)
