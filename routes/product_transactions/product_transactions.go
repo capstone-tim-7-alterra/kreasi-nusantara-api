@@ -3,6 +3,7 @@ package product_transactions
 import (
 	"kreasi-nusantara-api/config"
 	"kreasi-nusantara-api/controllers"
+	"kreasi-nusantara-api/drivers/redis"
 	"kreasi-nusantara-api/repositories"
 	"kreasi-nusantara-api/usecases"
 	"kreasi-nusantara-api/utils/token"
@@ -18,9 +19,10 @@ func InitProductTransactionsRoute(g *echo.Group, db *gorm.DB, v *validation.Vali
 	cartRepo := repositories.NewCartRepository(db)
 	cartUseCase := usecases.NewCartUseCase(cartRepo)
 	config := config.InitConfigMidtrans()
+	redisClient := redis.NewRedisClient()
 
 	productTransactionRepo := repositories.NewProductTransactionRepository(db)
-	productTransactionUseCase := usecases.NewProductTransactionUseCase(productTransactionRepo, cartUseCase, tokenUtil, config)
+	productTransactionUseCase := usecases.NewProductTransactionUseCase(productTransactionRepo, cartUseCase, tokenUtil, *redisClient ,config)
 	productTransactionController := controllers.NewProductTransactionController(productTransactionUseCase, v)
 
 	g.Use(echojwt.WithConfig(token.GetJWTConfig()))
