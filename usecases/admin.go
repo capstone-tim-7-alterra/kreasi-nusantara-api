@@ -156,7 +156,7 @@ func (au *adminUsecase) GetAllAdmin(c echo.Context, req *dto_base.PaginationRequ
 
 	adminResponses := make([]dto.AdminResponse, len(admins))
 	for i, admin := range admins {
-		createdAtStr := admin.CreatedAt.Format("24/05/2024")
+		createdAtStr := admin.CreatedAt.Format("02/01/2006")
 
 		adminResponses[i] = dto.AdminResponse{
 			ID:           admin.ID.String(),
@@ -210,7 +210,7 @@ func (au *adminUsecase) SearchAdminByUsername(c echo.Context, req *dto_base.Sear
 
 	adminResponses := make([]dto.AdminResponse, len(admins))
 	for i, admin := range admins {
-		createdAtStr := admin.CreatedAt.Format("24/05/2024")
+		createdAtStr := admin.CreatedAt.Format("02/01/2006")
 
 		adminResponses[i] = dto.AdminResponse{
 			ID:           admin.ID.String(),
@@ -313,7 +313,7 @@ func (au *adminUsecase) GetAdminByID(c echo.Context, adminID uuid.UUID) (*dto.Ad
 		return nil, err
 	}
 
-	createdAtStr := admins.CreatedAt.Format("24/05/2024")
+	createdAtStr := admins.CreatedAt.Format("02/01/2006")
 
 	adminResponse := &dto.AdminResponse{
 		ID:           admins.ID.String(),

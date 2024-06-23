@@ -124,7 +124,7 @@ func (pu *eventAdminUseCase) GetEventsAdmin(c echo.Context, req *dto_base.Pagina
 			Status:     status,
 			TypeTicket: ticketDetailsStr,                // Memasukkan nama tiket ke dalam TypeTicket
 			Date:       event.Date.Format("02-01-2006"), // Format tanggal yang diinginkan
-			Location:   location.Building,               // Sesuaikan dengan data lokasi yang diambil
+			Location:   location.Province,               // Sesuaikan dengan data lokasi yang diambil
 			Photos:     photos,
 		})
 	}
@@ -210,6 +210,7 @@ func (pu *eventAdminUseCase) CreateEventsAdmin(c echo.Context, req *dto.EventReq
 		ID:          locationID,
 		Building:    req.Location.Building,
 		Address:     req.Location.Address,
+		Province:    req.Location.Province,
 		City:        req.Location.City,
 		Subdistrict: req.Location.Subdistrict,
 		PostalCode:  req.Location.PostalCode,
@@ -313,6 +314,7 @@ func (pu *eventAdminUseCase) GetEventByID(c echo.Context, eventID uuid.UUID) (*d
 			ID:          location.ID,
 			Building:    location.Building,
 			Address:     location.Address,
+			Province:    location.Province,
 			City:        location.City,
 			Subdistrict: location.Subdistrict,
 			PostalCode:  location.PostalCode,
@@ -422,6 +424,7 @@ func (pu *eventAdminUseCase) UpdateEventsAdmin(c echo.Context, eventID uuid.UUID
 			ID:          existingEvent.LocationID,
 			Building:    req.Location.Building,
 			Address:     req.Location.Address,
+			Province:    req.Location.Province,
 			City:        req.Location.City,
 			Subdistrict: req.Location.Subdistrict,
 			PostalCode:  req.Location.PostalCode,

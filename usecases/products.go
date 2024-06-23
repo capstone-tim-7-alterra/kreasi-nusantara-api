@@ -179,6 +179,7 @@ func (puc *productUseCase) GetProductByID(c echo.Context, productId uuid.UUID) (
 
     for i, variant := range *product.ProductVariants {
         productDetailResponse.Variants[i] = dto.ProductVariantResponse{
+            ID:    variant.ID,
             Size:  variant.Size,
             Stock: variant.Stock,
         }
