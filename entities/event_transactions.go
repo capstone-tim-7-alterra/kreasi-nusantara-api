@@ -11,6 +11,7 @@ type EventTransaction struct {
 	EventPriceID      uuid.UUID `gorm:"type:uuid;not null"`
 	UserId            uuid.UUID `gorm:"type:uuid;not null"`
 	TransactionDate   time.Time
+	Quantity          int `gorm:"omitempty"`
 	TotalAmount       float64
 	TransactionStatus string
 	TransactionMethod string

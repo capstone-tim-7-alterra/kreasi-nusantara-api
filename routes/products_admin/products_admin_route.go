@@ -39,4 +39,5 @@ func InitProductAdminRoute(g *echo.Group, db *gorm.DB, v *validation.Validator) 
 	g.PUT("/products/:id", productAdminController.UpdateProduct)
 	g.GET("/products/search", productAdminController.SearchProductByName)
 	g.GET("/products/:id", productAdminController.GetProductByID)
+	g.POST("/products/import", productAdminController.ImportProductsFromCSV)
 }

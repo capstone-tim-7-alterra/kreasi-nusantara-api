@@ -28,6 +28,7 @@ type AdminUsecase interface {
 	DeleteAdmin(ctx echo.Context, adminID uuid.UUID) error
 	SearchAdminByUsername(c echo.Context, req *dto_base.SearchRequest) ([]dto.AdminResponse, *dto_base.MetadataResponse, error)
 	GetAdminByID(c echo.Context, adminID uuid.UUID) (*dto.AdminResponse, error)
+	GetAdminAvatar(c echo.Context, adminID uuid.UUID) (*dto.AdminAvatarResponse, error)
 }
 
 type adminUsecase struct {
@@ -304,6 +305,28 @@ func (au *adminUsecase) DeleteAdmin(ctx echo.Context, adminID uuid.UUID) error {
 
 	return nil
 }
+
+func (au *adminUsecase) GetAdminAvatar(c echo.Context, adminID uuid.UUID) (*dto.AdminAvatarResponse, error) {
+	ctx := c.Request().Context()
+
+	admins, err := au.adminRepo.GetAdminByID(ctx, adminID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if admin is nil
+	if admins == nil {
+		return nil, fmt.Errorf("admin with ID %s not found", adminID)
+	}
+
+	adminResponse := &dto.AdminAvatarResponse{
+		Photo: admins.Photo,
+		Name:  admins.FirstName + " " + admins.LastName,
+	}
+
+	return adminResponse, nil
+}
+
 
 func (au *adminUsecase) GetAdminByID(c echo.Context, adminID uuid.UUID) (*dto.AdminResponse, error) {
 	ctx := c.Request().Context()

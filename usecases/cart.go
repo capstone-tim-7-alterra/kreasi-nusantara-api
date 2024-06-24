@@ -55,6 +55,7 @@ func (cu *cartUseCase) GetUserCart(c echo.Context, userID uuid.UUID) (dto.CartIt
 
 		productInfo := dto.ProductInformation{
 			CartItemID:       item.ID,
+			CartID:           item.CartID,
 			ProductVariantID: item.ProductVariantID,
 			ProductName:      item.ProductVariant.Products.Name,
 			ProductImage:     productImage,
@@ -97,3 +98,4 @@ func (cu *cartUseCase) DeleteCartItem(c echo.Context, cartItemID uuid.UUID) erro
 
 	return cu.cartRepository.DeleteCartItems(ctx, cartItemID)
 }
+

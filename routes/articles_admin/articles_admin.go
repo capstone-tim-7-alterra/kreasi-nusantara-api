@@ -24,7 +24,7 @@ func InitArticleAdminRoute(g *echo.Group, db *gorm.DB, v *validation.Validator) 
 
 	articleAdminRepo := repositories.NewArticleAdminRepository(db)
 	articleAdminUsecase := usecases.NewArticleUseCaseAdmin(articleAdminRepo, tokenUtil, adminRepo)
-	articleAdminController := controllers.NewArticlesAdminController(articleAdminUsecase, v, cloudinaryService)
+	articleAdminController := controllers.NewArticlesAdminController(articleAdminUsecase, v, cloudinaryService, tokenUtil)
 
 	g.Use(echojwt.WithConfig(token.GetJWTConfig()), middlewares.IsAdminOrSuperAdmin)
 	g.GET("/articles", articleAdminController.GetArticles)

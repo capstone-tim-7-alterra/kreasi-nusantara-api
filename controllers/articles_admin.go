@@ -8,6 +8,7 @@ import (
 	"kreasi-nusantara-api/usecases"
 	err_util "kreasi-nusantara-api/utils/error"
 	http_util "kreasi-nusantara-api/utils/http"
+	"kreasi-nusantara-api/utils/token"
 	"kreasi-nusantara-api/utils/validation"
 	"net/http"
 	"strconv"
@@ -21,20 +22,19 @@ type ArticlesAdminController struct {
 	articleUseCaseAdmin usecases.ArticleUseCaseAdmin
 	validator           *validation.Validator
 	cloudinaryService   cloudinary.CloudinaryService
+	tokenUtil           token.TokenUtil
 }
 
-func NewArticlesAdminController(articleUseCaseAdmin usecases.ArticleUseCaseAdmin, validator *validation.Validator, cloudinaryService cloudinary.CloudinaryService) *ArticlesAdminController {
+func NewArticlesAdminController(articleUseCaseAdmin usecases.ArticleUseCaseAdmin, validator *validation.Validator, cloudinaryService cloudinary.CloudinaryService, tokenUtil token.TokenUtil) *ArticlesAdminController {
 	return &ArticlesAdminController{
 		articleUseCaseAdmin: articleUseCaseAdmin,
 		validator:           validator,
 		cloudinaryService:   cloudinaryService,
+		tokenUtil:           tokenUtil,
 	}
 }
 
-
-
 func (ac *ArticlesAdminController) GetArticles(c echo.Context) error {
-
 
 	page := strings.TrimSpace(c.QueryParam("page"))
 	limit := strings.TrimSpace(c.QueryParam("limit"))
@@ -60,12 +60,10 @@ func (ac *ArticlesAdminController) GetArticles(c echo.Context) error {
 		return http_util.HandleErrorResponse(c, http.StatusInternalServerError, msg.FAILED_GET_ARTICLES)
 	}
 
-
 	return http_util.HandlePaginationResponse(c, msg.GET_ARTICLES_SUCCESS, result, meta, link)
 }
 
 func (ac *ArticlesAdminController) SearchArticles(c echo.Context) error {
-
 
 	item := strings.TrimSpace(c.QueryParam("item"))
 	limit := strings.TrimSpace(c.QueryParam("limit"))
@@ -138,6 +136,8 @@ func (ac *ArticlesAdminController) CreateArticlesAdmin(c echo.Context) error {
 		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.MISMATCH_DATA_TYPE)
 	}
 
+	claims := ac.tokenUtil.GetClaims(c)
+
 	var request dto.ArticleRequest
 	request.Title = form.Value["title"][0]
 	if request.Title == "" {
@@ -178,7 +178,7 @@ func (ac *ArticlesAdminController) CreateArticlesAdmin(c echo.Context) error {
 		return http_util.HandleErrorResponse(c, http.StatusBadRequest, msg.INVALID_REQUEST_DATA)
 	}
 
-	err = ac.articleUseCaseAdmin.CreateArticles(c, &request)
+	err = ac.articleUseCaseAdmin.CreateArticles(c, &request, claims.ID)
 	if err != nil {
 		return http_util.HandleErrorResponse(c, http.StatusInternalServerError, msg.FAILED_CREATE_ARTICLE)
 	}
