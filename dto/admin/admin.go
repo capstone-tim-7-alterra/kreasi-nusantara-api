@@ -43,7 +43,7 @@ type AdminResponse struct {
 
 type AdminAvatarResponse struct {
 	Photo *string `json:"photo"`
-	Name  string  `json:"name`
+	Name  string  `json:"name"`
 }
 
 type UpdateAdminRequest struct {
