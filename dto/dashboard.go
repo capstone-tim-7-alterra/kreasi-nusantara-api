@@ -34,6 +34,10 @@ type ProductHeader struct {
 	TicketProfit  float64 `json:"ticket_profit"`
 	TotalTicket   int     `json:"total_ticket"`
 	DeletedTicket int     `json:"deleted_ticket"`
+	TotalLikes    int     `json:"total_likes"`
+	TotalComments int     `json:"total_comments"`
+	TotalVisitors int     `json:"total_visitors"`
+	TotalShares   int     `json:"total_shares"`
 }
 
 type ProductChart struct {

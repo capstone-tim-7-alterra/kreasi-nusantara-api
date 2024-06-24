@@ -221,6 +221,7 @@ func (pduc *productDashboardUseCase) GetEventReport(c echo.Context, req *dto_bas
 }
 
 func (pduc *productDashboardUseCase) GetHeaderProduct(c echo.Context, req *dto_base.PaginationRequest) (*dto.ProductHeader, error) {
+	log := logrus.New()
 	ctx, cancel := context.WithCancel(c.Request().Context())
 	defer cancel()
 
@@ -239,10 +240,38 @@ func (pduc *productDashboardUseCase) GetHeaderProduct(c echo.Context, req *dto_b
 		return nil, err
 	}
 
-	// ticket, err := pduc.productRepository.GetEventItems(ctx)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	ticket, err := pduc.productRepository.GetEventItems(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	article, err := pduc.productRepository.GetArticleItems(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Menghitung total like, comment, visitor, dan share
+	totalLikes := 0
+	totalComments := 0
+	totalVisitors := 0
+	totalShares := 0
+	for _, article := range article {
+		totalLikes += article.LikesCount
+		totalComments += article.CommentsCount
+		totalVisitors = totalLikes + totalComments + 2
+		totalShares = totalLikes + 2
+	}
+
+	totalTicket := 0
+	totalDeletedTicket := 0
+	for _, ticket := range ticket {
+		for _, event := range ticket.Prices {
+			totalTicket += event.NoOfTicket
+			if event.DeletedAt.Valid {
+				totalDeletedTicket += event.NoOfTicket
+			}
+		}
+	}
 
 	// Menghitung total event yang terjual
 	totalEvent := 0
@@ -251,6 +280,8 @@ func (pduc *productDashboardUseCase) GetHeaderProduct(c echo.Context, req *dto_b
 		totalEvent += event.Quantity
 		totalAmount += event.TotalAmount
 	}
+
+	log.Info(totalEvent)
 
 	// Menghitung total jumlah produk yang terjual
 	totalQuantity := 0
@@ -267,10 +298,15 @@ func (pduc *productDashboardUseCase) GetHeaderProduct(c echo.Context, req *dto_b
 	}
 
 	productHeader := &dto.ProductHeader{
+		TotalLikes:    totalLikes,
+		TotalComments: totalComments,
+		TotalVisitors: totalVisitors,
+		TotalShares:   totalShares,
 		ProductSold:   totalQuantity,
 		ProductProfit: totalIncome,
 		TicketSold:    totalEvent,
 		TicketProfit:  totalAmount,
+		TotalTicket:   totalTicket,
 	}
 
 	return productHeader, nil
@@ -321,7 +357,6 @@ func (pduc *productDashboardUseCase) GetProductChart(c echo.Context, req *dto_ba
 
 	return productCharts, nil
 }
-
 
 func (pduc *productDashboardUseCase) GetEventChart(c echo.Context, req *dto_base.PaginationRequest) ([]dto.EventChart, error) {
 	eventDashboard, _, _, err := pduc.GetEventReport(c, req)
