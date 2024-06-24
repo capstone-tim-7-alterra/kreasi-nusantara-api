@@ -1,6 +1,9 @@
 package controllers
 
 import (
+	"encoding/csv"
+	"fmt"
+	"io"
 	"kreasi-nusantara-api/drivers/cloudinary"
 	"kreasi-nusantara-api/usecases"
 	http_util "kreasi-nusantara-api/utils/http"
@@ -218,6 +221,117 @@ func (c *ProductsAdminController) CreateProduct(ctx echo.Context) error {
 
 	// Handle response if successful
 	return http_util.HandleSuccessResponse(ctx, http.StatusCreated, msg.PRODUCT_CREATED_SUCCESS, nil)
+}
+
+func (c *ProductsAdminController) ImportProductsFromCSV(ctx echo.Context) error {
+	file, err := ctx.FormFile("file")
+	if err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Failed to get file")
+	}
+
+	src, err := file.Open()
+	if err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, "Failed to open file")
+	}
+	defer src.Close()
+
+	reader := csv.NewReader(src)
+	header, err := reader.Read()
+	if err != nil {
+		return http_util.HandleErrorResponse(ctx, http.StatusBadRequest, "Failed to read header")
+	}
+
+	var currentProduct *dto.ProductRequest
+
+	for {
+		record, err := reader.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, "Failed to read file")
+		}
+
+		if name := record[getIndex(header, "name")]; name != "" {
+			// Jika menemukan produk baru, simpan produk sebelumnya
+			if currentProduct != nil {
+				if err := c.productAdminUseCase.CreateProduct(ctx, currentProduct); err != nil {
+					return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, fmt.Sprintf("Failed to create product: %v", err))
+				}
+			}
+
+			// Inisialisasi produk baru
+			currentProduct = &dto.ProductRequest{
+				Name:        name,
+				Description: record[getIndex(header, "description")],
+				MinOrder:    atoi(record[getIndex(header, "min_order")]),
+				CategoryID:  atoi(record[getIndex(header, "category_id")]),
+				ProductPricing: dto.ProductPricingRequest{
+					OriginalPrice:   atoi(record[getIndex(header, "original_price")]),
+					DiscountPercent: atoiPtr(record[getIndex(header, "discount_percent")]),
+				},
+				ProductVariants: &[]dto.ProductVariantsRequest{},
+				ProductImages:   []dto.ProductImagesRequest{},
+				ProductVideos:   []dto.ProductVideosRequest{},
+			}
+		}
+
+		// Tambahkan varian jika ada
+		if variantSize := record[getIndex(header, "variant_size")]; variantSize != "" {
+            variant := dto.ProductVariantsRequest{
+                Size:  variantSize,
+                Stock: atoi(record[getIndex(header, "variant_stock")]),
+            }
+            *currentProduct.ProductVariants = append(*currentProduct.ProductVariants, variant)
+        }
+
+		// Tambahkan gambar jika ada
+		if imageUrl := record[getIndex(header, "image_url")]; imageUrl != "" {
+			image := dto.ProductImagesRequest{
+				ImageUrl: &imageUrl,
+			}
+			currentProduct.ProductImages = append(currentProduct.ProductImages, image)
+		}
+
+		// Tambahkan video jika ada
+		if videoUrl := record[getIndex(header, "video_url")]; videoUrl != "" {
+			video := dto.ProductVideosRequest{
+				VideoUrl: &videoUrl,
+			}
+			currentProduct.ProductVideos = append(currentProduct.ProductVideos, video)
+		}
+	}
+
+	// Simpan produk terakhir
+	if currentProduct != nil {
+		if err := c.productAdminUseCase.CreateProduct(ctx, currentProduct); err != nil {
+			return http_util.HandleErrorResponse(ctx, http.StatusInternalServerError, fmt.Sprintf("Failed to create product: %v", err))
+		}
+	}
+
+	return http_util.HandleSuccessResponse(ctx, http.StatusOK, "Products imported successfully", nil)
+}
+
+func getIndex(header []string, column string) int {
+	for i, v := range header {
+		if v == column {
+			return i
+		}
+	}
+	return -1
+}
+
+func atoi(str string) int {
+	i, _ := strconv.Atoi(str)
+	return i
+}
+
+func atoiPtr(str string) *int {
+	if str == "" {
+		return nil
+	}
+	i := atoi(str)
+	return &i
 }
 
 func (pc *ProductsAdminController) GetAllProducts(c echo.Context) error {

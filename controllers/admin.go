@@ -7,6 +7,7 @@ import (
 	dto_base "kreasi-nusantara-api/dto/base"
 	"kreasi-nusantara-api/usecases"
 	http_util "kreasi-nusantara-api/utils/http"
+	"kreasi-nusantara-api/utils/token"
 	"kreasi-nusantara-api/utils/validation"
 	"net/http"
 	"strconv"
@@ -19,12 +20,14 @@ import (
 type adminController struct {
 	adminUsecase usecases.AdminUsecase
 	validator    *validation.Validator
+	tokenUtil    token.TokenUtil
 }
 
-func NewAdminController(adminUsecase usecases.AdminUsecase, validator *validation.Validator) *adminController {
+func NewAdminController(adminUsecase usecases.AdminUsecase, validator *validation.Validator, tokenUtil token.TokenUtil) *adminController {
 	return &adminController{
 		adminUsecase: adminUsecase,
 		validator:    validator,
+		tokenUtil:    tokenUtil,
 	}
 }
 
@@ -178,6 +181,15 @@ func (ac *adminController) SearchAdminByUsername(c echo.Context) error {
 	return http_util.HandleSearchResponse(c, msg.GET_ADMIN_SUCCESS, result, meta)
 }
 
+func (ac *adminController) GetAvatarAdmin(c echo.Context) error {
+	claims := ac.tokenUtil.GetClaims(c)
+	res, err := ac.adminUsecase.GetAdminAvatar(c, claims.ID)
+	if err != nil {
+		return http_util.HandleErrorResponse(c, http.StatusInternalServerError, msg.FAILED_GET_ADMIN)
+	}
+	return http_util.HandleSuccessResponse(c, http.StatusOK, msg.GET_ADMIN_SUCCESS, res)
+
+}
 
 func (ac *adminController) GetAdminByID(c echo.Context) error {
 	adminID := c.Param("id")

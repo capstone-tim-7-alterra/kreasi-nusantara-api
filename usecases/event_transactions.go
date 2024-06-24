@@ -57,6 +57,7 @@ func (eu *eventTransactionUseCase) CreateEventTransaction(c echo.Context, userID
 	transactionData.UserId = userID
 	transactionData.EventPriceID = request.EventPriceID
 	transactionData.TransactionStatus = "pending"
+	transactionData.Quantity = request.Quantity
 	transactionData.TotalAmount = float64(request.Quantity) * float64(price.Price)
 
 	transactionData.Buyer.ID = uuid.New()

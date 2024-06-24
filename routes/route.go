@@ -5,15 +5,16 @@ import (
 	"kreasi-nusantara-api/routes/articles"
 	"kreasi-nusantara-api/routes/articles_admin"
 	"kreasi-nusantara-api/routes/cart"
+	"kreasi-nusantara-api/routes/event_transactions"
 	"kreasi-nusantara-api/routes/events"
 	"kreasi-nusantara-api/routes/events_admin"
-	"kreasi-nusantara-api/routes/event_transactions"
 	"kreasi-nusantara-api/routes/product_transactions"
 	"kreasi-nusantara-api/routes/products"
 	"kreasi-nusantara-api/routes/products_admin"
 	"kreasi-nusantara-api/routes/user"
 	"kreasi-nusantara-api/routes/webhook"
 	"kreasi-nusantara-api/utils/validation"
+	"kreasi-nusantara-api/routes/dashboard"
 
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -34,6 +35,7 @@ func InitRoute(e *echo.Echo, db *gorm.DB, v *validation.Validator) {
 	productTransactionRoute := baseRoute.Group("")
 	eventTransactionRoute := baseRoute.Group("")
 	paymentNotifRoute := baseRoute.Group("")
+	productDashboardRoute := baseRoute.Group("/admin")
 
 	user.InitUserRoute(userRoute, db, v)
 	user.InitUserAddressesRoute(userRoute, db, v)
@@ -49,4 +51,5 @@ func InitRoute(e *echo.Echo, db *gorm.DB, v *validation.Validator) {
 	product_transactions.InitProductTransactionsRoute(productTransactionRoute, db, v)
 	event_transactions.InitEventTransactionsRoute(eventTransactionRoute, db, v)
 	webhook.InitWebhookRoute(paymentNotifRoute, db)
+	dashboard.InitProductDashboard(productDashboardRoute, db, v)
 }

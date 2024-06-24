@@ -440,15 +440,7 @@ func (pu *productAdminUseCase) SearchProductByName(c echo.Context, req *dto_base
 		if !ok {
 			categoryName = "Unknown" // Kategori tidak ditemukan, bisa disesuaikan dengan kebutuhan Anda
 		}
-		summary, exists := ratingReviewMap[product.ID]
-		if !exists {
-			// If there are no reviews for the product, set default values
-			summary = entities.RatingSummary{
-				AverageRating: 0,
-				TotalReview:   0,
-			}
-		}
-
+		
 		// Konversi entitas ProductImages ke DTO
 		var productImages []dto.ProductImagesResponse
 		for _, image := range product.ProductImages {
@@ -464,7 +456,7 @@ func (pu *productAdminUseCase) SearchProductByName(c echo.Context, req *dto_base
 				Size:  variant.Size,
 			})
 		}
-
+		summary := ratingReviewMap[product.ID]
 		productResponses = append(productResponses, dto.ProductResponseAdmin{
 			ID:              product.ID,
 			Name:            product.Name,

@@ -54,6 +54,7 @@ func (cc *cartController) GetCartItems(c echo.Context) error {
 	return http_util.HandleSuccessResponse(c, http.StatusOK, msg.GET_CART_ITEMS_SUCCESS, res)
 }
 
+
 func (cc *cartController) UpdateCartItems(c echo.Context) error {
 	cartItemID := uuid.MustParse(c.Param("cartItemID"))
 

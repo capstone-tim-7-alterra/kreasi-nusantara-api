@@ -2,7 +2,6 @@ package dto
 
 import (
 	"mime/multipart"
-
 )
 
 type RegisterRequest struct {
@@ -31,8 +30,6 @@ type LoginResponse struct {
 	Token    string `json:"token"`
 }
 
-
-
 type AdminResponse struct {
 	ID           string  `json:"id"`
 	FirstName    string  `json:"first_name"`
@@ -42,6 +39,11 @@ type AdminResponse struct {
 	IsSuperAdmin bool    `json:"is_super_admin"`
 	Photo        *string `json:"photo"`
 	CreatedAt    string  `json:"created_at"`
+}
+
+type AdminAvatarResponse struct {
+	Photo *string `json:"photo"`
+	Name  string  `json:"name"`
 }
 
 type UpdateAdminRequest struct {

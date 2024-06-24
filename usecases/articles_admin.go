@@ -23,7 +23,7 @@ import (
 type ArticleUseCaseAdmin interface {
 	GetArticles(c echo.Context, req *dto_base.PaginationRequest) (*[]dto.ArticleAdminResponse, *dto_base.PaginationMetadata, *dto_base.Link, error)
 	SearchArticles(c echo.Context, req *dto_base.SearchRequest) ([]dto.ArticleAdminResponse, *dto_base.MetadataResponse, error)
-	CreateArticles(c echo.Context, req *dto.ArticleRequest) error
+	CreateArticles(c echo.Context, req *dto.ArticleRequest, adminId uuid.UUID)  error
 	UpdateArticles(c echo.Context, articleId uuid.UUID, req *dto.ArticleRequest) error
 	DeleteArticles(c echo.Context, articleId uuid.UUID) error
 	GetArticleByID(c echo.Context, articleId uuid.UUID) (*dto.ArticleAdminResponse, error)
@@ -191,19 +191,9 @@ func (auc *articleUseCaseAdmin) SearchArticles(c echo.Context, req *dto_base.Sea
 	return articleResponse, metadata, nil
 }
 
-func (auc *articleUseCaseAdmin) CreateArticles(c echo.Context, req *dto.ArticleRequest) error {
+func (auc *articleUseCaseAdmin) CreateArticles(c echo.Context, req *dto.ArticleRequest, adminId uuid.UUID) error {
 	ctx, cancel := context.WithCancel(c.Request().Context())
 	defer cancel()
-
-	claims := auc.tokenUtil.GetClaims(c)
-	if claims == nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
-	}
-
-	// Pastikan bahwa claims memiliki ID yang valid
-	if claims.ID.String() == "" {
-		return echo.NewHTTPError(http.StatusUnauthorized, "Claim ID is missing")
-	}
 
 	article := &entities.Articles{
 		ID:            uuid.New(),
@@ -212,7 +202,7 @@ func (auc *articleUseCaseAdmin) CreateArticles(c echo.Context, req *dto.ArticleR
 		Tags:          req.Tags,
 		Image:         req.Image,
 		CreatedAt:     time.Now(),
-		AuthorID:      claims.ID,
+		AuthorID:      adminId,
 		LikesCount:    0,
 		CommentsCount: 0,
 	}

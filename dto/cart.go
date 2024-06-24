@@ -28,6 +28,7 @@ type RemoveCartItemRequest struct {
 
 type ProductInformation struct {
 	CartItemID       uuid.UUID `json:"cart_item_id" form:"cart_item_id"`
+	CartID           uuid.UUID `json:"cart_id"`
 	ProductVariantID uuid.UUID `json:"product_variant_id"`
 	ProductName      string    `json:"product_name"`
 	ProductImage     string    `json:"product_image"`

@@ -115,6 +115,9 @@ func (cr *cartRepository) GetCartItems(ctx context.Context, userID uuid.UUID) (e
 	return cart, nil
 }
 
+
+
+
 func (cr *cartRepository) UpdateCartItems(ctx context.Context, cartItemID uuid.UUID, quantity int) error {
 	if err := ctx.Err(); err != nil {
 		return err

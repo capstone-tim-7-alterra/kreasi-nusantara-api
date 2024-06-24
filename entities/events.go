@@ -50,7 +50,7 @@ type EventLocations struct {
 type EventPhotos struct {
 	ID        uuid.UUID `gorm:"primaryKey;type:uuid"`
 	EventID   uuid.UUID `gorm:"type:uuid;not null"`
-	Image     *string    `gorm:"type:varchar(255);not null"`
+	Image     *string   `gorm:"type:varchar(255);not null"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -66,6 +66,7 @@ type EventPrices struct {
 	EndPublish   time.Time
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
+	DeletedAt    gorm.DeletedAt `gorm:"index"`
 }
 
 type EventTicketType struct {
