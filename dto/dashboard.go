@@ -1,19 +1,17 @@
 package dto
 
 import (
-	"time"
-
 	"github.com/google/uuid"
 )
 
 type ProductDashboard struct {
-	ID            string    `json:"id"`
-	Name          string    `json:"name"`
-	Income        float64   `json:"income"`
-	PaymentMethod string    `json:"payment_method"`
-	Image         string    `json:"image"`
-	Status        string    `json:"status"`
-	Date          time.Time `json:"date"`
+	ID            string  `json:"id"`
+	Name          string  `json:"name"`
+	Income        float64 `json:"income"`
+	PaymentMethod string  `json:"payment_method"`
+	Image         string  `json:"image"`
+	Status        string  `json:"status"`
+	Date          string  `json:"date"`
 }
 
 type EventDashboard struct {
@@ -24,7 +22,7 @@ type EventDashboard struct {
 	PaymentMethod string    `json:"payment_method"`
 	Image         string    `json:"image"`
 	Status        string    `json:"status"`
-	Date          time.Time `json:"date"`
+	Date          string    `json:"date"`
 }
 
 type ProductHeader struct {
