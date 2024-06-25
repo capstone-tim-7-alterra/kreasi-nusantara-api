@@ -437,19 +437,20 @@ func (pu *eventAdminUseCase) UpdateEventsAdmin(c echo.Context, eventID uuid.UUID
 
 	// Update photos
 	if len(req.Photos) > 0 {
-		existingEvent.Photos = make([]entities.EventPhotos, len(req.Photos))
+		photos := make([]entities.EventPhotos, len(req.Photos))
 		for i, photo := range req.Photos {
-			existingEvent.Photos[i] = entities.EventPhotos{
+			photos[i] = entities.EventPhotos{
 				ID:      uuid.New(),
 				EventID: eventID,
 				Image:   &photo.Image,
 			}
 		}
+		existingEvent.Photos = photos
 	}
 
 	// Update prices
 	if len(req.Prices) > 0 {
-		existingEvent.Prices = make([]entities.EventPrices, len(req.Prices))
+		prices := make([]entities.EventPrices, len(req.Prices))
 		for i, p := range req.Prices {
 			publishTime, err := time.Parse("02-01-2006 15:04:05", p.Publish)
 			if err != nil {
@@ -461,7 +462,7 @@ func (pu *eventAdminUseCase) UpdateEventsAdmin(c echo.Context, eventID uuid.UUID
 				return fmt.Errorf("error parsing end publish time for price %d: %w", i, err)
 			}
 
-			existingEvent.Prices[i] = entities.EventPrices{
+			prices[i] = entities.EventPrices{
 				ID:           uuid.New(),
 				EventID:      eventID,
 				Price:        p.Price,
@@ -471,14 +472,11 @@ func (pu *eventAdminUseCase) UpdateEventsAdmin(c echo.Context, eventID uuid.UUID
 				EndPublish:   endPublishTime,
 			}
 		}
+		existingEvent.Prices = prices
 	}
 
 	// Save updated event in database
-	if err := pu.eventAdminRepository.UpdateEventsAdmin(ctx, eventID, existingEvent); err != nil {
-		return err
-	}
-
-	return nil
+	return pu.eventAdminRepository.UpdateEventsAdmin(ctx, eventID, existingEvent)
 }
 
 func (pu *eventAdminUseCase) DeleteEventsAdmin(c echo.Context, eventID uuid.UUID) error {
@@ -618,7 +616,6 @@ func (pu *eventAdminUseCase) GetTicketType(c echo.Context) ([]dto.EventTicketTyp
 
 	return response, nil
 }
-
 
 func (pu *eventAdminUseCase) DeleteTicketType(c echo.Context, ticketTypeID int) error {
 	ctx, cancel := context.WithCancel(c.Request().Context())

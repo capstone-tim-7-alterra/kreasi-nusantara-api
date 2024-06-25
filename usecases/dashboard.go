@@ -9,6 +9,7 @@ import (
 	err_util "kreasi-nusantara-api/utils/error"
 	"math"
 	"strconv"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
@@ -93,7 +94,7 @@ func (pduc *productDashboardUseCase) GetProductReport(c echo.Context, req *dto_b
 			PaymentMethod: product.TransactionMethod,
 			Image:         productImage,
 			Status:        product.TransactionStatus,
-			Date:          product.TracsactionDate, // Corrected field name
+			Date:          product.TracsactionDate.Format("Jan 02, 2006 03:04:05 PM"), // Corrected field name
 		})
 
 		// Log product dashboard details
@@ -187,7 +188,7 @@ func (pduc *productDashboardUseCase) GetEventReport(c echo.Context, req *dto_bas
 			PaymentMethod: event.TransactionMethod,
 			Image:         eventImage,
 			Status:        event.TransactionStatus,
-			Date:          event.TransactionDate, // Corrected field name
+			Date:          event.TransactionDate.Format("Jan 02, 2006 03:04:05 PM"), // Corrected field name
 		})
 	}
 
@@ -221,6 +222,7 @@ func (pduc *productDashboardUseCase) GetEventReport(c echo.Context, req *dto_bas
 }
 
 func (pduc *productDashboardUseCase) GetHeaderProduct(c echo.Context, req *dto_base.PaginationRequest) (*dto.ProductHeader, error) {
+	log := logrus.New()
 	ctx, cancel := context.WithCancel(c.Request().Context())
 	defer cancel()
 
@@ -239,10 +241,36 @@ func (pduc *productDashboardUseCase) GetHeaderProduct(c echo.Context, req *dto_b
 		return nil, err
 	}
 
-	// ticket, err := pduc.productRepository.GetEventItems(ctx)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	ticket, err := pduc.productRepository.GetEventItems(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	article, err := pduc.productRepository.GetArticleItems(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Menghitung total like, comment, visitor, dan share
+	totalLikes := 0
+	totalComments := 0
+	totalVisitors := 14
+	totalShares := 16
+	for _, article := range article {
+		totalLikes += article.LikesCount
+		totalComments += article.CommentsCount
+	}
+
+	totalTicket := 0
+	totalDeletedTicket := 0
+	for _, ticket := range ticket {
+		for _, event := range ticket.Prices {
+			totalTicket += event.NoOfTicket
+			if event.DeletedAt.Valid {
+				totalDeletedTicket += event.NoOfTicket
+			}
+		}
+	}
 
 	// Menghitung total event yang terjual
 	totalEvent := 0
@@ -251,6 +279,8 @@ func (pduc *productDashboardUseCase) GetHeaderProduct(c echo.Context, req *dto_b
 		totalEvent += event.Quantity
 		totalAmount += event.TotalAmount
 	}
+
+	log.Info(totalEvent)
 
 	// Menghitung total jumlah produk yang terjual
 	totalQuantity := 0
@@ -267,10 +297,15 @@ func (pduc *productDashboardUseCase) GetHeaderProduct(c echo.Context, req *dto_b
 	}
 
 	productHeader := &dto.ProductHeader{
+		TotalLikes:    totalLikes,
+		TotalComments: totalComments,
+		TotalVisitors: totalVisitors,
+		TotalShares:   totalShares,
 		ProductSold:   totalQuantity,
 		ProductProfit: totalIncome,
 		TicketSold:    totalEvent,
 		TicketProfit:  totalAmount,
+		TotalTicket:   totalTicket,
 	}
 
 	return productHeader, nil
@@ -285,7 +320,14 @@ func (pduc *productDashboardUseCase) GetProductChart(c echo.Context, req *dto_ba
 	// Menggunakan map untuk mengelompokkan ProductDashboard berdasarkan Name
 	productMap := make(map[string][]dto.ProductValue)
 	for _, dashboard := range *productDashboards {
-		dateKey := dashboard.Date.Format("02/01") // Format tanggal sebagai "YYYY-MM-DD"
+		// Parse string date ke time.Time
+		parsedDate, err := time.Parse("Jan 02, 2006 03:04:05 PM", dashboard.Date)
+		if err != nil {
+			return nil, err
+		}
+		// Format tanggal sebagai "02/01"
+		dateKey := parsedDate.Format("02/01")
+
 		if _, ok := productMap[dashboard.Name]; !ok {
 			productMap[dashboard.Name] = make([]dto.ProductValue, 0)
 		}
@@ -322,7 +364,6 @@ func (pduc *productDashboardUseCase) GetProductChart(c echo.Context, req *dto_ba
 	return productCharts, nil
 }
 
-
 func (pduc *productDashboardUseCase) GetEventChart(c echo.Context, req *dto_base.PaginationRequest) ([]dto.EventChart, error) {
 	eventDashboard, _, _, err := pduc.GetEventReport(c, req)
 	if err != nil {
@@ -332,7 +373,13 @@ func (pduc *productDashboardUseCase) GetEventChart(c echo.Context, req *dto_base
 	// Membuat map untuk mengumpulkan pendapatan per event per tanggal
 	eventMap := make(map[string]map[string]float64)
 	for _, dashboard := range *eventDashboard {
-		dateKey := dashboard.Date.Format("02/01") // Format tanggal sebagai "YYYY-MM-DD"
+		// Pastikan dashboard.Date adalah time.Time dan format sebagai "02/01"
+		parsedDate, err := time.Parse("Jan 02, 2006 03:04:05 PM", dashboard.Date)
+		if err != nil {
+			return nil, err
+		}
+		dateKey := parsedDate.Format("02/01")
+
 		if _, ok := eventMap[dashboard.Name]; !ok {
 			eventMap[dashboard.Name] = make(map[string]float64)
 		}
@@ -355,11 +402,14 @@ func (pduc *productDashboardUseCase) GetEventChart(c echo.Context, req *dto_base
 
 		// Log nama event dan total pendapatan jika diperlukan
 		totalIncome := calculateTotalIncomeEvent(eventValues)
-		fmt.Println("Event Name:", name, "Total Income:", totalIncome)
+		fmt.Println("Product Name:", name, "Total Income:", totalIncome)
+
 	}
 
 	return eventCharts, nil
 }
+
+// Helper function to calculate total income per event
 
 // Fungsi untuk menghitung total pendapatan dari slice ProductValue
 func calculateTotalIncome(values []dto.ProductValue) float64 {

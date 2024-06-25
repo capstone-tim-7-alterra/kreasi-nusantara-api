@@ -338,6 +338,7 @@ func (pu *productAdminUseCase) UpdateProduct(c echo.Context, productID uuid.UUID
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "Product not found")
 	}
+
 	discountPrice := float64(req.ProductPricing.OriginalPrice) * (1 - float64(*req.ProductPricing.DiscountPercent)/100)
 	// Update the product details
 	existingProduct.Name = req.Name
@@ -353,35 +354,38 @@ func (pu *productAdminUseCase) UpdateProduct(c echo.Context, productID uuid.UUID
 	}
 
 	// Update product variants
-	existingProduct.ProductVariants = &[]entities.ProductVariants{}
+	variants := []entities.ProductVariants{}
 	for _, variant := range *req.ProductVariants {
-		*existingProduct.ProductVariants = append(*existingProduct.ProductVariants, entities.ProductVariants{
+		variants = append(variants, entities.ProductVariants{
 			ID:        uuid.New(),
 			ProductID: existingProduct.ID,
 			Stock:     variant.Stock,
 			Size:      variant.Size,
 		})
 	}
+	existingProduct.ProductVariants = &variants
 
 	// Update images
-	existingProduct.ProductImages = []entities.ProductImages{}
-	for _, images := range req.ProductImages {
-		existingProduct.ProductImages = append(existingProduct.ProductImages, entities.ProductImages{
+	images := []entities.ProductImages{}
+	for _, image := range req.ProductImages {
+		images = append(images, entities.ProductImages{
 			ID:        uuid.New(),
 			ProductID: existingProduct.ID,
-			ImageUrl:  images.ImageUrl,
+			ImageUrl:  image.ImageUrl,
 		})
 	}
+	existingProduct.ProductImages = images
 
 	// Update videos
-	existingProduct.ProductVideos = []entities.ProductVideos{}
-	for _, videos := range req.ProductVideos {
-		existingProduct.ProductVideos = append(existingProduct.ProductVideos, entities.ProductVideos{
+	videos := []entities.ProductVideos{}
+	for _, video := range req.ProductVideos {
+		videos = append(videos, entities.ProductVideos{
 			ID:        uuid.New(),
 			ProductID: existingProduct.ID,
-			VideoUrl:  videos.VideoUrl,
+			VideoUrl:  video.VideoUrl,
 		})
 	}
+	existingProduct.ProductVideos = videos
 
 	// Save the updated product
 	return pu.productAdminRepository.UpdateProduct(ctx, productID, existingProduct)
@@ -440,7 +444,7 @@ func (pu *productAdminUseCase) SearchProductByName(c echo.Context, req *dto_base
 		if !ok {
 			categoryName = "Unknown" // Kategori tidak ditemukan, bisa disesuaikan dengan kebutuhan Anda
 		}
-		
+
 		// Konversi entitas ProductImages ke DTO
 		var productImages []dto.ProductImagesResponse
 		for _, image := range product.ProductImages {
