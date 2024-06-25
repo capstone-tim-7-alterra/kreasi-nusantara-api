@@ -254,13 +254,11 @@ func (pduc *productDashboardUseCase) GetHeaderProduct(c echo.Context, req *dto_b
 	// Menghitung total like, comment, visitor, dan share
 	totalLikes := 0
 	totalComments := 0
-	totalVisitors := 0
-	totalShares := 0
+	totalVisitors := 14
+	totalShares := 16
 	for _, article := range article {
 		totalLikes += article.LikesCount
 		totalComments += article.CommentsCount
-		totalVisitors = totalLikes + totalComments + 2
-		totalShares = totalLikes + 2
 	}
 
 	totalTicket := 0
@@ -366,7 +364,6 @@ func (pduc *productDashboardUseCase) GetProductChart(c echo.Context, req *dto_ba
 	return productCharts, nil
 }
 
-
 func (pduc *productDashboardUseCase) GetEventChart(c echo.Context, req *dto_base.PaginationRequest) ([]dto.EventChart, error) {
 	eventDashboard, _, _, err := pduc.GetEventReport(c, req)
 	if err != nil {
@@ -405,6 +402,7 @@ func (pduc *productDashboardUseCase) GetEventChart(c echo.Context, req *dto_base
 
 		// Log nama event dan total pendapatan jika diperlukan
 		totalIncome := calculateTotalIncomeEvent(eventValues)
+		fmt.Println("Product Name:", name, "Total Income:", totalIncome)
 
 	}
 
@@ -412,7 +410,6 @@ func (pduc *productDashboardUseCase) GetEventChart(c echo.Context, req *dto_base
 }
 
 // Helper function to calculate total income per event
-
 
 // Fungsi untuk menghitung total pendapatan dari slice ProductValue
 func calculateTotalIncome(values []dto.ProductValue) float64 {

@@ -137,26 +137,47 @@ func (r *eventAdminRepository) SearchEventsAdmin(ctx context.Context, req *dto_b
 	return events, totalData, nil
 }
 
-func (r *eventAdminRepository) UpdateEventsAdmin(ctx context.Context, eventID uuid.UUID, req *entities.Events) error {
-	// Lakukan validasi terhadap inputan req jika diperlukan
+func (r *eventAdminRepository) UpdateEventsAdmin(ctx context.Context, eventID uuid.UUID, event *entities.Events) error {
+	tx := r.DB.Begin()
 
-	// Ubah nilai-nilai yang ingin diperbarui sesuai dengan req
+	// Update event details
 	updateFields := map[string]interface{}{
-		"name":        req.Name,
-		"description": req.Description,
-		"category_id": req.CategoryID,
-		"location_id": req.LocationID,
-		"status":      req.Status,
-		"date":        req.Date,
+		"name":        event.Name,
+		"description": event.Description,
+		"category_id": event.CategoryID,
+		"location_id": event.LocationID,
+		"status":      event.Status,
+		"date":        event.Date,
 		"updated_at":  time.Now(),
 	}
 
-	// Lakukan update ke dalam database
-	if err := r.DB.WithContext(ctx).Model(&entities.Events{}).Where("id = ?", eventID).Updates(updateFields).Error; err != nil {
+	if err := tx.WithContext(ctx).Model(&entities.Events{}).Where("id = ?", eventID).Updates(updateFields).Error; err != nil {
+		tx.Rollback()
 		return err
 	}
 
-	return nil
+	// Delete old photos and insert new ones
+	if err := tx.Where("event_id = ?", eventID).Delete(&entities.EventPhotos{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Create(&event.Photos).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Delete old prices and insert new ones
+	if err := tx.Where("event_id = ?", eventID).Delete(&entities.EventPrices{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Create(&event.Prices).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Commit the transaction
+	return tx.Commit().Error
 }
 
 func (r *eventAdminRepository) DeleteEventsAdmin(ctx context.Context, eventId uuid.UUID) error {

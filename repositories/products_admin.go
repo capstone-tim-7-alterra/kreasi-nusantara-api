@@ -106,7 +106,6 @@ func (pr *productAdminRepository) SearchProductByName(ctx context.Context, req *
 		return nil, 0, err
 	}
 
-
 	return products, totalData, nil
 }
 
@@ -183,7 +182,52 @@ func (pr *productAdminRepository) UpdateProduct(ctx context.Context, productID u
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	return pr.DB.Model(&entities.Products{}).Where("id = ?", productID).Updates(product).Error
+
+	tx := pr.DB.Begin()
+
+	// Update product details
+	if err := tx.Model(&entities.Products{}).Where("id = ?", productID).Updates(product).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Delete old related data
+	if err := tx.Where("product_id = ?", productID).Delete(&entities.ProductPricing{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Where("product_id = ?", productID).Delete(&entities.ProductVariants{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Where("product_id = ?", productID).Delete(&entities.ProductImages{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Where("product_id = ?", productID).Delete(&entities.ProductVideos{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Insert new related data
+	if err := tx.Create(&product.ProductPricing).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Create(&product.ProductVariants).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Create(&product.ProductImages).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Create(&product.ProductVideos).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
 }
 
 func (pr *productAdminRepository) DeleteProduct(ctx context.Context, productID uuid.UUID) error {
