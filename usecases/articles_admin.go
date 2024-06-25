@@ -23,7 +23,7 @@ import (
 type ArticleUseCaseAdmin interface {
 	GetArticles(c echo.Context, req *dto_base.PaginationRequest) (*[]dto.ArticleAdminResponse, *dto_base.PaginationMetadata, *dto_base.Link, error)
 	SearchArticles(c echo.Context, req *dto_base.SearchRequest) ([]dto.ArticleAdminResponse, *dto_base.MetadataResponse, error)
-	CreateArticles(c echo.Context, req *dto.ArticleRequest, adminId uuid.UUID)  error
+	CreateArticles(c echo.Context, req *dto.ArticleRequest, adminId uuid.UUID) error
 	UpdateArticles(c echo.Context, articleId uuid.UUID, req *dto.ArticleRequest) error
 	DeleteArticles(c echo.Context, articleId uuid.UUID) error
 	GetArticleByID(c echo.Context, articleId uuid.UUID) (*dto.ArticleAdminResponse, error)
@@ -78,29 +78,28 @@ func (auc *articleUseCaseAdmin) GetArticles(c echo.Context, req *dto_base.Pagina
 		return nil, nil, nil, err
 	}
 
-	authorMap := make(map[uuid.UUID]string)
-	for _, a := range author {
-		authorMap[a.ID] = a.FirstName + " " + a.LastName
-	}
+	article := []dto.ArticleAdminResponse{}
+	for _, authors := range articles {
 
-	articleResponse := make([]dto.ArticleAdminResponse, len(articles))
-	for i, article := range articles {
-		authorName, ok := authorMap[article.AuthorID]
-		if !ok {
-			authorName = ""
+		var authorName string
+
+		for _, a := range author {
+			if a.ID == authors.AuthorID {
+				authorName = a.FirstName + " " + a.LastName
+			}
 		}
 
-		createdAtStr := article.CreatedAt.Format("Jan 2, 2006")
+		createdAtStr := authors.CreatedAt.Format("Jan 2, 2006")
 
-		articleResponse[i] = dto.ArticleAdminResponse{
-			ID:        article.ID,
-			Tags:      article.Tags,
-			Title:     article.Title,
+		article = append(article, dto.ArticleAdminResponse{
+			ID:        authors.ID,
+			Tags:      authors.Tags,
+			Title:     authors.Title,
 			Author:    authorName,
-			Image:     article.Image,
-			Content:   article.Content,
+			Image:     authors.Image,
+			Content:   authors.Content,
 			CreatedAt: createdAtStr,
-		}
+		})
 	}
 
 	totalPage := int(math.Ceil(float64(totalData) / float64(req.Limit)))
@@ -127,7 +126,7 @@ func (auc *articleUseCaseAdmin) GetArticles(c echo.Context, req *dto_base.Pagina
 		Prev: prev,
 	}
 
-	return &articleResponse, paginationMetadata, link, nil
+	return &article, paginationMetadata, link, nil
 }
 
 func (auc *articleUseCaseAdmin) SearchArticles(c echo.Context, req *dto_base.SearchRequest) ([]dto.ArticleAdminResponse, *dto_base.MetadataResponse, error) {
@@ -159,27 +158,31 @@ func (auc *articleUseCaseAdmin) SearchArticles(c echo.Context, req *dto_base.Sea
 		return nil, nil, err
 	}
 
-	authorMap := make(map[uuid.UUID]string)
-	for _, a := range author {
-		authorMap[a.ID] = a.FirstName + " " + a.LastName
+	article := []dto.ArticleAdminResponse{}
+	for _, authors := range articles {
+
+		var authorName string
+
+		for _, a := range author {
+			if a.ID == authors.AuthorID {
+				authorName = a.FirstName + " " + a.LastName
+			}
+		}
+
+		createdAtStr := authors.CreatedAt.Format("Jan 2, 2006")
+
+		article = append(article, dto.ArticleAdminResponse{
+			ID:        authors.ID,
+			Tags:      authors.Tags,
+			Title:     authors.Title,
+			Author:    authorName,
+			Image:     authors.Image,
+			Content:   authors.Content,
+			CreatedAt: createdAtStr,
+		})
 	}
 
-	articleResponse := make([]dto.ArticleAdminResponse, len(articles))
-	for i, article := range articles {
-		authorName, ok := authorMap[article.AuthorID]
-		if !ok {
-			authorName = ""
-		}
-		CreatedAtStr := article.CreatedAt.Format("Jan 2, 2006")
-		articleResponse[i] = dto.ArticleAdminResponse{
-			ID:        article.ID,
-			Title:     article.Title,
-			Author:    authorName,
-			Content:   article.Content,
-			Image:     article.Image,
-			CreatedAt: CreatedAtStr,
-		}
-	}
+	
 
 	metadata := &dto_base.MetadataResponse{
 		TotalData:   int(totalData),
@@ -188,7 +191,7 @@ func (auc *articleUseCaseAdmin) SearchArticles(c echo.Context, req *dto_base.Sea
 		HasLoadMore: *req.Offset+req.Limit < int(totalData),
 	}
 
-	return articleResponse, metadata, nil
+	return article, metadata, nil
 }
 
 func (auc *articleUseCaseAdmin) CreateArticles(c echo.Context, req *dto.ArticleRequest, adminId uuid.UUID) error {

@@ -4,6 +4,7 @@ import (
 	"context"
 	dto_base "kreasi-nusantara-api/dto/base"
 	"kreasi-nusantara-api/entities"
+
 	"gorm.io/gorm"
 )
 
@@ -22,9 +23,8 @@ type ProductDashboardRepository interface {
 	GetEvents(ctx context.Context, req *dto_base.PaginationRequest) ([]entities.EventTransaction, int64, error)
 	GetCartItems(ctx context.Context) ([]entities.Cart, error)
 	GetEventItems(ctx context.Context) ([]entities.Events, error)
+	GetArticleItems(ctx context.Context) ([]entities.Articles, error)
 }
-
-
 
 func (pr *productDashboardRepository) GetProducts(ctx context.Context, req *dto_base.PaginationRequest) ([]entities.ProductTransaction, int64, error) {
 	if err := ctx.Err(); err != nil {
@@ -45,7 +45,6 @@ func (pr *productDashboardRepository) GetProducts(ctx context.Context, req *dto_
 	return products, totalData, nil
 }
 
-
 func (pr *productDashboardRepository) GetEvents(ctx context.Context, req *dto_base.PaginationRequest) ([]entities.EventTransaction, int64, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, 0, err
@@ -64,8 +63,6 @@ func (pr *productDashboardRepository) GetEvents(ctx context.Context, req *dto_ba
 
 	return events, totalData, nil
 }
-
-
 
 func (pr *productDashboardRepository) GetCartItems(ctx context.Context) ([]entities.Cart, error) {
 	if err := ctx.Err(); err != nil {
@@ -97,4 +94,17 @@ func (pr *productDashboardRepository) GetEventItems(ctx context.Context) ([]enti
 	}
 
 	return events, nil
+}
+
+func (pr *productDashboardRepository) GetArticleItems(ctx context.Context) ([]entities.Articles, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
+	var articles []entities.Articles
+	if err := pr.DB.Find(&articles).Error; err != nil {
+		return nil, err
+	}
+
+	return articles, nil
 }
