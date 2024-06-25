@@ -26,7 +26,7 @@ func main() {
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{
 			"http://localhost:5173",
-			"https://kreasi-nusantara-batik-website-testing.vercel.app/",
+			"https://kreasi-nusantara-batik-website-testing.vercel.app",
 		},
 		AllowHeaders: []string{
 			echo.HeaderOrigin,
