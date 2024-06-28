@@ -78,6 +78,7 @@ func migrate(db *gorm.DB) {
 		&entities.CartItems{},
 		&entities.Cart{},
 		&entities.ProductTransaction{},
+		&entities.SingleProductTransaction{},
 		&entities.EventTransaction{},
 		&entities.EventTransactionBuyer{},
 	)

@@ -11,6 +11,7 @@ import (
 
 type ProductTransactionRepository interface {
 	CreateTransaction(ctx context.Context, transaction *entities.ProductTransaction) error
+	CreateSingleTransaction(ctx context.Context, trans *entities.SingleProductTransaction) error
 	GetTransactionByID(ctx context.Context, transactionId string) (*entities.ProductTransaction, error)
 }
 
@@ -26,6 +27,14 @@ func NewProductTransactionRepository(db *gorm.DB) ProductTransactionRepository {
 
 func (pr *productTransactionRepository) CreateTransaction(ctx context.Context, transaction *entities.ProductTransaction) error {
 	if err := pr.DB.WithContext(ctx).Create(transaction).Error; err != nil {
+		log.Printf("Error while creating transaction in database: %v", err)
+		return err
+	}
+	return nil
+}
+
+func (pr *productTransactionRepository) CreateSingleTransaction(ctx context.Context, trans *entities.SingleProductTransaction) error {
+	if err := pr.DB.WithContext(ctx).Create(trans).Error; err != nil {
 		log.Printf("Error while creating transaction in database: %v", err)
 		return err
 	}

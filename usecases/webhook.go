@@ -61,6 +61,8 @@ func (u *webhookUsecase) HandleNotification(c echo.Context, webhook entities.Pay
 
 	if res == "event" {
 		return u.webhookRepository.HandleNotification(c.Request().Context(), webhook, transactionUpdate, "event_transactions")
-	} 
+	} else if res == "tes123" {
+		return u.webhookRepository.HandleNotification(c.Request().Context(), webhook, transactionUpdate, "single_product_transactions")
+	}
 	return u.webhookRepository.HandleNotification(c.Request().Context(), webhook, transactionUpdate, "product_transactions")
 }

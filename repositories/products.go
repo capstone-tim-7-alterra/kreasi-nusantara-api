@@ -23,6 +23,8 @@ type ProductRepository interface {
 	GetAllAverageRatingsAndTotalReviews(ctx context.Context) ([]entities.RatingSummary, error)
 	GetAverageRatingAndTotalReview(ctx context.Context, productId uuid.UUID) (float64, int, error)
 	GetLatestReviews(ctx context.Context, productId uuid.UUID) ([]*entities.ProductReviews, error)
+
+	GetProductVariantPriceByID(ctx context.Context, productVariantID uuid.UUID) (float64, error)
 }
 
 type productRepository struct {
@@ -215,4 +217,26 @@ func (pr *productRepository) FindUnlistedProductId(Id []uuid.UUID) (*[]entities.
 	}
 
 	return &products, nil
+}
+
+func (pr *productRepository) GetProductVariantPriceByID(ctx context.Context, productVariantID uuid.UUID) (float64, error) {
+	var productVariant entities.ProductVariants
+	var productPricing entities.ProductPricing
+
+	if err := pr.DB.WithContext(ctx).First(&productVariant, "id = ?", productVariantID).Error; err != nil {
+		return 0, err
+	}
+
+	if err := pr.DB.WithContext(ctx).First(&productPricing, "product_id = ?", productVariant.ProductID).Error; err != nil {
+		return 0, err
+	}
+
+	var price float64
+	if productPricing.DiscountPrice != nil {
+		price = *productPricing.DiscountPrice
+	} else {
+		price = float64(productPricing.OriginalPrice)
+	}
+
+	return price, nil
 }

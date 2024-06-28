@@ -21,12 +21,13 @@ func InitProductTransactionsRoute(g *echo.Group, db *gorm.DB, v *validation.Vali
 	config := config.InitConfigMidtrans()
 	redisClient := redis.NewRedisClient()
 
+	productRepo := repositories.NewProductRepository(db)
 	productTransactionRepo := repositories.NewProductTransactionRepository(db)
-	productTransactionUseCase := usecases.NewProductTransactionUseCase(productTransactionRepo, cartUseCase, tokenUtil, *redisClient ,config)
-	productTransactionController := controllers.NewProductTransactionController(productTransactionUseCase, v)
+	productTransactionUseCase := usecases.NewProductTransactionUseCase(productTransactionRepo, productRepo, cartUseCase, tokenUtil, *redisClient ,config)
+	productTransactionController := controllers.NewProductTransactionController(productTransactionUseCase, v, tokenUtil)
 
 	g.Use(echojwt.WithConfig(token.GetJWTConfig()))
 	g.POST("/product-transactions", productTransactionController.CreateProductTransaction)
 	g.GET("/product-transactions/:id", productTransactionController.GetProductTransactionById)
-
+	g.POST("/product-transactions/single", productTransactionController.CreateSingleProductTransaction)
 }

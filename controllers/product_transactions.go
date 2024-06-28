@@ -1,9 +1,11 @@
 package controllers
 
 import (
+	msg "kreasi-nusantara-api/constants/message"
 	"kreasi-nusantara-api/dto"
 	"kreasi-nusantara-api/usecases"
 	http_util "kreasi-nusantara-api/utils/http"
+	"kreasi-nusantara-api/utils/token"
 	"kreasi-nusantara-api/utils/validation"
 	"net/http"
 
@@ -13,13 +15,15 @@ import (
 
 type ProductTransactionController struct {
 	productTransactionUsecase usecases.ProductTransactionUseCase
-	validator                  *validation.Validator
+	validator                 *validation.Validator
+	tokenUtil                 token.TokenUtil
 }
 
-func NewProductTransactionController(productTransactionUsecase usecases.ProductTransactionUseCase, validator *validation.Validator) *ProductTransactionController {
+func NewProductTransactionController(productTransactionUsecase usecases.ProductTransactionUseCase, validator *validation.Validator, tokenUtil token.TokenUtil) *ProductTransactionController {
 	return &ProductTransactionController{
 		productTransactionUsecase: productTransactionUsecase,
-		validator:                  validator,
+		validator:                 validator,
+		tokenUtil:                 tokenUtil,
 	}
 }
 
@@ -43,6 +47,35 @@ func (ctr *ProductTransactionController) CreateProductTransaction(c echo.Context
 
 	// Mengembalikan URL dalam respons
 	return http_util.HandleSuccessResponse(c, http.StatusCreated, "Transaction created successfully", map[string]interface{}{
+		"transaction": response,
+	})
+}
+
+func (ctr *ProductTransactionController) CreateSingleProductTransaction(c echo.Context) error {
+	log := logrus.New()
+	request := new(dto.SingleTransactionRequest)
+
+	claims := ctr.tokenUtil.GetClaims(c)
+	if claims == nil {
+		return http_util.HandleErrorResponse(c, http.StatusUnauthorized, msg.UNAUTHORIZED)
+	}
+
+	if err := c.Bind(request); err != nil {
+		return http_util.HandleErrorResponse(c, http.StatusBadRequest, "Invalid request data")
+	}
+
+	if err := ctr.validator.Validate(request); err != nil {
+		return http_util.HandleErrorResponse(c, http.StatusBadRequest, "Invalid request data")
+	}
+
+	response, err := ctr.productTransactionUsecase.CreateSingleTransaction(c, claims.ID, *request)
+	if err != nil {
+		log.WithError(err).Error("Failed to create single transaction")
+		return http_util.HandleErrorResponse(c, http.StatusInternalServerError, err.Error())
+	}
+
+	// Mengembalikan URL dalam respons
+	return http_util.HandleSuccessResponse(c, http.StatusCreated, "Single transaction created successfully", map[string]interface{}{
 		"transaction": response,
 	})
 }

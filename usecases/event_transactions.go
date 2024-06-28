@@ -2,7 +2,6 @@ package usecases
 
 import (
 	"context"
-	"fmt"
 	"kreasi-nusantara-api/config"
 	"kreasi-nusantara-api/drivers/redis"
 	"kreasi-nusantara-api/dto"
@@ -46,12 +45,9 @@ func (eu *eventTransactionUseCase) CreateEventTransaction(c echo.Context, userID
 	var transactionData entities.EventTransaction
 
 	price, err := eu.eventPriceRepository.GetPriceByID(ctx, request.EventPriceID)
-	fmt.Println("price", price)
 	if err != nil {
 		return dto.EventTransactionResponse{}, err
 	}
-
-	fmt.Println("transaction buyer in", request.IdentityNumber)
 
 	transactionData.ID = uuid.New()
 	transactionData.UserId = userID
